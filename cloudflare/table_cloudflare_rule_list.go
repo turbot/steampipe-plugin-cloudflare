@@ -47,9 +47,7 @@ func listRuleList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 	}
 	account := h.Item.(cloudflare.Account)
 	conn.AccountID = account.ID
-	plugin.Logger(ctx).Warn("listRuleList", "account", account)
 	items, err := conn.ListIPLists(ctx)
-	plugin.Logger(ctx).Warn("listRuleList", "items", items)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +83,7 @@ func getRuleListItems(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	if err != nil {
 		return nil, err
 	}
-	// TODO - How can I get the parent hydrate item here?
+	// TODO - The ParentHydrate item is not yet available. Needs work.
 	plugin.Logger(ctx).Warn("getRuleListItems", "hydrateResults", h.HydrateResults)
 	account := h.Item.(cloudflare.Account)
 	conn.AccountID = account.ID
