@@ -61,7 +61,6 @@ func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) 
 	return nil, errors.New("Cloudflare API credentials not found. Edit your connection configuration file and then restart Steampipe.")
 }
 
-// function which returns an ErrorPredicate for AWS API calls
 func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 	return func(err error) bool {
 		errMsg := err.Error()
