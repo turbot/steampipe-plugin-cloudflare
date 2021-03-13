@@ -25,7 +25,7 @@ func tableCloudflareRuleList(ctx context.Context) *plugin.Table {
 		},
 		Columns: []*plugin.Column{
 			// Top columns
-			//{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getParentAccount, Transform: transform.FromField("ID"), Description: "Account ID containing the Rule List."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getParentAccount, Transform: transform.FromField("ID"), Description: "Account ID containing the Rule List."},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the Rule List."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the Rule List, used in filter expressions."},
 			// Other columns
@@ -52,7 +52,7 @@ func listRuleList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		return nil, err
 	}
 	for _, i := range items {
-		d.StreamLeafListItem(ctx, i)
+		d.StreamListItem(ctx, i)
 	}
 	return nil, nil
 }
@@ -74,7 +74,7 @@ func getRuleList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 }
 
 func getParentAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.Item.(cloudflare.Account)
+	account := h.HydrateResults["listAccount"].(cloudflare.Account)
 	return account, nil
 }
 
@@ -83,9 +83,7 @@ func getRuleListItems(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	if err != nil {
 		return nil, err
 	}
-	// TODO - The ParentHydrate item is not yet available. Needs work.
-	plugin.Logger(ctx).Warn("getRuleListItems", "hydrateResults", h.HydrateResults)
-	account := h.Item.(cloudflare.Account)
+	account := h.HydrateResults["listAccount"].(cloudflare.Account)
 	conn.AccountID = account.ID
 	ruleList := h.Item.(cloudflare.IPList)
 	items, err := conn.ListIPListItems(ctx, ruleList.ID)
