@@ -74,7 +74,7 @@ func getRuleList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 }
 
 func getParentAccount(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.HydrateResults["listAccount"].(cloudflare.Account)
+	account := h.ParentItem.(cloudflare.Account)
 	return account, nil
 }
 
@@ -83,7 +83,7 @@ func getRuleListItems(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	if err != nil {
 		return nil, err
 	}
-	account := h.HydrateResults["listAccount"].(cloudflare.Account)
+	account := h.ParentItem.(cloudflare.Account)
 	conn.AccountID = account.ID
 	ruleList := h.Item.(cloudflare.IPList)
 	items, err := conn.ListIPListItems(ctx, ruleList.ID)
