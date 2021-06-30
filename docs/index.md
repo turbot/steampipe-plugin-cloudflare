@@ -1,6 +1,6 @@
 ---
 organization: Turbot
-category: ["networking"]
+category: ["internet"]
 icon_url: "/images/plugins/turbot/cloudflare.svg"
 brand_color: "#f48120"
 display_name: Cloudflare
