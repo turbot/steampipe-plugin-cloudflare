@@ -1,6 +1,6 @@
 # Table: cloudflare_account_role
 
-Query information about the account roles, defines what permissions a Member of an Account has.
+Account roles define what permissions an account member has.
 
 ## Examples
 
