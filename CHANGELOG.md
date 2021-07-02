@@ -1,3 +1,17 @@
+## v0.0.2 [2021-07-02]
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_account_role](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_account_role) ([#6](https://github.com/turbot/steampipe-plugin-cloudflare/pull/6))
+  - [cloudflare_firewall_rule](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_firewall_rule) ([#8](https://github.com/turbot/steampipe-plugin-cloudflare/pull/8))
+  - [cloudflare_page_rule](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_page_rule) ([#10](https://github.com/turbot/steampipe-plugin-cloudflare/pull/10))
+
+_Enhancements_
+
+- Updated plugin category from `networking` to `internet`
+- Updated plugin license to Apache 2.0 per [turbot/steampipe#488](https://github.com/turbot/steampipe/issues/488)
+
 ## v0.0.1 [2021-03-11]
 
 _What's new?_
