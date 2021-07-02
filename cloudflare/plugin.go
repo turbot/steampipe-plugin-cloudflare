@@ -16,12 +16,14 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		DefaultTransform: transform.FromJSONTag(),
 		TableMap: map[string]*plugin.Table{
-			"cloudflare_account":    tableCloudflareAccount(ctx),
-			"cloudflare_api_token":  tableCloudflareAPIToken(ctx),
-			"cloudflare_dns_record": tableCloudflareDNSRecord(ctx),
-			"cloudflare_page_rule":  tableCloudflarePageRule(ctx),
-			"cloudflare_user":       tableCloudflareUser(ctx),
-			"cloudflare_zone":       tableCloudflareZone(ctx),
+			"cloudflare_account":       tableCloudflareAccount(ctx),
+			"cloudflare_account_role":  tableCloudflareAccountRole(ctx),
+			"cloudflare_api_token":     tableCloudflareAPIToken(ctx),
+			"cloudflare_dns_record":    tableCloudflareDNSRecord(ctx),
+			"cloudflare_firewall_rule": tableCloudflareFirewallRule(ctx),
+			"cloudflare_page_rule":     tableCloudflarePageRule(ctx),
+			"cloudflare_user":          tableCloudflareUser(ctx),
+			"cloudflare_zone":          tableCloudflareZone(ctx),
 		},
 	}
 	return p
