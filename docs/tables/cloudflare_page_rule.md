@@ -16,7 +16,7 @@ from
   cloudflare_page_rule;
 ```
 
-### Get all page rules which are not enabled
+### List disabled page rules
 
 ```sql
 select
@@ -29,7 +29,7 @@ where
   status = 'disabled';
 ```
 
-### Get all page rules for which Always Online feature of the Cloudflare Caching app is not enabled
+### List page rules that do not have the Always Online feature enabled
 
 ```sql
 select
