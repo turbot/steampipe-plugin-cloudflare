@@ -1,6 +1,6 @@
 # Table: cloudflare_firewall_rule
 
-Query information about firewall rules. It uses filter expressions for more control over how traffic is matched to the rule. A filter expression permits selecting traffic by multiple criteria allowing greater freedom in rule creation.
+Firewall rules use filter expressions to control what traffic is allowed. A filter expression permits selecting traffic by multiple criteria allowing greater freedom in rule creation.
 
 ## Examples
 
@@ -15,7 +15,7 @@ from
   cloudflare_firewall_rule;
 ```
 
-### Query all firewall rules which are paused
+### List paused firewall rules
 
 ```sql
 select
@@ -28,7 +28,7 @@ where
   paused;
 ```
 
-### Get the rule that blocks requests based on IP reputation
+### List firewall rules that block requests based on IP reputation
 
 ```sql
 select
