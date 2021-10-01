@@ -23,6 +23,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_firewall_rule": tableCloudflareFirewallRule(ctx),
 			"cloudflare_page_rule":     tableCloudflarePageRule(ctx),
 			"cloudflare_user":          tableCloudflareUser(ctx),
+			"cloudflare_worker_script": tableCloudflareWorkerScript(ctx),
 			"cloudflare_zone":          tableCloudflareZone(ctx),
 		},
 	}
