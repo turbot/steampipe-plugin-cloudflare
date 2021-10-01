@@ -30,7 +30,7 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 		Description: "Cloudflare Page Rule",
 		List: &plugin.ListConfig{
 			Hydrate:       listPageRules,
-			ParentHydrate: listZone,
+			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),

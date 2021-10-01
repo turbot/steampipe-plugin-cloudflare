@@ -15,7 +15,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_zone",
 		Description: "A Zone is a domain name along with its subdomains and other identities.",
 		List: &plugin.ListConfig{
-			Hydrate: listZone,
+			Hydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("id"),
@@ -56,13 +56,16 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 	}
 }
 
-func listZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connect(ctx, d)
 	if err != nil {
+		logger.Error("listZones", "connection_error", err)
 		return nil, err
 	}
 	resp, err := conn.ListZonesContext(ctx)
 	if err != nil {
+		logger.Error("listZones", "ListZonesContext api error", err)
 		return nil, err
 	}
 	for _, i := range resp.Result {

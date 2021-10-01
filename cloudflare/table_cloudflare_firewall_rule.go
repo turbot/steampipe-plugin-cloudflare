@@ -32,7 +32,7 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 		Description: "Cloudflare Firewall Rule",
 		List: &plugin.ListConfig{
 			Hydrate:       listFirewallRules,
-			ParentHydrate: listZone,
+			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
