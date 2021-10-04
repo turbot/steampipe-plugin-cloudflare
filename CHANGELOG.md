@@ -5,7 +5,7 @@ _Enhancements_
 - Updated the README file as per the latest format ([#18](https://github.com/turbot/steampipe-plugin-cloudflare/pull/18))
 
 _Bug fixes_
-- Fixed the `cloudflare_zone` table to include the `dnssec` and `settings` columns ([#17](https://github.com/turbot/steampipe-plugin-cloudflare/pull/17))
+- Fixed the `cloudflare_zone` table to include the missing `dnssec` and `settings` columns ([#17](https://github.com/turbot/steampipe-plugin-cloudflare/pull/17))
 
 ## v0.0.2 [2021-07-02]
 
