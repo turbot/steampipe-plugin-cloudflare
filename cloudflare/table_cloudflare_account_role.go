@@ -22,7 +22,7 @@ type accountRoleInfo = struct {
 func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_account_role",
-		Description: "Cloudflare Account Role",
+		Description: "A Role defines what permissions a Member of an Account has.",
 		List: &plugin.ListConfig{
 			Hydrate:       listRoles,
 			ParentHydrate: listAccount,

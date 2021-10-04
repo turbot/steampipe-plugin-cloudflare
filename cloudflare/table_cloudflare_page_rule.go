@@ -27,7 +27,7 @@ type pageRuleInfo = struct {
 func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_page_rule",
-		Description: "Cloudflare Page Rule",
+		Description: "Page Rules gives the ability to control how Cloudflare works on a URL or subdomain basis.",
 		List: &plugin.ListConfig{
 			Hydrate:       listPageRules,
 			ParentHydrate: listZones,

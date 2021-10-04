@@ -29,7 +29,7 @@ type firewallRuleInfo = struct {
 func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_firewall_rule",
-		Description: "Cloudflare Firewall Rule",
+		Description: "Cloudflare Firewall Rules is a flexible and intuitive framework for filtering HTTP requests.",
 		List: &plugin.ListConfig{
 			Hydrate:       listFirewallRules,
 			ParentHydrate: listZones,

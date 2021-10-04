@@ -10,7 +10,7 @@ import (
 func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_load_balancer_pool",
-		Description: "Cloudflare Load balancers allows to distribute traffic across servers, which reduces server strain and latency and improves the experience for end users.",
+		Description: "A pool is a group of origin servers, with each origin identified by its IP address or hostname.",
 		List: &plugin.ListConfig{
 			Hydrate:       listLoadBalancerPools,
 			ParentHydrate: listZones,
@@ -44,6 +44,7 @@ func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		logger.Error("listLoadBalancers", "connection_error", err)
 		return nil, err
 	}
+	// Rest api only supports monitor as an input.
 	loadBalancersPools, err := conn.ListLoadBalancerPools(ctx)
 	if err != nil {
 		logger.Error("ListLoadBalancers", "api error", err)
