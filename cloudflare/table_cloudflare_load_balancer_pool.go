@@ -18,13 +18,13 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The API item identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "A short name for the pool."},
-			{Name: "enabled", Type: proto.ColumnType_STRING, Description: "Status of this pool. Disabled pools will not receive traffic and are excluded from health checks."},
+			{Name: "enabled", Type: proto.ColumnType_BOOL, Description: "Status of this pool. Disabled pools will not receive traffic and are excluded from health checks."},
 			{Name: "monitor", Type: proto.ColumnType_STRING, Description: "The ID of the Monitor to use for health checking origins within this pool."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the pool was created."},
 
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "Description for the pool."},
-			{Name: "latitude", Type: proto.ColumnType_TIMESTAMP, Description: "The latitude this pool is physically located at; used for proximity steering. Values should be between -90 and 90."},
-			{Name: "longitude", Type: proto.ColumnType_TIMESTAMP, Description: "The longitude this pool is physically located at; used for proximity steering. Values should be between -180 and 180."},
+			{Name: "latitude", Type: proto.ColumnType_STRING, Description: "The latitude this pool is physically located at; used for proximity steering. Values should be between -90 and 90."},
+			{Name: "longitude", Type: proto.ColumnType_STRING, Description: "The longitude this pool is physically located at; used for proximity steering. Values should be between -180 and 180."},
 			{Name: "minimum_origins", Type: proto.ColumnType_INT, Description: "The minimum number of origins that must be healthy for this pool to serve traffic. If the number of healthy origins falls below this number, the pool will be marked unhealthy and we will failover to the next available pool. Default: 1."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the pool was last modified."},
 			{Name: "notification_email", Type: proto.ColumnType_STRING, Description: "The email address to send health status notifications to. This can be an individual mailbox or a mailing list. Multiple emails can be supplied as a comma delimited list."},
