@@ -12,7 +12,7 @@ import (
 func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_worker_route",
-		Description: "A Zone is a domain name along with its subdomains and other identities.",
+		Description: "Routes are basic patterns used to enable or disable workers that match requests.",
 		List: &plugin.ListConfig{
 			Hydrate:       listWorkerRoutes,
 			ParentHydrate: listZones,

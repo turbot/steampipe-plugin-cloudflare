@@ -10,7 +10,7 @@ import (
 func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_worker_script",
-		Description: "A Zone is a domain name along with its subdomains and other identities.",
+		Description: "A Worker script is a single script that is executed on matching routes in the Cloudflare edge.",
 		List: &plugin.ListConfig{
 			Hydrate: listWorkerScripts,
 		},
@@ -20,6 +20,7 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			{Name: "etag", Type: proto.ColumnType_STRING, Description: "Hashed script content, can be used in a If-None-Match header when updating."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the script was last modified."},
 			{Name: "size", Type: proto.ColumnType_INT, Description: "Size of the script, in bytes."},
+			// Can add column to list triggers
 		},
 	}
 }
