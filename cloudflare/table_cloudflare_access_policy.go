@@ -18,7 +18,6 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 			Hydrate:       listAccessPolicies,
 			ParentHydrate: listAccessApplications,
 		},
-		// Get Config - Currently SDK is not supporting get call
 		Columns: []*plugin.Column{
 			//Top fields
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Access plolicy unique API identifier."},
@@ -44,6 +43,40 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 }
 
 func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+
+	appID := h.Item.(cloudflare.AccessApplication).ID
+	conn, err := connect(ctx, d)
+	if err != nil {
+		logger.Error("listAccessPolicies", "connection error", err)
+		return nil, err
+	}
+
+	opts := cloudflare.PaginationOptions{
+		PerPage: 100,
+		Page:    1,
+	}
+
+	for {
+		items, result_info, err := conn.AccessPolicies(ctx, conn.AccountID, appID, opts)
+		if err != nil {
+			logger.Error("listAccessPolicies", "AccessPolicies api error", err)
+			return nil, err
+		}
+		for _, i := range items {
+			d.StreamListItem(ctx, i)
+		}
+
+		if result_info.Page >= result_info.TotalPages {
+			break
+		}
+		opts.Page = opts.Page + 1
+	}
+
+	return nil, nil
+}
+
+func getAccessPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 
 	appID := h.Item.(cloudflare.AccessApplication).ID
