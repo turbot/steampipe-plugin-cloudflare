@@ -42,8 +42,11 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 }
 
 func listAccessApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+
 	conn, err := connect(ctx, d)
 	if err != nil {
+		logger.Error("listAccessApplications", "connection error", err)
 		return nil, err
 	}
 
@@ -55,6 +58,7 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	for {
 		items, result_info, err := conn.AccessApplications(ctx, conn.AccountID, opts)
 		if err != nil {
+			logger.Error("listAccessApplications", "AccessApplications api error", err)
 			return nil, err
 		}
 		for _, i := range items {

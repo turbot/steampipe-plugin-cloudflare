@@ -30,8 +30,11 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 }
 
 func listAccessGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+
 	conn, err := connect(ctx, d)
 	if err != nil {
+		logger.Error("listAccessGroups", "connection error", err)
 		return nil, err
 	}
 
@@ -43,6 +46,7 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	for {
 		items, result_info, err := conn.AccessGroups(ctx, conn.AccountID, opts)
 		if err != nil {
+			logger.Error("listAccessGroups", "AccessGroups api error", err)
 			return nil, err
 		}
 		for _, i := range items {

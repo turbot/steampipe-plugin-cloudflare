@@ -18,6 +18,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		TableMap: map[string]*plugin.Table{
 			"cloudflare_access_application":    tableCloudflareAccessApplication(ctx),
 			"cloudflare_access_group":          tableCloudflareAccessGroup(ctx),
+			"cloudflare_access_policy":         tableCloudflareAccessPolicy(ctx),
 			"cloudflare_account":               tableCloudflareAccount(ctx),
 			"cloudflare_account_role":          tableCloudflareAccountRole(ctx),
 			"cloudflare_api_token":             tableCloudflareAPIToken(ctx),
