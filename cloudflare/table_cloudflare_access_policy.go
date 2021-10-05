@@ -17,6 +17,9 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listAccessPolicies,
 			ParentHydrate: listAccessApplications,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "application_id", Require: plugin.Optional},
+			},
 		},
 		Columns: []*plugin.Column{
 			//Top fields
@@ -46,6 +49,14 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	logger := plugin.Logger(ctx)
 
 	appID := h.Item.(cloudflare.AccessApplication).ID
+	inputAppID := d.KeyColumnQuals["application_id"].GetStringValue()
+
+	// Avoid getting access policies for other applications id
+	// "application_id" mentioned in where clause
+	if inputAppID != "" && appID != inputAppID {
+		return nil, nil
+	}
+
 	conn, err := connect(ctx, d)
 	if err != nil {
 		logger.Error("listAccessPolicies", "connection error", err)
