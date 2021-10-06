@@ -16,6 +16,9 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listWorkerRoutes,
 			ParentHydrate: listZones,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "zone_id", Require: plugin.Optional},
+			},
 		},
 		Columns: []*plugin.Column{
 			// Top columns
@@ -30,16 +33,24 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 
 func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
+	zoneDetails := h.Item.(cloudflare.Zone)
+
+	inputZoneId := d.KeyColumnQualString("zone_id")
+
+	// Only list routes for zones stated in the input query
+	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
+		return nil, nil
+	}
+
 	conn, err := connect(ctx, d)
 	if err != nil {
-		logger.Error("listWorkerRoutes", "ListWorkerRoutes connect error", err)
+		logger.Error("listWorkerRoutes", "connect error", err)
 		return nil, err
 	}
 
-	zoneDetails := h.Item.(cloudflare.Zone)
 	resp, err := conn.ListWorkerRoutes(ctx, zoneDetails.ID)
 	if err != nil {
-		logger.Error("listWorkerRoutes", "ListWorkerRoutes api call error", err)
+		logger.Error("listWorkerRoutes", "api call error", err)
 		return nil, err
 	}
 	for _, resource := range resp.Routes {
