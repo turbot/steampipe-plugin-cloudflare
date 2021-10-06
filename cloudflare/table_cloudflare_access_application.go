@@ -27,7 +27,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 
 			// Other fields
 			{Name: "aud", Type: proto.ColumnType_STRING, Description: "Audience tag."},
-			{Name: "auto_redirect_to_identity", Type: proto.ColumnType_BOOL, Description: " Option to skip identity provider selection if only one is configured in allowed_idps. Defaults to false (disabled)."},
+			{Name: "auto_redirect_to_identity", Type: proto.ColumnType_BOOL, Description: "Option to skip identity provider selection if only one is configured in allowed_idps. Defaults to false (disabled)."},
 			{Name: "custom_deny_message", Type: proto.ColumnType_STRING, Description: "Option that returns a custom error message when a user is denied access to the application."},
 			{Name: "custom_deny_url", Type: proto.ColumnType_STRING, Description: "Option that redirects to a custom URL when a user is denied access to the application."},
 			{Name: "enable_binding_cookie", Type: proto.ColumnType_BOOL, Description: "Option to provide increased security against compromised authorization tokens and CSRF attacks by requiring an additional \"binding\" cookie on requests. Defaults to false."},
