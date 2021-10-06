@@ -45,7 +45,24 @@ connection "cloudflare" {
 }
 ```
 
+### Account scoped services
+
+Resources scoped at a account level requires account id to be set to query them.
+
+- Can we set through `CLOUDFLARE_ACCOUNT_ID` environment variable or
+- `account_id` in Steampipe config.
+
+```hcl
+connection "cloudflare" {
+  plugin     = "cloudflare"
+  account_id = "fb1234f556777ba12a123d456f2f46e6"
+  email      = "pam@dundermifflin.com"
+  api_key    = "2980b99351d629a537f1440e12b5b97a135b7"
+}
+```
+
 Credentials are resolved in this order:
+
 1. `token` in Steampipe config.
 2. `email` and `api_key` in Steampipe config.
 3. `CLOUDFLARE_API_TOKEN` environment variable (like Terraform).
