@@ -19,8 +19,8 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the script was created."},
 			{Name: "etag", Type: proto.ColumnType_STRING, Description: "Hashed script content, can be used in a If-None-Match header when updating."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the script was last modified."},
-			{Name: "size", Type: proto.ColumnType_INT, Description: "Size of the script, in bytes."},
-			// Can add column to list triggers
+			// Always coming as 0
+			// {Name: "size", Type: proto.ColumnType_INT, Description: "Size of the script, in bytes."},
 		},
 	}
 }
@@ -29,12 +29,12 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger := plugin.Logger(ctx)
 	conn, err := connect(ctx, d)
 	if err != nil {
-		logger.Error("listWorkers", "connection error", err)
+		logger.Error("listWorkersScripts", "connection error", err)
 		return nil, err
 	}
 	resp, err := conn.ListWorkerScripts(ctx)
 	if err != nil {
-		logger.Error("listWorkers", "ListWorkerScripts api error", err)
+		logger.Error("listWorkersScripts", "api error", err)
 		return nil, err
 	}
 	for _, resource := range resp.WorkerList {
