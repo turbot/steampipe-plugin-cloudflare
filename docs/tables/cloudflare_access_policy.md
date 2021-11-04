@@ -20,7 +20,7 @@ from
   cloudflare_access_policy;
 ```
 
-### List policies that requires justifcation for accessing the resources.
+### List policies that require justifcation for accessing resources
 
 ```sql
 select
