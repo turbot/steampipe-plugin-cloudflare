@@ -45,12 +45,23 @@ connection "cloudflare" {
 }
 ```
 
-### Account scoped services
+Credentials are resolved in this order:
 
-Resources scoped at a account level requires account id to be set to query them.
+1. `token` in Steampipe config.
+2. `email` and `api_key` in Steampipe config.
+3. `CLOUDFLARE_API_TOKEN` environment variable (like Terraform).
+4. `CLOUDFLARE_EMAIL` and `CLOUDFLARE_API_KEY` environment variables (like Terraform).
+5. `CF_API_TOKEN` environment variable (like flarectl).
+6. `CF_API_EMAIL` and `CF_API_KEY` environment variables (like flarectl).
 
-- Can we set through `CLOUDFLARE_ACCOUNT_ID` environment variable or
-- `account_id` in Steampipe config.
+### Account scoped resources
+
+In order to query resources owned by a specific account, the account ID must be set through the:
+
+- `account_id` config argument OR
+- `CLOUDFLARE_ACCOUNT_ID` environment variable
+
+For example:
 
 ```hcl
 connection "cloudflare" {
@@ -60,15 +71,6 @@ connection "cloudflare" {
   api_key    = "2980b99351d629a537f1440e12b5b97a135b7"
 }
 ```
-
-Credentials are resolved in this order:
-
-1. `token` in Steampipe config.
-2. `email` and `api_key` in Steampipe config.
-3. `CLOUDFLARE_API_TOKEN` environment variable (like Terraform).
-4. `CLOUDFLARE_EMAIL` and `CLOUDFLARE_API_KEY` environment variables (like Terraform).
-5. `CF_API_TOKEN` environment variable (like flarectl).
-6. `CF_API_EMAIL` and `CF_API_KEY` environment variables (like flarectl).
 
 ## Scope
 
