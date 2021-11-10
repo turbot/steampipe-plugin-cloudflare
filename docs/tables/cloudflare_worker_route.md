@@ -18,7 +18,7 @@ from
   cloudflare_worker_route;
 ```
 
-### List worker routes not attached to any worker
+### List idle worker routes (i.e. not attached to any worker)
 
 ```sql
 select
