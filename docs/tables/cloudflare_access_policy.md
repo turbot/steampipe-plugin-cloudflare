@@ -2,7 +2,7 @@
 
 Access Policies are used in conjunction with Access Applications to restrict access to a particular resource.
 
-**Note:** It's required that `account_id` is set in `~/.steampipe/config/cloudflare.spc` or through `CLOUDFLARE_ACCOUNT_ID` environment variable to access this table.
+**Note:** An account ID must be set in the connection configuration's `account_id` argument or through the `CLOUDFLARE_ACCOUNT_ID` environment variable to query this table.
 
 ## Examples
 

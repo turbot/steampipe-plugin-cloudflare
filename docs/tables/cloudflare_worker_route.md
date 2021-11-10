@@ -1,8 +1,8 @@
-# Table: cloudflare_worker_script
+# Table: cloudflare_worker_route
 
 Routes are basic patterns that allow users to map a URL pattern to a Worker script to enable Workers to run on custom domains.
 
-**Note:** It's required that `account_id` is set in `~/.steampipe/config/cloudflare.spc` or through `CLOUDFLARE_ACCOUNT_ID` environment variable to access this table.
+**Note:** An account ID must be set in the connection configuration's `account_id` argument or through the `CLOUDFLARE_ACCOUNT_ID` environment variable to query this table.
 
 ## Examples
 

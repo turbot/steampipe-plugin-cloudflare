@@ -2,7 +2,7 @@
 
 A Worker script is a single script that is executed on matching routes in the Cloudflare edge.
 
-**Note:** It's required that `account_id` is set in `~/.steampipe/config/cloudflare.spc` or through `CLOUDFLARE_ACCOUNT_ID` environment variable to access this table.
+**Note:** An account ID must be set in the connection configuration's `account_id` argument or through the `CLOUDFLARE_ACCOUNT_ID` environment variable to query this table.
 
 ## Examples
 
