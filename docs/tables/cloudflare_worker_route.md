@@ -17,3 +17,16 @@ select
 from
   cloudflare_worker_route;
 ```
+
+### List worker routes not attached to any worker
+
+```sql
+select
+  id,
+  zone_name,
+  pattern
+from
+  cloudflare.cloudflare_worker_route
+where
+  script = '';
+```

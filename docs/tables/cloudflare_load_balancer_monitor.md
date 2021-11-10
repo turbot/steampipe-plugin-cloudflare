@@ -19,3 +19,20 @@ select
 from
   cloudflare_load_balancer_monitor;
 ```
+
+### Get information of monitors attached to pool
+
+```sql
+select
+  p.id as pool_id,
+  p.name as pool_name,
+  p.enabled as pool_enabled,
+  p.notification_email,
+  m.id as monitor_id,
+  m.description monitor_description
+from
+  cloudflare_load_balancer_pool p,
+  cloudflare_load_balancer_monitor as m
+where
+  p.monitor = m.id;
+```
