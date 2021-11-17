@@ -30,7 +30,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_page_rule":             tableCloudflarePageRule(ctx),
 			"cloudflare_user":                  tableCloudflareUser(ctx),
 			"cloudflare_worker_route":          tableCloudflareWorkerRoute(ctx),
-			"cloudflare_worker_script":         tableCloudflareWorkerScript(ctx),
 			"cloudflare_zone":                  tableCloudflareZone(ctx),
 		},
 	}
