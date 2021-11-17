@@ -123,16 +123,3 @@ func getZoneDNSSEC(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	}
 	return item, nil
 }
-
-func getZoneUniversalSSLSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	zone := h.Item.(cloudflare.Zone)
-	item, err := conn.UniversalSSLSettingDetails(ctx, zone.ID)
-	if err != nil {
-		return nil, err
-	}
-	return item, nil
-}
