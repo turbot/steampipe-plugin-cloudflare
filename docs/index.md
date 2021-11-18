@@ -54,12 +54,9 @@ Credentials are resolved in this order:
 5. `CF_API_TOKEN` environment variable (like flarectl).
 6. `CF_API_EMAIL` and `CF_API_KEY` environment variables (like flarectl).
 
-### Account scoped resources
+### Account Scoped Resources
 
-In order to query resources owned by a specific account, the account ID must be set through the:
-
-- `account_id` config argument OR
-- `CLOUDFLARE_ACCOUNT_ID` environment variable
+In order to query resources owned by a specific account, the account ID must be set through the `account_id` config argument or the `CLOUDFLARE_ACCOUNT_ID` environment variable.
 
 For example:
 

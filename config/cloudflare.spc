@@ -1,8 +1,9 @@
 connection "cloudflare" {
   plugin   = "cloudflare"
 
-  # Account ID to access resources scoped at the account level
-  # account_id = "YOUR_ACCOUNT_ID"
+  # The account ID to retrieve account scoped resources for
+  # May alternatively be set via the CLOUDFLARE_ACCOUNT_ID env variable
+  #account_id = "YOUR_ACCOUNT_ID"
 
   # API Token for your Cloudflare account
   # See https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys#12345680
