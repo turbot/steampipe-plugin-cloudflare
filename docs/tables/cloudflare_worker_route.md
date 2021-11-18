@@ -2,8 +2,6 @@
 
 Routes are basic patterns that allow users to map a URL pattern to a Worker script to enable Workers to run on custom domains.
 
-**Note:** An account ID must be set in the connection configuration's `account_id` argument or through the `CLOUDFLARE_ACCOUNT_ID` environment variable to query this table.
-
 ## Examples
 
 ### Basic info

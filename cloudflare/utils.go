@@ -16,15 +16,15 @@ func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) 
 	cloudflareConfig := GetConfig(d.Connection)
 
 	var option cloudflare.Option
-	// if cloudflareConfig.AccountID != nil {
-	// 	option = cloudflare.UsingAccount(*cloudflareConfig.AccountID)
-	// } else {
-	// 	accountID, ok := os.LookupEnv("CLOUDFLARE_ACCOUNT_ID")
-	// 	if ok && accountID != "" {
-	// 		option = cloudflare.UsingAccount(accountID)
-	// 	}
+	if cloudflareConfig.AccountID != nil {
+		option = cloudflare.UsingAccount(*cloudflareConfig.AccountID)
+	} else {
+		accountID, ok := os.LookupEnv("CLOUDFLARE_ACCOUNT_ID")
+		if ok && accountID != "" {
+			option = cloudflare.UsingAccount(accountID)
+		}
 
-	// }
+	}
 
 	// First: check for the token
 	if cloudflareConfig.Token != nil {

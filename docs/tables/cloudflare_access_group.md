@@ -5,6 +5,8 @@ Access group allows to define a set of users to which an application policy can 
 
 **Note:** An account ID must be set in the connection configuration's `account_id` argument or through the `CLOUDFLARE_ACCOUNT_ID` environment variable to query this table.
 
+**Warning**: If `account_id` is missing in the connection configuration. Query to this table will error out with message: `Error: HTTP status 400: Could not route to /accounts/access/groups, perhaps your object identifier is invalid? (7003), No route for that URI (7000)`
+
 ## Examples
 
 ### Basic info
