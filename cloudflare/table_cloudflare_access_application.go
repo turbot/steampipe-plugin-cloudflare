@@ -7,6 +7,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
 
 func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
@@ -14,15 +15,21 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_access_application",
 		Description: "Access Applications are used to restrict access to a whole application using an authorisation gateway managed by Cloudflare.",
 		List: &plugin.ListConfig{
-			Hydrate: listAccessApplications,
+			ParentHydrate: listAccount,
+			Hydrate:       listAccessApplications,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "account_id", Require: plugin.Optional},
+				{Name: "account_name", Require: plugin.Optional},
+			},
 		},
 		// Get Config - Currently SDK is not supporting get call
 		Columns: []*plugin.Column{
 			// Top fields
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Application API uuid."},
-			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the Access Application."},
-			{Name: "domain", Type: proto.ColumnType_STRING, Description: "The domain and path that Access will block."},
-			{Name: "type", Type: proto.ColumnType_STRING, Description: "The application type. Defaults to self_hosted. Valid values are self_hosted, ssh, vnc, or file."},
+			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access application."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account access application belongs."},
+			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account access application belongs."},
+			{Name: "domain", Type: proto.ColumnType_STRING, Description: "The domain and path that access will block."},
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the application was created."},
 
 			// Other fields
@@ -36,13 +43,22 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 
 			// JSON fields
 			{Name: "allowed_idps", Type: proto.ColumnType_JSON, Description: "The identity providers selected for the application."},
-			{Name: "cors_headers", Type: proto.ColumnType_JSON, Description: "CORS configuration for the Access Application. See below for reference structure."},
+			{Name: "cors_headers", Type: proto.ColumnType_JSON, Description: "CORS configuration for the access application. See below for reference structure."},
 		},
 	}
 }
 
-func listAccessApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
+	account := h.Item.(cloudflare.Account)
+
+	if account_id := d.KeyColumnQualString("account_id"); account_id != "" && account.ID != account_id {
+		return nil, nil
+	}
+
+	if account_name := d.KeyColumnQualString("account_name"); account_name != "" && account.Name != account_name {
+		return nil, nil
+	}
 
 	conn, err := connect(ctx, d)
 	if err != nil {
@@ -56,7 +72,7 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	for {
-		items, result_info, err := conn.AccessApplications(ctx, conn.AccountID, opts)
+		items, result_info, err := conn.AccessApplications(ctx, account.ID, opts)
 		if err != nil {
 			logger.Error("listAccessApplications", "AccessApplications api error", err)
 			return nil, err
@@ -72,4 +88,9 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	return nil, nil
+}
+
+func getAccountDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	account := h.ParentItem.(cloudflare.Account)
+	return account, nil
 }

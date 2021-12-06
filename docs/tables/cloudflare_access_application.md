@@ -2,10 +2,6 @@
 
 Access Applications are used to restrict access to a whole application using an authorisation gateway managed by Cloudflare.
 
-**Note:** An account ID must be set in the connection configuration's `account_id` argument or through the `CLOUDFLARE_ACCOUNT_ID` environment variable to query this table.
-
-**Warning**: If `account_id` is missing in the connection configuration. Query to this table will error out with message: `Error: HTTP status 400: Could not route to /accounts/access/apps, perhaps your object identifier is invalid? (7003), No route for that URI (7000)`
-
 ## Examples
 
 ### Basic info
@@ -20,7 +16,7 @@ from
   cloudflare_access_application;
 ```
 
-### Get applications count by type
+### Get applications count by account
 
 ```sql
 select
@@ -29,7 +25,7 @@ select
 from
   cloudflare_access_application
 group by
-  type;
+  account_id;
 ```
 
 ### List applications with binding cookie enabled for increased security
