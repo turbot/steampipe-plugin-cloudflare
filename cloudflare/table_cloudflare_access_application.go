@@ -27,8 +27,8 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 			// Top fields
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Application API uuid."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access application."},
-			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account access application belongs."},
-			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account access application belongs."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access application belongs."},
+			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account, access application belongs."},
 			{Name: "domain", Type: proto.ColumnType_STRING, Description: "The domain and path that access will block."},
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the application was created."},
 
