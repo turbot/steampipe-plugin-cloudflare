@@ -38,56 +38,20 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 			Hydrate:           getPageRule,
 		},
 		Columns: []*plugin.Column{
-			{
-				Name:        "id",
-				Description: "Specifies the Page Rule identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ID"),
-			},
-			{
-				Name:        "status",
-				Description: "Specifies the status of the page rule.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "zone_id",
-				Description: "Specifies the zone identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ZoneID"),
-			},
-			{
-				Name:        "created_on",
-				Description: "The time when the page rule is created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-			},
-			{
-				Name:        "modified_on",
-				Description: "The time when the page rule was last modified.",
-				Type:        proto.ColumnType_TIMESTAMP,
-			},
-			{
-				Name:        "priority",
-				Description: "A number that indicates the preference for a page rule over another.",
-				Type:        proto.ColumnType_INT,
-			},
-			{
-				Name:        "actions",
-				Description: "A list of actions to perform if the targets of this rule match the request. Actions can redirect the url to another url or override settings (but not both).",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "targets",
-				Description: "A list of targets to evaluate on a request.",
-				Type:        proto.ColumnType_JSON,
-			},
+			// Top columns
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Specifies the Page Rule identifier."},
+			{Name: "status", Type: proto.ColumnType_STRING, Description: "Specifies the status of the page rule."},
 
-			// steampipe standard columns
-			{
-				Name:        "title",
-				Description: "Title of the resource.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ID"),
-			},
+			// Other columns
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "Specifies the zone identifier."},
+			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the page rule is created."},
+			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the page rule was last modified."},
+			{Name: "priority", Type: proto.ColumnType_INT, Description: "A number that indicates the preference for a page rule over another."},
+			{Name: "title", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Title of the resource."},
+
+			// JSON columns
+			{Name: "actions", Type: proto.ColumnType_JSON, Description: "A list of actions to perform if the targets of this rule match the request. Actions can redirect the url to another url or override settings (but not both)."},
+			{Name: "targets", Type: proto.ColumnType_JSON, Description: "A list of targets to evaluate on a request."},
 		},
 	}
 }

@@ -18,14 +18,16 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 			ParentHydrate: listZones,
 		},
 		Columns: []*plugin.Column{
+			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "API item identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The DNS hostname to associate with your Load Balancer."},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Hydrate: getParentZoneDetails, Transform: transform.FromField("Name"), Description: "The zone name to which load balancer belongs."},
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Hydrate: getParentZoneDetails, Transform: transform.FromField("ID"), Description: "The zone ID to which load balancer belongs."},
 			{Name: "ttl", Type: proto.ColumnType_INT, Description: "Time to live (TTL) of the DNS entry for the IP address returned by this load balancer. This only applies to gray-clouded (unproxied) load balancers."},
 			{Name: "enabled", Type: proto.ColumnType_BOOL, Description: "Whether to enable (the default) this load balancer."},
-			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Load balancer creation time."},
 
+			// Other columns
+			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Load balancer creation time."},
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "Load balancer description."},
 			{Name: "fallback_pool", Type: proto.ColumnType_STRING, Description: "The pool ID to use when all other pools are detected as unhealthy."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Last modification time."},
@@ -34,12 +36,11 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 			{Name: "session_affinity_ttl", Type: proto.ColumnType_INT, Description: "Time, in seconds, until this load balancers session affinity cookie expires after being created."},
 			{Name: "steering_policy", Type: proto.ColumnType_STRING, Description: "Determine which method the load balancer uses to determine the fastest route to your origin. Valid values are: \"off\", \"geo\", \"dynamic_latency\", \"random\", \"proximity\" or \"\". Default is \"\"."},
 
+			// JSON columns
 			{Name: "default_pools", Type: proto.ColumnType_JSON, Description: "A list of pool IDs ordered by their failover priority. Pools defined here are used by default, or when region_pools are not configured for a given region."},
 			{Name: "pop_pools", Type: proto.ColumnType_JSON, Description: "A mapping of Cloudflare PoP identifiers to a list of pool IDs (ordered by their failover priority) for the PoP (datacenter). This feature is only available to enterprise customers."},
 			{Name: "region_pools", Type: proto.ColumnType_JSON, Description: "A mapping of region/country codes to a list of pool IDs (ordered by their failover priority) for the given region. Any regions not explicitly defined will fall back to using default_pools."},
 			{Name: "session_affinity_attributes", Type: proto.ColumnType_JSON, Description: "session affinity cookie attributes."},
-			// BETA Field Not General Access: A list of rules for this load balancer to execute. https://api.cloudflare.com/#load-balancers-properties
-			// {Name: "rules", Type: proto.ColumnType_JSON, Description: "A list of rules for this load balancer to execute."},
 		},
 	}
 }

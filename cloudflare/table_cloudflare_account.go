@@ -26,7 +26,8 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the account."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the account."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the account."},
-			// Other columns
+
+			// JSON columns
 			{Name: "settings", Type: proto.ColumnType_JSON, Description: "Settings for the account."},
 		},
 	}

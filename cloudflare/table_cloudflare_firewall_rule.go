@@ -40,66 +40,22 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 			Hydrate:           getFirewallRule,
 		},
 		Columns: []*plugin.Column{
-			{
-				Name:        "id",
-				Description: "Specifies the Firewall Rule identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ID"),
-			},
-			{
-				Name:        "paused",
-				Description: "Indicates whether the firewall rule is currently paused.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "action",
-				Description: "The action to apply to a matched request.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "description",
-				Type:        proto.ColumnType_STRING,
-				Description: "A description of the rule to help identify it..",
-			},
-			{
-				Name:        "created_on",
-				Description: "The time when the firewall rule is created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-			},
-			{
-				Name:        "modified_on",
-				Description: "The time when the firewall rule is updated.",
-				Type:        proto.ColumnType_TIMESTAMP,
-			},
-			{
-				Name:        "priority",
-				Description: "The priority of the rule to allow control of processing order. A lower number indicates high priority. If not provided, any rules with a priority will be sequenced before those without.",
-				Type:        proto.ColumnType_INT,
-			},
-			{
-				Name:        "zone_id",
-				Description: "Specifies the zone identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ZoneID"),
-			},
-			{
-				Name:        "filter",
-				Description: "A set of firewall properties.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "products",
-				Description: "A list of products to bypass for a request when the bypass action is used.",
-				Type:        proto.ColumnType_JSON,
-			},
+			// Top columns
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Specifies the Firewall Rule identifier."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "Specifies the zone identifier."},
+			{Name: "paused", Type: proto.ColumnType_BOOL, Description: "Indicates whether the firewall rule is currently paused."},
+			{Name: "priority", Type: proto.ColumnType_INT, Description: "The priority of the rule to allow control of processing order. A lower number indicates high priority. If not provided, any rules with a priority will be sequenced before those without."},
+			{Name: "action", Type: proto.ColumnType_STRING, Description: "The action to apply to a matched request."},
 
-			// steampipe standard columns
-			{
-				Name:        "title",
-				Description: "Title of the resource.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("ID"),
-			},
+			// Other columns
+			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is created."},
+			{Name: "description", Type: proto.ColumnType_STRING, Description: "A description of the rule to help identify it.."},
+			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is updated."},
+			{Name: "title", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Title of the resource."},
+
+			// JSON columns
+			{Name: "filter", Type: proto.ColumnType_JSON, Description: "A set of firewall properties."},
+			{Name: "products", Type: proto.ColumnType_JSON, Description: "A list of products to bypass for a request when the bypass action is used."},
 		},
 	}
 }

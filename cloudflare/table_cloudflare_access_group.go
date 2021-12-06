@@ -27,17 +27,17 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 		},
 		// Get Config - Currently SDK is not supporting get call
 		Columns: []*plugin.Column{
-			// Top fields
+			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Identifier of the access group."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access group."},
 			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access group belongs."},
 			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account, access group belongs."},
 
-			// Other fields
+			// Other columns
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when access group was created."},
 			{Name: "updated_at", Type: proto.ColumnType_TIMESTAMP, Description: "TImestamp when access group was last modified."},
 
-			// JSON fields
+			// JSON columns
 			{Name: "exclude", Type: proto.ColumnType_JSON, Description: "The exclude policy works like a NOT logical operator. The user must not satisfy all of the rules in exclude."},
 			{Name: "include", Type: proto.ColumnType_JSON, Description: "The include policy works like an OR logical operator. The user must satisfy one of the rules in includes."},
 			{Name: "require", Type: proto.ColumnType_JSON, Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},

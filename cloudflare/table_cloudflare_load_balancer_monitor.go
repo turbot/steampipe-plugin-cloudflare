@@ -15,10 +15,13 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 			Hydrate: listLoadBalancerMonitors,
 		},
 		Columns: []*plugin.Column{
+			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Load balancer monitor API item identifier."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the load balancer monitor was created."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the load balancer monitor was last modified."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "The protocol to use for the healthcheck. Currently supported protocols are \"HTTP\", \"HTTPS\" and \"TCP\". Default: \"http\"."},
+
+			// Other columns
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "Monitor description."},
 			{Name: "method", Type: proto.ColumnType_STRING, Description: "The method to use for the health check. Valid values are any valid HTTP verb if type is \"http\" or \"https\", or connection_established if type is \"tcp\". Default: \"GET\" if type is \"http\" or \"https\", or \"connection_established\" if type is \"tcp\" ."},
 			{Name: "path", Type: proto.ColumnType_STRING, Description: "The endpoint path to health check against. Default: \"/\". Only valid if type is \"http\" or \"https\"."},

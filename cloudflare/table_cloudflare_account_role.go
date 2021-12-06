@@ -36,6 +36,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
 		},
 		Columns: []*plugin.Column{
+			// Top columns
 			{
 				Name:        "id",
 				Description: "Specifies the Role identifier.",
@@ -53,6 +54,8 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("AccountID"),
 			},
+
+			// Other columns
 			{
 				Name:        "description",
 				Description: "A description of the role.",
@@ -63,8 +66,6 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Description: "A list of permissions attached with the role.",
 				Type:        proto.ColumnType_JSON,
 			},
-
-			// steampipe standard columns
 			{
 				Name:        "title",
 				Description: "Title of the resource.",

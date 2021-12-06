@@ -27,7 +27,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 		},
 		// Get Config - Currently SDK is not supporting get call
 		Columns: []*plugin.Column{
-			// Top fields
+			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Application API uuid."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access application."},
 			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access application belongs."},
@@ -35,7 +35,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 			{Name: "domain", Type: proto.ColumnType_STRING, Description: "The domain and path that access will block."},
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the application was created."},
 
-			// Other fields
+			// Other columns
 			{Name: "aud", Type: proto.ColumnType_STRING, Description: "Audience tag."},
 			{Name: "auto_redirect_to_identity", Type: proto.ColumnType_BOOL, Description: "Option to skip identity provider selection if only one is configured in allowed_idps. Defaults to false (disabled)."},
 			{Name: "custom_deny_message", Type: proto.ColumnType_STRING, Description: "Option that returns a custom error message when a user is denied access to the application."},
@@ -44,7 +44,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 			{Name: "session_duration", Type: proto.ColumnType_STRING, Description: "How often a user will be forced to re-authorise. Must be in the format \"48h\" or \"2h45m\". Valid time units are ns, us (or µs), ms, s, m, h. Defaults to 24h."},
 			{Name: "updated_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the application was last modified."},
 
-			// JSON fields
+			// JSON columns
 			{Name: "allowed_idps", Type: proto.ColumnType_JSON, Description: "The identity providers selected for the application."},
 			{Name: "cors_headers", Type: proto.ColumnType_JSON, Description: "CORS configuration for the access application. See below for reference structure."},
 		},

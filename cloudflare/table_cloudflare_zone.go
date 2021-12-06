@@ -26,6 +26,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Zone identifier tag."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The domain name."},
+
 			// Other columns
 			// TODO - do we need this here {Name: "account", Type: proto.ColumnType_JSON, Description: "TODO"},
 			{Name: "betas", Type: proto.ColumnType_JSON, Description: "Beta feature flags associated with the zone."},
