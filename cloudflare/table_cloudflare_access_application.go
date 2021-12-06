@@ -2,9 +2,12 @@ package cloudflare
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/cloudflare/cloudflare-go"
 
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -52,11 +55,11 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 	logger := plugin.Logger(ctx)
 	account := h.Item.(cloudflare.Account)
 
-	if account_id := d.KeyColumnQualString("account_id"); account_id != "" && account.ID != account_id {
+	if accountID := d.KeyColumnQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
 	}
 
-	if account_name := d.KeyColumnQualString("account_name"); account_name != "" && account.Name != account_name {
+	if accountName := d.KeyColumnQualString("account_name"); accountName != "" && account.Name != accountName {
 		return nil, nil
 	}
 
@@ -74,6 +77,13 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 	for {
 		items, result_info, err := conn.AccessApplications(ctx, account.ID, opts)
 		if err != nil {
+			var cloudFlareErr *cloudflare.APIRequestError
+			if errors.As(err, &cloudFlareErr) {
+				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
+					return nil, nil
+				}
+			}
 			logger.Error("listAccessApplications", "AccessApplications api error", err)
 			return nil, err
 		}

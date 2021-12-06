@@ -1,0 +1,51 @@
+package cloudflare
+
+import (
+	"context"
+
+	"github.com/cloudflare/cloudflare-go"
+	"github.com/turbot/steampipe-plugin-sdk/connection"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+)
+
+const matrixKeyAccount = "account_id"
+
+var pluginQueryData *plugin.QueryData
+
+func init() {
+	pluginQueryData = &plugin.QueryData{
+		ConnectionManager: connection.NewManager(),
+	}
+}
+
+// BuildAccountmatrix :: return a list of matrix items, one per account.
+// Allows to perform three level resource listing as in case of cloudflare_access_policy
+// (i.e List Account -> List Applications -> List Access policies for each application)
+func BuildAccountmatrix(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+	pluginQueryData.Connection = connection
+
+	// cache matrix
+	cacheKey := "AccountListMatrix"
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]map[string]interface{})
+	}
+
+	conn, err := connect(ctx, pluginQueryData)
+	if err != nil {
+		return nil
+	}
+
+	items, _, err := conn.Accounts(ctx, cloudflare.PaginationOptions{})
+	if err != nil {
+		return nil
+	}
+
+	matrix := make([]map[string]interface{}, len(items))
+	for i, account := range items {
+		matrix[i] = map[string]interface{}{matrixKeyAccount: account.ID}
+	}
+
+	// set cache
+	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+	return matrix
+}
