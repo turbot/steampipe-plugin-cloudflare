@@ -17,6 +17,10 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listAccount,
 			Hydrate:       listAccessGroups,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "account_id", Require: plugin.Optional},
+				{Name: "account_name", Require: plugin.Optional},
+			},
 		},
 		// Get Config - Currently SDK is not supporting get call
 		Columns: []*plugin.Column{
