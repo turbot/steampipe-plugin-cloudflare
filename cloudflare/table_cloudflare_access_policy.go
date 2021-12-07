@@ -34,11 +34,15 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromMatrixItem(matrixKeyAccount), Description: "The ID of account where application belongs."},
 
 			// Other columns
+			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when access policy was created."},
 			{Name: "decision", Type: proto.ColumnType_STRING, Description: "Defines the action Access will take if the policy matches the user. Allowed values: allow, deny, non_identity, bypass"},
 			{Name: "precedence", Type: proto.ColumnType_INT, Description: "The unique precedence for policies on a single application."},
-			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when access policy was created."},
+			{Name: "purpose_justification_prompt", Type: proto.ColumnType_STRING, Description: "The text the user will be prompted with when a purpose justification is required."},
+			{Name: "purpose_justification_required", Type: proto.ColumnType_BOOL, Description: "Defines whether or not the user is prompted for a justification when this policy is applied."},
+			{Name: "updated_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when access policy was last modified."},
 
 			// JSON columns
+			{Name: "approval_groups", Type: proto.ColumnType_JSON, Description: "The list of approval groups that must approve the access request."},
 			{Name: "exclude", Type: proto.ColumnType_JSON, Description: "The exclude policy works like a NOT logical operator. The user must not satisfy all of the rules in exclude."},
 			{Name: "include", Type: proto.ColumnType_JSON, Description: "The include policy works like an OR logical operator. The user must satisfy one of the rules in includes."},
 			{Name: "require", Type: proto.ColumnType_JSON, Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
@@ -71,6 +75,7 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	for {
+		// items, result_info, err := conn.AccessPolicy(ctx, accountID, appID, opts)
 		items, result_info, err := conn.AccessPolicies(ctx, accountID, appID, opts)
 		if err != nil {
 			logger.Error("listAccessPolicies", "AccessPolicies api error", err)
