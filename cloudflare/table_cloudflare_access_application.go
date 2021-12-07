@@ -74,8 +74,29 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 		Page:    1,
 	}
 
+	type ListPageResponse struct {
+		Applications []cloudflare.AccessApplication
+		resp         cloudflare.ResultInfo
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < int64(opts.PerPage) {
+			opts.PerPage = int(*limit)
+		}
+	}
+
+	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+		applications, resp, err := conn.AccessApplications(ctx, account.ID, opts)
+		return ListPageResponse{
+			Applications: applications,
+			resp:         resp,
+		}, err
+	}
+
 	for {
-		items, result_info, err := conn.AccessApplications(ctx, account.ID, opts)
+		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
+		// items, result_info, err := conn.AccessApplications(ctx, account.ID, opts)
 		if err != nil {
 			var cloudFlareErr *cloudflare.APIRequestError
 			if errors.As(err, &cloudFlareErr) {
@@ -83,15 +104,26 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
 					return nil, nil
 				}
+				cloudFlareErr.ClientRateLimited()
+
 			}
 			logger.Error("listAccessApplications", "AccessApplications api error", err)
 			return nil, err
 		}
-		for _, i := range items {
+
+		listResponse := listPageResponse.(ListPageResponse)
+		apps := listResponse.Applications
+		resp := listResponse.resp
+		for _, i := range apps {
 			d.StreamListItem(ctx, i)
 		}
 
-		if result_info.Page >= result_info.TotalPages {
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
+
+		if resp.Page >= resp.TotalPages {
 			break
 		}
 		opts.Page = opts.Page + 1
