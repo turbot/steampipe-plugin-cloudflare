@@ -100,7 +100,7 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 
 	conn, err := connect(ctx, d)
 	if err != nil {
-		logger.Error("listAccessApplications", "connection error", err)
+		logger.Error("listParentAccessApplications", "connection error", err)
 		return nil, err
 	}
 
@@ -109,24 +109,38 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 		Page:    1,
 	}
 
+	type ListPageResponse struct {
+		Applications []cloudflare.AccessApplication
+		resp         cloudflare.ResultInfo
+	}
+
+	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+		applications, resp, err := conn.AccessApplications(ctx, accountID, opts)
+		return ListPageResponse{
+			Applications: applications,
+			resp:         resp,
+		}, err
+	}
+
 	for {
-		items, result_info, err := conn.AccessApplications(ctx, accountID, opts)
+		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
 		if err != nil {
 			var cloudFlareErr *cloudflare.APIRequestError
 			if errors.As(err, &cloudFlareErr) {
 				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
+					logger.Warn("listParentAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
 					return nil, nil
 				}
 			}
-			logger.Error("listAccessApplications", "AccessApplications api error", err)
+			logger.Error("listParentAccessApplications", "AccessApplications api error", err)
 			return nil, err
 		}
-		for _, i := range items {
+		listResponse := listPageResponse.(ListPageResponse)
+		for _, i := range listResponse.Applications {
 			d.StreamListItem(ctx, i)
 		}
 
-		if result_info.Page >= result_info.TotalPages {
+		if listResponse.resp.Page >= listResponse.resp.TotalPages {
 			break
 		}
 		opts.Page = opts.Page + 1
