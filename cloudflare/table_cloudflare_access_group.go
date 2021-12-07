@@ -68,8 +68,28 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		Page:    1,
 	}
 
+	type ListPageResponse struct {
+		Groups []cloudflare.AccessGroup
+		resp   cloudflare.ResultInfo
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < int64(opts.PerPage) {
+			opts.PerPage = int(*limit)
+		}
+	}
+
+	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+		groups, resp, err := conn.AccessGroups(ctx, account.ID, opts)
+		return ListPageResponse{
+			Groups: groups,
+			resp:   resp,
+		}, err
+	}
+
 	for {
-		items, result_info, err := conn.AccessGroups(ctx, account.ID, opts)
+		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
 		if err != nil {
 			var cloudFlareErr *cloudflare.APIRequestError
 			if errors.As(err, &cloudFlareErr) {
@@ -81,11 +101,16 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 			logger.Error("listAccessGroups", "AccessGroups api error", err)
 			return nil, err
 		}
-		for _, i := range items {
+		listResponse := listPageResponse.(ListPageResponse)
+		for _, i := range listResponse.Groups {
 			d.StreamListItem(ctx, i)
 		}
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 
-		if result_info.Page >= result_info.TotalPages {
+		if listResponse.resp.Page >= listResponse.resp.TotalPages {
 			break
 		}
 		opts.Page = opts.Page + 1

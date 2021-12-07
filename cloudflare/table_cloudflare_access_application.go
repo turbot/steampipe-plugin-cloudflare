@@ -96,7 +96,6 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	for {
 		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
-		// items, result_info, err := conn.AccessApplications(ctx, account.ID, opts)
 		if err != nil {
 			var cloudFlareErr *cloudflare.APIRequestError
 			if errors.As(err, &cloudFlareErr) {
@@ -104,8 +103,6 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
 					return nil, nil
 				}
-				cloudFlareErr.ClientRateLimited()
-
 			}
 			logger.Error("listAccessApplications", "AccessApplications api error", err)
 			return nil, err
