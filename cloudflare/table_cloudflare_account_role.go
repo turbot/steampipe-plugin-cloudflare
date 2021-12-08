@@ -22,10 +22,13 @@ type accountRoleInfo = struct {
 func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_account_role",
-		Description: "Cloudflare Account Role",
+		Description: "A Role defines what permissions a Member of an Account has.",
 		List: &plugin.ListConfig{
 			Hydrate:       listRoles,
 			ParentHydrate: listAccount,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "account_id", Require: plugin.Optional},
+			},
 		},
 		Get: &plugin.GetConfig{
 			Hydrate:           getAccountRole,
@@ -33,6 +36,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
 		},
 		Columns: []*plugin.Column{
+			// Top columns
 			{
 				Name:        "id",
 				Description: "Specifies the Role identifier.",
@@ -50,6 +54,8 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("AccountID"),
 			},
+
+			// Other columns
 			{
 				Name:        "description",
 				Description: "A description of the role.",
@@ -60,8 +66,6 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Description: "A list of permissions attached with the role.",
 				Type:        proto.ColumnType_JSON,
 			},
-
-			// steampipe standard columns
 			{
 				Name:        "title",
 				Description: "Title of the resource.",
@@ -75,13 +79,17 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	account := h.Item.(cloudflare.Account)
+	if accountID := d.KeyColumnQualString("account_id"); accountID != "" && account.ID != accountID {
+		return nil, nil
+	}
+
 	conn, err := connect(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-	accountData := h.Item.(cloudflare.Account)
 
-	resp, err := conn.AccountRoles(ctx, accountData.ID)
+	resp, err := conn.AccountRoles(ctx, account.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +100,7 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 			Name:        role.Name,
 			Description: role.Description,
 			Permissions: role.Permissions,
-			AccountID:   accountData.ID,
+			AccountID:   account.ID,
 		})
 	}
 	return nil, nil

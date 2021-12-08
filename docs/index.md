@@ -46,12 +46,22 @@ connection "cloudflare" {
 ```
 
 Credentials are resolved in this order:
+
 1. `token` in Steampipe config.
 2. `email` and `api_key` in Steampipe config.
 3. `CLOUDFLARE_API_TOKEN` environment variable (like Terraform).
 4. `CLOUDFLARE_EMAIL` and `CLOUDFLARE_API_KEY` environment variables (like Terraform).
 5. `CF_API_TOKEN` environment variable (like flarectl).
 6. `CF_API_EMAIL` and `CF_API_KEY` environment variables (like flarectl).
+
+For example:
+
+```hcl
+connection "cloudflare" {
+  plugin = "cloudflare"
+  token  = "9wZVRX3j9Z1CiE38HcmThwkb2hThisIsAFakeToken"
+}
+```
 
 ## Scope
 

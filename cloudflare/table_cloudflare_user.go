@@ -19,6 +19,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the user."},
 			{Name: "email", Type: proto.ColumnType_STRING, Description: "Email of the user."},
 			{Name: "username", Type: proto.ColumnType_STRING, Description: "Username (actually often in ID style) of the user."},
+
 			// Other columns
 			{Name: "telephone", Type: proto.ColumnType_STRING, Description: "Telephone number of the user."},
 			{Name: "first_name", Type: proto.ColumnType_STRING, Description: "First name of the user."},
@@ -29,6 +30,8 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the user was last modified."},
 			{Name: "api_key", Type: proto.ColumnType_STRING, Description: "API Key for the user."},
 			{Name: "two_factor_authentication_enabled", Type: proto.ColumnType_BOOL, Description: "True if two factor authentication is enabled for this user."},
+
+			// JSON columns
 			{Name: "betas", Type: proto.ColumnType_JSON, Description: "Beta feature flags associated with the user."},
 			{Name: "organizations", Type: proto.ColumnType_JSON, Description: "Organizations the user is a member of."},
 		},

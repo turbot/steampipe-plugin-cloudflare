@@ -14,18 +14,15 @@ import (
 func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) {
 
 	cloudflareConfig := GetConfig(d.Connection)
-	if &cloudflareConfig != nil {
 
-		// First: check for the token
-		if cloudflareConfig.Token != nil {
-			return cloudflare.NewWithAPIToken(*cloudflareConfig.Token)
-		}
+	// First: check for the token
+	if cloudflareConfig.Token != nil {
+		return cloudflare.NewWithAPIToken(*cloudflareConfig.Token)
+	}
 
-		// Second: Email + API Key
-		if cloudflareConfig.Email != nil && cloudflareConfig.APIKey != nil {
-			return cloudflare.New(*cloudflareConfig.APIKey, *cloudflareConfig.Email)
-		}
-
+	// Second: Email + API Key
+	if cloudflareConfig.Email != nil && cloudflareConfig.APIKey != nil {
+		return cloudflare.New(*cloudflareConfig.APIKey, *cloudflareConfig.Email)
 	}
 
 	// Third: CLOUDFLARE_API_TOKEN (like Terraform)
@@ -71,4 +68,11 @@ func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 		}
 		return false
 	}
+}
+
+func shouldRetryError(err error) bool {
+	if cloudflareErr, ok := err.(*cloudflare.APIRequestError); ok {
+		return cloudflareErr.ClientRateLimited()
+	}
+	return false
 }
