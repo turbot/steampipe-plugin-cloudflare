@@ -1,7 +1,6 @@
 # Table: cloudflare_access_group
 
-A group is a set of rules that can be configured once and then quickly applied across many Access applications.
-Access group allows to define a set of users to which an application policy can be applied.
+An access group is a set of rules that can be configured once and then quickly applied across many Access applications.
 
 ## Examples
 
