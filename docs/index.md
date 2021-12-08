@@ -20,7 +20,7 @@ Download and install the latest Cloudflare plugin:
 steampipe plugin install cloudflare
 ```
 
-## Connection Configuration
+## Configuration
 
 Connection configurations are defined using HCL in one or more Steampipe config files. Steampipe will load ALL configuration files from `~/.steampipe/config` that have a `.spc` extension. A config file may contain multiple connections.
 
@@ -66,3 +66,8 @@ connection "cloudflare" {
 ## Scope
 
 A Cloudflare connection is scoped to a single Cloudflare account, with a single set of credentials.
+
+## Get involved
+
+- Open source: https://github.com/turbot/steampipe-plugin-cloudflare
+- Community: [Slack Channel](https://steampipe.io/community/join)
