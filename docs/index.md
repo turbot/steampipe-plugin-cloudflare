@@ -58,9 +58,8 @@ For example:
 
 ```hcl
 connection "cloudflare" {
-  plugin     = "cloudflare"
-  email      = "pam@dundermifflin.com"
-  api_key    = "2980b99351d629a537f1440e12b5b97a135b7"
+  plugin = "cloudflare"
+  token  = "9wZVRX3j9Z1CiE38HcmThwkb2hThisIsAFakeToken"
 }
 ```
 
