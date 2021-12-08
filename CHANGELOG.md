@@ -1,3 +1,20 @@
+## v0.2.0 [2021-12-08]
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_access_application](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_access_application) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+  - [cloudflare_access_group](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_access_group) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+  - [cloudflare_access_policy](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_access_policy) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+  - [cloudflare_load_balancer](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_load_balancer) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+  - [cloudflare_load_balancer_monitor](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_load_balancer_monitor) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+  - [cloudflare_load_balancer_pool](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_load_balancer_pool) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+  - [cloudflare_worker_route](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_worker_route) ([#19](https://github.com/turbot/steampipe-plugin-cloudflare/pull/19))
+
+_Enhancements_
+
+- `README.md` and `docs/index.md` files now have updated Slack channel links
+
 ## v0.1.0 [2021-11-23]
 
 _Enhancements_
