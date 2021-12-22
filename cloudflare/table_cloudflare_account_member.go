@@ -103,6 +103,11 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 		for _, i := range response {
 			d.StreamListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if pageData.Count >= pageData.Total {
 			break
