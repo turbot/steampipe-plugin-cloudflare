@@ -102,7 +102,7 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		}
 
 		for _, i := range response {
-			d.StreamLeafListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
+			d.StreamListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
 		}
 		if pageData.Count >= pageData.Total {
 			break
@@ -123,6 +123,11 @@ func getAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	accountID := d.KeyColumnQuals["account_id"].GetStringValue()
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// empty check
+	if accountID == "" || id == "" {
+		return nil, nil
+	}
 
 	data, err := conn.AccountMember(ctx, accountID, id)
 	if err != nil {
