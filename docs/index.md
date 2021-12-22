@@ -6,6 +6,8 @@ brand_color: "#f48120"
 display_name: Cloudflare
 name: cloudflare
 description: Steampipe plugin for querying Cloudflare databases, networks, and other resources.
+og_description: Query cloudflare databases, networks, and other resources with SQL! Open source CLI. No DB required. 
+og_image: "/images/plugins/turbot/cloudflare-social-graphic.png"
 ---
 
 # Cloudflare
