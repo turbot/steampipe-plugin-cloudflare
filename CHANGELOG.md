@@ -3,7 +3,7 @@
 _What's new?_
 
 - New tables added
-  - [cloudflare_account_member](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_account_member) ([#4](https://github.com/turbot/steampipe-plugin-cloudflare/pull/4)))
+  - [cloudflare_account_member](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_account_member) ([#4](https://github.com/turbot/steampipe-plugin-cloudflare/pull/4))
 
 ## v0.2.0 [2021-12-08]
 
