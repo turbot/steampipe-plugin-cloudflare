@@ -1,6 +1,6 @@
 ---
 organization: Turbot
-category: ["networking"]
+category: ["internet"]
 icon_url: "/images/plugins/turbot/cloudflare.svg"
 brand_color: "#f48120"
 display_name: Cloudflare
@@ -20,7 +20,7 @@ Download and install the latest Cloudflare plugin:
 steampipe plugin install cloudflare
 ```
 
-## Connection Configuration
+## Configuration
 
 Connection configurations are defined using HCL in one or more Steampipe config files. Steampipe will load ALL configuration files from `~/.steampipe/config` that have a `.spc` extension. A config file may contain multiple connections.
 
@@ -46,6 +46,7 @@ connection "cloudflare" {
 ```
 
 Credentials are resolved in this order:
+
 1. `token` in Steampipe config.
 2. `email` and `api_key` in Steampipe config.
 3. `CLOUDFLARE_API_TOKEN` environment variable (like Terraform).
@@ -53,6 +54,20 @@ Credentials are resolved in this order:
 5. `CF_API_TOKEN` environment variable (like flarectl).
 6. `CF_API_EMAIL` and `CF_API_KEY` environment variables (like flarectl).
 
+For example:
+
+```hcl
+connection "cloudflare" {
+  plugin = "cloudflare"
+  token  = "9wZVRX3j9Z1CiE38HcmThwkb2hThisIsAFakeToken"
+}
+```
+
 ## Scope
 
 A Cloudflare connection is scoped to a single Cloudflare account, with a single set of credentials.
+
+## Get involved
+
+- Open source: https://github.com/turbot/steampipe-plugin-cloudflare
+- Community: [Slack Channel](https://steampipe.io/community/join)
