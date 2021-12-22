@@ -102,7 +102,7 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		}
 
 		for _, i := range response {
-			d.StreamLeafListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
+			d.StreamListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
 		}
 		if pageData.Count >= pageData.Total {
 			break
