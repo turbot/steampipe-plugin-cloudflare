@@ -20,6 +20,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_access_group":          tableCloudflareAccessGroup(ctx),
 			"cloudflare_access_policy":         tableCloudflareAccessPolicy(ctx),
 			"cloudflare_account":               tableCloudflareAccount(ctx),
+			"cloudflare_account_member":        tableCloudflareAccountMember(ctx),
 			"cloudflare_account_role":          tableCloudflareAccountRole(ctx),
 			"cloudflare_api_token":             tableCloudflareAPIToken(ctx),
 			"cloudflare_dns_record":            tableCloudflareDNSRecord(ctx),
