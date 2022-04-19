@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
 
 func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) {
