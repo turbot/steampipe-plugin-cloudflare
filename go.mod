@@ -1,6 +1,6 @@
 module github.com/turbot/steampipe-plugin-cloudflare
 
-go 1.17
+go 1.18
 
 require (
 	github.com/cloudflare/cloudflare-go v0.27.0
