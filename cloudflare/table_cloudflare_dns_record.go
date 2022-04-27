@@ -5,8 +5,8 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
 
 func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
