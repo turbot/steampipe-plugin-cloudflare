@@ -4,33 +4,25 @@ import (
 	"context"
 
 	"github.com/cloudflare/cloudflare-go"
-	"github.com/turbot/steampipe-plugin-sdk/v3/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 const matrixKeyAccount = "account_id"
 
-var pluginQueryData *plugin.QueryData
-
-func init() {
-	pluginQueryData = &plugin.QueryData{
-		ConnectionManager: connection.NewManager(),
-	}
-}
 
 // BuildAccountmatrix :: return a list of matrix items, one per account.
 // Allows to perform three level resource listing as in case of cloudflare_access_policy
 // (i.e List Account -> List Applications -> List Access policies for each application)
-func BuildAccountmatrix(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
-	pluginQueryData.Connection = connection
+func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
+	// pluginQueryData.Connection = connection
 
 	// cache matrix
 	cacheKey := "AccountListMatrix"
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
-	conn, err := connect(ctx, pluginQueryData)
+	conn, err := connect(ctx, d)
 	if err != nil {
 		return nil
 	}
@@ -46,6 +38,6 @@ func BuildAccountmatrix(ctx context.Context, connection *plugin.Connection) []ma
 	}
 
 	// set cache
-	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+	d.ConnectionManager.Cache.Set(cacheKey, matrix)
 	return matrix
 }
