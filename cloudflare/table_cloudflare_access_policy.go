@@ -24,7 +24,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 				{Name: "application_id", Require: plugin.Optional},
 			},
 		},
-		GetMatrixItem: BuildAccountmatrix,
+		GetMatrixItemFunc: BuildAccountmatrix,
 		Columns: []*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Access plolicy unique API identifier."},
