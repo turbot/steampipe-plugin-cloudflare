@@ -8,9 +8,9 @@ import (
 	"github.com/cloudflare/cloudflare-go"
 
 	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
@@ -24,7 +24,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 				{Name: "application_id", Require: plugin.Optional},
 			},
 		},
-		GetMatrixItem: BuildAccountmatrix,
+		GetMatrixItemFunc: BuildAccountmatrix,
 		Columns: []*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Access plolicy unique API identifier."},
