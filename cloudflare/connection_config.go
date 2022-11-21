@@ -6,9 +6,11 @@ import (
 )
 
 type cloudflareConfig struct {
-	Token  *string `cty:"token"`
-	Email  *string `cty:"email"`
-	APIKey *string `cty:"api_key"`
+	Token     *string `cty:"token"`
+	Email     *string `cty:"email"`
+	APIKey    *string `cty:"api_key"`
+	AccessKey *string `cty:"access_key"`
+	SecretKey *string `cty:"secret_key"`
 }
 
 var ConfigSchema = map[string]*schema.Attribute{
@@ -19,6 +21,12 @@ var ConfigSchema = map[string]*schema.Attribute{
 		Type: schema.TypeString,
 	},
 	"api_key": {
+		Type: schema.TypeString,
+	},
+	"access_key": {
+		Type: schema.TypeString,
+	},
+	"secret_key": {
 		Type: schema.TypeString,
 	},
 }

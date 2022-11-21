@@ -3,10 +3,16 @@ package cloudflare
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/cloudflare/cloudflare-go"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
@@ -56,6 +62,47 @@ func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) 
 	}
 
 	return nil, errors.New("Cloudflare API credentials not found. Edit your connection configuration file and then restart Steampipe.")
+}
+
+func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s3.Client, error) {
+	sessionCacheKey := fmt.Sprintf("session-v2-%s", accountID)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
+		return cachedData.(*s3.Client), nil
+	}
+
+	cloudflareConfig := GetConfig(d.Connection)
+	var accessKey, secret string
+
+	if cloudflareConfig.AccessKey != nil {
+		accessKey = *cloudflareConfig.AccessKey
+	}
+
+	if cloudflareConfig.SecretKey != nil {
+		secret = *cloudflareConfig.SecretKey
+	}
+
+	if accessKey == "" || secret == "" {
+		return nil, errors.New("Cloudflare R2 API credentials not found. Edit your connection to configure AccessKey and Secret, and then restart Steampipe.")
+	}
+
+	r2EndpointResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		return aws.Endpoint{
+			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID),
+		}, nil
+	})
+
+	cfg, err := config.LoadDefaultConfig(context.Background(),
+		config.WithEndpointResolverWithOptions(r2EndpointResolver),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secret, "")),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config: %v", err)
+	}
+	client := s3.NewFromConfig(cfg)
+
+	d.ConnectionManager.Cache.Set(sessionCacheKey, client)
+
+	return client, nil
 }
 
 func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
