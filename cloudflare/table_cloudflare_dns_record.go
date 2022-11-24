@@ -5,8 +5,8 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
@@ -52,8 +52,8 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	if err != nil {
 		return nil, err
 	}
-	quals := d.KeyColumnQuals
-	zoneID := quals["zone_id"].GetStringValue()
+
+	zoneID := d.EqualsQualString("zone_id")
 	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
 	if err != nil {
 		return nil, err
@@ -69,9 +69,9 @@ func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err != nil {
 		return nil, err
 	}
-	quals := d.KeyColumnQuals
-	zoneID := quals["zone_id"].GetStringValue()
-	id := quals["id"].GetStringValue()
+
+	zoneID := d.EqualsQualString("zone_id")
+	id := d.EqualsQualString("id")
 	item, err := conn.DNSRecord(ctx, zoneID, id)
 	if err != nil {
 		return nil, err

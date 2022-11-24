@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/cloudflare/cloudflare-go"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type accountRoleInfo = struct {
@@ -80,7 +80,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 
 func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	account := h.Item.(cloudflare.Account)
-	if accountID := d.KeyColumnQualString("account_id"); accountID != "" && account.ID != accountID {
+	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
 	}
 
@@ -114,8 +114,8 @@ func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
-	accountID := d.KeyColumnQuals["account_id"].GetStringValue()
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	accountID := d.EqualsQualString("account_id")
+	id := d.EqualsQualString("id")
 
 	data, err := conn.AccountRole(ctx, accountID, id)
 	if err != nil {

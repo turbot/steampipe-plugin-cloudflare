@@ -6,9 +6,9 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type firewallRuleInfo = struct {
@@ -99,8 +99,8 @@ func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	zoneID := d.KeyColumnQuals["zone_id"].GetStringValue()
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	zoneID := d.EqualsQualString("zone_id")
+	id := d.EqualsQualString("id")
 
 	op, err := conn.FirewallRule(ctx, zoneID, id)
 	if err != nil {
