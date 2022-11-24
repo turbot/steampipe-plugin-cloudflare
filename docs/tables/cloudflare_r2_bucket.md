@@ -30,5 +30,3 @@ where
   server_side_encryption_configuration is null
   and account_id = 'fb1696f453testaccount39e734f5f96e9';
 ```
-
-<!--- Add more examples --->
