@@ -3,6 +3,7 @@ package cloudflare
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -109,6 +110,11 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	input := &s3.ListBucketsInput{}
 	bucketsResult, err := conn.ListBuckets(ctx, input)
 	if err != nil {
+		// Get "https://<account>.r2.cloudflarestorage.com/": remote error: tls: handshake failure (SQLSTATE HV000)
+		if strings.Contains(err.Error(), "tls: handshake failure") {
+			return nil, nil
+		}
+
 		plugin.Logger(ctx).Error("cloudflare_r2_bucket.listR2Buckets", "api_error", err)
 		return nil, err
 	}

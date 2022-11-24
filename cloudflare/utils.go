@@ -64,6 +64,7 @@ func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) 
 	return nil, errors.New("Cloudflare API credentials not found. Edit your connection configuration file and then restart Steampipe.")
 }
 
+// Create Cloudflare R2 API client
 func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s3.Client, error) {
 	sessionCacheKey := fmt.Sprintf("session-v2-%s", accountID)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
@@ -82,7 +83,7 @@ func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s
 	}
 
 	if accessKey == "" || secret == "" {
-		return nil, errors.New("Cloudflare R2 API credentials not found. Edit your connection to configure AccessKey and Secret, and then restart Steampipe.")
+		return nil, errors.New("cloudflare R2 API credentials not found. Edit your connection to configure AccessKey and Secret, and then restart Steampipe")
 	}
 
 	r2EndpointResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
