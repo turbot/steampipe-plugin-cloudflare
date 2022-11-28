@@ -109,7 +109,7 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 				return nil, nil
 			}
 		}
-		if pageData.Count >= pageData.Total {
+		if pageData.Page == pageData.TotalPages {
 			break
 		}
 		pages.Page = pageData.Page + 1
