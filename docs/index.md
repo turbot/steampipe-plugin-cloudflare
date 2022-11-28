@@ -65,6 +65,19 @@ connection "cloudflare" {
 }
 ```
 
+### Configuring R2 API credentials
+
+In order to access the R2 APIs, you must [Generate an S3 Auth token](https://developers.cloudflare.com/r2/data-access/s3-api/tokens/) to serve as the Access Key for usage with existing S3-compatible SDKs.
+
+```hcl
+connection "cloudflare" {
+  plugin = "cloudflare"
+
+  access_key = "YOUR_R2_ACCESS_KEY_ID"
+  secret_key = "YOUR_R2_SECRET_ACCESS_KEY"
+}
+```
+
 ## Scope
 
 A Cloudflare connection is scoped to a single Cloudflare account, with a single set of credentials.
