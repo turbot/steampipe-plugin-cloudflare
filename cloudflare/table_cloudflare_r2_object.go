@@ -19,7 +19,7 @@ import (
 func tableCloudflareR2Object(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "cloudflare_r2_object",
-		Description:      "List Cloudflare R2 Objects in R2 buckets by bucket name",
+		Description:      "List Cloudflare R2 Objects by bucket name",
 		DefaultTransform: transform.FromCamel().NullIfZero(),
 		List: &plugin.ListConfig{
 			Hydrate: listR2Objects,
