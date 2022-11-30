@@ -35,7 +35,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			{Name: "development_mode", Type: proto.ColumnType_INT, Description: "The interval (in seconds) from when development mode expires (positive integer) or last expired (negative integer) for the domain. If development mode has never been enabled, this value is 0."},
 			{Name: "dnssec", Type: proto.ColumnType_JSON, Hydrate: getZoneDNSSEC, Transform: transform.FromValue(), Description: "DNSSEC settings for the zone."},
 			{Name: "host", Type: proto.ColumnType_JSON, Description: "TODO"},
-			{Name: "meta", Type: proto.ColumnType_JSON, Description: "Metadata associated witht the zone."},
+			{Name: "meta", Type: proto.ColumnType_JSON, Description: "Metadata associated with the zone."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the zone was last modified."},
 			{Name: "name_servers", Type: proto.ColumnType_JSON, Description: "Cloudflare-assigned name servers. This is only populated for zones that use Cloudflare DNS."},
 			{Name: "original_dnshost", Type: proto.ColumnType_STRING, Description: "DNS host at the time of switching to Cloudflare."},
