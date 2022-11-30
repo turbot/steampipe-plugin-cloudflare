@@ -18,7 +18,7 @@ from
   cloudflare_access_policy;
 ```
 
-### List policies that require justifcation for accessing resources
+### List policies that require justification for accessing resources
 
 ```sql
 select
