@@ -8,9 +8,9 @@ import (
 	"github.com/cloudflare/cloudflare-go"
 
 	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
@@ -53,9 +53,9 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 
-	accountID := d.KeyColumnQualString(matrixKeyAccount)
+	accountID := d.EqualsQualString(matrixKeyAccount)
 	appID := h.Item.(cloudflare.AccessApplication).ID
-	inputAppID := d.KeyColumnQuals["application_id"].GetStringValue()
+	inputAppID := d.EqualsQuals["application_id"].GetStringValue()
 
 	// Avoid getting access policies for other applications id
 	// "application_id" mentioned in where clause
@@ -96,7 +96,7 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	accountID := d.KeyColumnQualString(matrixKeyAccount)
+	accountID := d.EqualsQualString(matrixKeyAccount)
 
 	conn, err := connect(ctx, d)
 	if err != nil {

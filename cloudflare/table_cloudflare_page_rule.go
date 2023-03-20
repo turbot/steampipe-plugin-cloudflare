@@ -6,9 +6,9 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type pageRuleInfo = struct {
@@ -93,8 +93,8 @@ func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, err
 	}
 
-	zoneID := d.KeyColumnQuals["zone_id"].GetStringValue()
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
 
 	op, err := conn.PageRule(ctx, zoneID, id)
 	if err != nil {
