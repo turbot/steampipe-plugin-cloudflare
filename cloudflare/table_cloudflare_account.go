@@ -5,8 +5,8 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 func tableCloudflareAccount(ctx context.Context) *plugin.Table {
@@ -53,7 +53,7 @@ func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	if err != nil {
 		return nil, err
 	}
-	quals := d.KeyColumnQuals
+	quals := d.EqualsQuals
 	id := quals["id"].GetStringValue()
 	account, _, err := conn.Account(ctx, id)
 	if err != nil {
