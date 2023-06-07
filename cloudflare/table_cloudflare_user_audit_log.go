@@ -5,9 +5,9 @@ import (
 
 	"github.com/cloudflare/cloudflare-go"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
@@ -124,22 +124,21 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 
 func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 
-	quals := d.KeyColumnQuals
-
 	conn, err := connect(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_user_audit_log.listUserAuditLogs", "connection_error", err)
 		return nil, err
 	}
 
 	opts := cloudflare.AuditLogFilter{}
-	if quals["actor_ip"] != nil && quals["actor_ip"].GetStringValue() != "" {
-		opts.ActorIP = quals["actor_ip"].GetStringValue()
+	if d.EqualsQualString("actor_ip") != "" {
+		opts.ActorIP = d.EqualsQualString("actor_ip")
 	}
-	if quals["actor_email"] != nil && quals["actor_email"].GetStringValue() != "" {
-		opts.ActorEmail = quals["actor_email"].GetStringValue()
+	if d.EqualsQualString("actor_email") != "" {
+		opts.ActorEmail = d.EqualsQualString("actor_email")
 	}
-	if quals["id"] != nil && quals["id"].GetStringValue() != "" {
-		opts.ID = quals["id"].GetStringValue()
+	if d.EqualsQualString("id") != "" {
+		opts.ID = d.EqualsQualString("id")
 	}
 	if d.Quals["when"] != nil {
 		for _, q := range d.Quals["when"].Quals {
@@ -154,18 +153,14 @@ func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	}
 
 	items, err := conn.GetUserAuditLogs(ctx, opts)
-
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_user_audit_log.listUserAuditLogs", "api_error", err)
 		return nil, err
 	}
 
 	for _, i := range items.Result {
 		d.StreamListItem(ctx, i)
-
-		// Context can be cancelled due to manual cancellation or thelimit has been hit
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
-			return nil, nil
-		}
 	}
+
 	return nil, nil
 }
