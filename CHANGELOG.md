@@ -1,3 +1,10 @@
+## v0.7.0 [2023-06-08]
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_user_audit_log](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_user_audit_log) ([#41](https://github.com/turbot/steampipe-plugin-cloudflare/pull/41))
+
 ## v0.6.0 [2023-03-22]
 
 _Bug fixes_
