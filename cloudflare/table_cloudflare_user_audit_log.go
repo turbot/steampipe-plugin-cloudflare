@@ -90,6 +90,7 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 				Name:        "when",
 				Description: "When the change happened.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.From(convertAuditLogTimeToRFC3339Timestamp),
 			},
 
 			{
@@ -131,7 +132,10 @@ func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	opts := cloudflare.AuditLogFilter{}
+	opts := cloudflare.AuditLogFilter{
+		Page:    1,
+		PerPage: 1000,
+	}
 	if d.EqualsQualString("actor_ip") != "" {
 		opts.ActorIP = d.EqualsQualString("actor_ip")
 	}
@@ -157,15 +161,35 @@ func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		}
 	}
 
-	items, err := conn.GetUserAuditLogs(ctx, opts)
-	if err != nil {
-		plugin.Logger(ctx).Error("cloudflare_user_audit_log.listUserAuditLogs", "api_error", err)
-		return nil, err
-	}
+	for {
+		items, err := conn.GetUserAuditLogs(ctx, opts)
+		if err != nil {
+			plugin.Logger(ctx).Error("cloudflare_user_audit_log.listUserAuditLogs", "api_error", err)
+			return nil, err
+		}
 
-	for _, i := range items.Result {
-		d.StreamListItem(ctx, i)
+		// Value of items.TotalPages is always 0, so we need to check if we have reached the end of the list
+		if len(items.Result) == 0 {
+			break
+		}
+
+		for _, i := range items.Result {
+			d.StreamListItem(ctx, i)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
+		}
+		opts.Page = opts.Page + 1
 	}
 
 	return nil, nil
+}
+
+//// TRANSFORM FUNCTION
+
+func convertAuditLogTimeToRFC3339Timestamp(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	data := d.HydrateItem.(cloudflare.AuditLog)
+	return data.When.Format(time.RFC3339), nil
 }
