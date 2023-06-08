@@ -20,7 +20,7 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:       "when",
-					Operators:  []string{">", ">=", "<", "="},
+					Operators:  []string{">", ">=", "<", "<=", "="},
 					Require:    plugin.Optional,
 					CacheMatch: "exact",
 				},
@@ -147,15 +147,17 @@ func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	if d.Quals["when"] != nil {
 		for _, q := range d.Quals["when"].Quals {
 			timestamp := q.Value.GetTimestampValue().AsTime().Format(time.RFC3339)
-			timestampBefore := q.Value.GetTimestampValue().AsTime().Add(time.Second).Format(time.RFC3339)
+			timestampAdd := q.Value.GetTimestampValue().AsTime().Add(time.Second).Format(time.RFC3339)
 			switch q.Operator {
 			case ">=", ">":
 				opts.Since = timestamp
 			case "<":
 				opts.Before = timestamp
+			case "<=":
+				opts.Before = timestampAdd
 			case "=":
 				opts.Since = timestamp
-				opts.Before = timestampBefore
+				opts.Before = timestampAdd
 			}
 		}
 	}
