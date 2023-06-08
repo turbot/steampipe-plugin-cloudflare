@@ -92,7 +92,6 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.From(convertAuditLogTimeToRFC3339Timestamp),
 			},
-
 			{
 				Name:        "action",
 				Description: "The action that was taken.",
