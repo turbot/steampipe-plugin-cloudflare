@@ -94,11 +94,9 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, nil
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// What happens if we try to access a bucket in an account where the R2 plan is not enabled?
 	// Can we do something with this error?
 	// Error: operation error S3: ListBuckets, exceeded maximum number of attempts, 3, https response error StatusCode: 0, RequestID: , HostID: , request send failed, Get "https://<account>.r2.cloudflarestorage.com/": remote error: tls: handshake failure (SQLSTATE HV000)
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get R2 client
 	conn, err := getR2Client(ctx, d, accountID)
