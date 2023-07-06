@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/cloudflare/cloudflare-go"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 const matrixKeyAccount = "account_id"

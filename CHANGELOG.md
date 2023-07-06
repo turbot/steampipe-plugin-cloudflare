@@ -1,3 +1,20 @@
+## v0.7.0 [2023-06-08]
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_user_audit_log](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_user_audit_log) ([#41](https://github.com/turbot/steampipe-plugin-cloudflare/pull/41))
+
+## v0.6.0 [2023-03-22]
+
+_Bug fixes_
+
+- Fixed pagination in `cloudflare_account_member` table. ([#39](https://github.com/turbot/steampipe-plugin-cloudflare/pull/39))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.3.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v530-2023-03-16) which includes fixes for query cache pending item mechanism and aggregator connections not working for dynamic tables. ([#48](https://github.com/turbot/steampipe-plugin-cloudflare/pull/48))
+
 ## v0.5.0 [2022-09-28]
 
 _Dependencies_

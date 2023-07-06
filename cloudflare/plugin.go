@@ -3,8 +3,8 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func Plugin(ctx context.Context) *plugin.Plugin {
@@ -33,6 +33,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_r2_object":             tableCloudflareR2Object(ctx),
 			"cloudflare_r2_object_data":        tableCloudflareR2ObjectData(ctx),
 			"cloudflare_user":                  tableCloudflareUser(ctx),
+			"cloudflare_user_audit_log":        tableCloudflareUserAuditLog(ctx),
 			"cloudflare_worker_route":          tableCloudflareWorkerRoute(ctx),
 			"cloudflare_zone":                  tableCloudflareZone(ctx),
 		},
