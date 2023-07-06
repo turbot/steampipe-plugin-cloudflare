@@ -1,3 +1,13 @@
+## v0.8.0 [2023-07-06]
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_r2_bucket](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_r2_bucket) ([#43](https://github.com/turbot/steampipe-plugin-cloudflare/pull/43))
+  - [cloudflare_r2_object_data](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_r2_object_data) ([#43](https://github.com/turbot/steampipe-plugin-cloudflare/pull/43))
+  - [cloudflare_r2_object](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_r2_object) ([#43](https://github.com/turbot/steampipe-plugin-cloudflare/pull/43))
+- Added `access_key` and `secret_key` config arguments to query `cloudflare_r2_*` tables. ([#43](https://github.com/turbot/steampipe-plugin-cloudflare/pull/43))
+
 ## v0.7.0 [2023-06-08]
 
 _What's new?_
