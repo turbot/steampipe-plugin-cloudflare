@@ -49,7 +49,7 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 
 			// Other columns
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is created."},
-			{Name: "description", Type: proto.ColumnType_STRING, Description: "A description of the rule to help identify it.."},
+			{Name: "description", Type: proto.ColumnType_STRING, Description: "A description of the rule to help identify it."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is updated."},
 			{Name: "title", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Title of the resource."},
 

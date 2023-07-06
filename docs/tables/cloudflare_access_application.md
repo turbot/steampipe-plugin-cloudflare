@@ -1,6 +1,6 @@
 # Table: cloudflare_access_application
 
-Access applications are used to restrict access to a whole application using an authorisation gateway managed by Cloudflare.
+Access applications are used to restrict access to a whole application using an authorization gateway managed by Cloudflare.
 
 ## Examples
 
