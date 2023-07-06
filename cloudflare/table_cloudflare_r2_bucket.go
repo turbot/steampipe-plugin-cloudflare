@@ -9,9 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -89,7 +89,7 @@ type BucketData = struct {
 func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Get cloudflare account data
-	accountID := d.KeyColumnQualString("account_id")
+	accountID := d.EqualsQualString("account_id")
 	if accountID == "" {
 		return nil, nil
 	}
@@ -121,7 +121,7 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		d.StreamListItem(ctx, BucketData{bucket, accountID})
 
 		// Context may get cancelled due to manual cancellation or if the limit has been reached
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
 	}
@@ -134,8 +134,8 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 // do not have a get call for R2 bucket.
 // using list api call to create get function
 func getR2Bucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	accountID := d.KeyColumnQualString("account_id")
-	bucketName := d.KeyColumnQualString("name")
+	accountID := d.EqualsQualString("account_id")
+	bucketName := d.EqualsQualString("name")
 
 	// Return nil if either of the required params is not passed in the qual
 	if accountID == "" || bucketName == "" {

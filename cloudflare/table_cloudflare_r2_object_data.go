@@ -9,9 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -271,9 +271,9 @@ func getR2ObjectData(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		bucket = data.Bucket
 		key = data.Key
 	} else {
-		accountID = aws.String(d.KeyColumnQualString("account_id"))
-		bucket = aws.String(d.KeyColumnQualString("bucket"))
-		key = aws.String(d.KeyColumnQualString("key"))
+		accountID = aws.String(d.EqualsQualString("account_id"))
+		bucket = aws.String(d.EqualsQualString("bucket"))
+		key = aws.String(d.EqualsQualString("key"))
 	}
 
 	// get R2 client

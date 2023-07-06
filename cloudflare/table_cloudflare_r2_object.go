@@ -9,9 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -166,8 +166,8 @@ type s3ObjectMetadata = struct {
 //// LIST FUNCTION
 
 func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	accountID := d.KeyColumnQualString("account_id")
-	bucketName := d.KeyColumnQualString("bucket")
+	accountID := d.EqualsQualString("account_id")
+	bucketName := d.EqualsQualString("bucket")
 
 	// return nil, if either of the required columns is missing
 	if accountID == "" || bucketName == "" {
@@ -186,8 +186,8 @@ func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	}
 
 	// set prefixes
-	prefix := d.KeyColumnQualString("prefix")
-	key := d.KeyColumnQualString("key")
+	prefix := d.EqualsQualString("prefix")
+	key := d.EqualsQualString("key")
 
 	if prefix != "" {
 		input.Prefix = aws.String(prefix)
@@ -226,7 +226,7 @@ func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		})
 
 		// context may get cancelled due to manual cancellation or if the limit has been reached
-		if d.QueryStatus.RowsRemaining(ctx) == 0 {
+		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
 	}
