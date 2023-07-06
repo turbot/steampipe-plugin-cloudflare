@@ -10,7 +10,6 @@ require (
 	github.com/aws/smithy-go v1.13.5
 	github.com/cloudflare/cloudflare-go v0.27.0
 	github.com/turbot/go-kit v0.5.0
-	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.13
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.3.0
 )
 

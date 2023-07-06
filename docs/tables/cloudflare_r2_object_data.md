@@ -71,3 +71,51 @@ where
   and bucket = 'user_uploads'
   and key = 'avatar_9ac3097c-1e56-4108-b92e-226a3f4caeb8';
 ```
+
+### List the object data of those objects that are encrypted with SSE KMS key
+
+```sql
+select
+  key,
+  bucket,
+  content_type
+from
+  cloudflare_r2_object_data
+where
+  sse_kms_key_id is not null
+  and account_id = 'fb1696f453testaccount39e734f5f96e9'
+  and bucket = 'logs'
+  and key = 'logs/application_logs/2020/11/04/14/40/dashboard/db_logs.json.gz';
+```
+
+### List the object data of those objects that are expiring in the next 7 days
+
+```sql
+select
+  key,
+  bucket,
+  content_type
+from
+  cloudflare_r2_object_data
+where
+  expires >= now() + interval '7' day
+  and account_id = 'fb1696f453testaccount39e734f5f96e9'
+  and bucket = 'logs'
+  and key = 'logs/application_logs/2020/11/04/14/40/dashboard/db_logs.json.gz';
+```
+
+### List the object data of those objects that are 'Delete Marker'
+
+```sql
+select
+  key,
+  bucket,
+  content_type
+from
+  cloudflare_r2_object_data
+where
+  delete_marker 
+  and account_id = 'fb1696f453testaccount39e734f5f96e9'
+  and bucket = 'logs'
+  and key = 'logs/application_logs/2020/11/04/14/40/dashboard/db_logs.json.gz';
+```

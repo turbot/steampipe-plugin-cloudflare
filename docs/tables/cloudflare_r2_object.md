@@ -69,3 +69,57 @@ where
   and prefix = 'static_assets'
   and last_modified < current_date - interval '3 months';
 ```
+
+### List objects created in the last 30 days
+
+```sql
+select
+  key,
+  bucket,
+  last_modified,
+  etag,
+  size
+from
+  cloudflare_r2_object
+where
+  creation_date >= now() - interval '30' day
+  and account_id = 'fb1696f453testaccount39e734f5f96e9'
+  and bucket = 'cloudflare_logs_2021_03_01'
+  and key = '/logs/2021/03/01/12/05/32.log';
+```
+
+### List objects that return truncated results
+
+```sql
+select
+  key,
+  bucket,
+  last_modified,
+  etag,
+  size
+from
+  cloudflare_r2_object
+where
+  is_truncated
+  and account_id = 'fb1696f453testaccount39e734f5f96e9'
+  and bucket = 'cloudflare_logs_2021_03_01'
+  and key = '/logs/2021/03/01/12/05/32.log';
+```
+
+### List objects that have bucket key enabled
+
+```sql
+select
+  key,
+  bucket,
+  last_modified,
+  etag,
+  size
+from
+  cloudflare_r2_object
+where
+  bucket_key_enabled
+  and account_id = 'fb1696f453testaccount39e734f5f96e9'
+  and bucket = 'cloudflare_logs_2021_03_01'
+  and key = '/logs/2021/03/01/12/05/32.log';
+```

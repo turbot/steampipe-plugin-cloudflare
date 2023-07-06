@@ -30,3 +30,16 @@ where
   server_side_encryption_configuration is null
   and account_id = 'fb1696f453testaccount39e734f5f96e9';
 ```
+
+### List buckets created in the last 30 days
+
+```sql
+select
+  name,
+  server_side_encryption_configuration
+from
+  cloudflare_r2_bucket
+where
+  creation_date >= now() - interval '30' day
+  and account_id = 'fb1696f453testaccount39e734f5f96e9';
+```
