@@ -85,4 +85,4 @@ A Cloudflare connection is scoped to a single Cloudflare account, with a single 
 ## Get involved
 
 - Open source: https://github.com/turbot/steampipe-plugin-cloudflare
-- Community: [Slack Channel](https://steampipe.io/community/join)
+- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
