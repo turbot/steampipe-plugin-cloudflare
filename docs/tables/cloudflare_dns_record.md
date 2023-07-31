@@ -32,3 +32,16 @@ where
 order by
   priority
 ```
+
+### List all records from each zone
+
+```sql
+select
+  r.*,
+  z.name as zone
+from
+  cloudflare_dns_record r,
+  cloudflare_zone z
+where
+  r.zone_id = z.id;
+```
