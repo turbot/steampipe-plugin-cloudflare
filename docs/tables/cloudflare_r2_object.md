@@ -1,12 +1,20 @@
-# Table: cloudflare_r2_object_data
+---
+title: "Steampipe Table: cloudflare_r2_object - Query Cloudflare R2 Objects using SQL"
+description: "Allows users to query R2 Objects in Cloudflare, specifically providing insights into object details such as object ID, object type, and object content."
+---
 
-Cloudflare R2 objects are stored in one or more Cloudflare R2 buckets, and each object can be up to 5 TB in size.
+# Table: cloudflare_r2_object - Query Cloudflare R2 Objects using SQL
 
-> Note: Using this table adds to cost to your monthly bill from Cloudflare. Optimizations have been put in place to minimize the impact as much as possible. Please refer to Cloudflare R2 Pricing to understand the cost implications.
+Cloudflare R2 is a storage service that provides fast, reliable, and cost-effective object storage. It is designed to handle data from any source, making it a versatile solution for storing, retrieving, and managing data. With R2, users can store any amount of data and access it anywhere at any time.
+
+## Table Usage Guide
+
+The `cloudflare_r2_object` table provides insights into the R2 Objects within Cloudflare. As a DevOps engineer, explore object-specific details through this table, such as the object ID, object type, and object content. Utilize it to manage and monitor your Cloudflare R2 Objects, ensuring optimal data storage and retrieval.
 
 ## Examples
 
 ### Basic info
+Explore the specific details of an account's stored objects within a particular Cloudflare bucket to understand their size and changes. This can be useful for assessing storage usage and tracking modifications to objects within a specific time period.
 
 ```sql
 select
@@ -21,6 +29,7 @@ where
 ```
 
 ### List all objects with a fixed `prefix`
+Discover the segments that have a specific prefix within your Cloudflare account. This is beneficial for organizing and locating specific sets of data, such as logs from a certain date.
 
 ```sql
 select
@@ -37,6 +46,7 @@ where
 ```
 
 ### List all objects with a fixed `key`
+Discover the segments that contain specific objects within a given account and bucket, which can be useful for pinpointing where certain data is stored or identifying patterns in data storage.
 
 ```sql
 select
@@ -53,6 +63,7 @@ where
 ```
 
 ### List all objects which were not modified in the last 3 months
+Explore the objects within a specific account and bucket that have remained unmodified over the past three months. This query can be used to identify stagnant or unused data, aiding in efficient data management and potential cleanup efforts.
 
 ```sql
 select
@@ -71,6 +82,7 @@ where
 ```
 
 ### List objects created in the last 30 days
+Explore objects that have been created in the past month within a specific account and bucket. This can be useful for monitoring recent activity or changes in your Cloudflare data.
 
 ```sql
 select
@@ -89,6 +101,7 @@ where
 ```
 
 ### List objects that return truncated results
+Determine the instances where certain objects are yielding incomplete results within a specific Cloudflare account and bucket, allowing you to identify and address potential issues with data integrity or retrieval.
 
 ```sql
 select
@@ -107,6 +120,7 @@ where
 ```
 
 ### List objects that have bucket key enabled
+Explore which objects within a specific Cloudflare account have the bucket key enabled. This is particularly useful for identifying potential security risks or for auditing purposes.
 
 ```sql
 select

@@ -1,16 +1,20 @@
-# Table: cloudflare_r2_object_data
+---
+title: "Steampipe Table: cloudflare_r2_object_data - Query Cloudflare R2 Objects using SQL"
+description: "Allows users to query Cloudflare R2 Objects, specifically object data, providing insights into the data stored in R2 storage."
+---
 
-The `cloudflare_r2_object_data` table provides access to the data stored in a R2 object.
+# Table: cloudflare_r2_object_data - Query Cloudflare R2 Objects using SQL
 
-The data is serialized into a string if it contains valid UTF8 bytes, otherwise it is encoded into Base64, as defined in [RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648).
+Cloudflare R2 is a storage service that offers a simple, scalable, and cost-effective way to store and retrieve any amount of data at any time. It is designed to deliver 99.999999999% durability, and scale past trillions of objects worldwide. Customers use R2 for backups, restores, and to serve user-generated content.
 
-To list objects, you must mention the `key` and the name of the container `bucket` which contains the objects.
+## Table Usage Guide
 
-> Note: Using this table adds to cost to your monthly bill from Cloudflare. Optimizations have been put in place to minimize the impact as much as possible. Please refer to [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/platform/pricing/) to understand the cost implications.
+The `cloudflare_r2_object_data` table provides insights into the objects stored in Cloudflare R2 storage. As a data analyst or a DevOps engineer, you can explore object-specific details through this table, including object metadata, storage class, and associated data. Utilize it to uncover information about objects, such as their size, last modified date, and the storage class they belong to.
 
 ## Examples
 
 ### Basic info
+Explore which types of content are stored in a specific Cloudflare account and bucket. This can be useful for understanding the structure and organization of your data, particularly for large-scale log management.
 
 ```sql
 select
@@ -26,6 +30,7 @@ where
 ```
 
 ### Parse object data into `jsonb`
+Analyze the settings to understand the specific object data within a given Cloudflare account and bucket. This is particularly useful for exploring and understanding application log data.
 
 ```sql
 select
@@ -41,6 +46,7 @@ where
 ```
 
 ### Process `jsonb` data in objects
+Determine the areas in which errors occur in your application by analyzing event data from your Cloudflare logs. This allows you to pinpoint specific instances of error levels, enhancing your ability to troubleshoot and improve your application's performance.
 
 ```sql
 select
@@ -60,6 +66,7 @@ where
 ```
 
 ### Get the raw binary `data` by converting back from `base64`
+Discover the segments that enable the extraction of raw binary data from a specific user's uploaded files in a Cloudflare account. This might be used to analyze or manipulate the file data directly, bypassing the need for base64 encoding.
 
 ```sql
 select
@@ -73,6 +80,7 @@ where
 ```
 
 ### List the object data of those objects that are encrypted with SSE KMS key
+Explore which objects within a specific account and bucket are encrypted using a KMS key. This is particularly useful for identifying and managing sensitive data that requires enhanced security measures.
 
 ```sql
 select
@@ -89,6 +97,7 @@ where
 ```
 
 ### List the object data of those objects that are expiring in the next 7 days
+Determine the details of certain objects set to expire within the next week. This could be particularly useful for managing and prioritizing updates or renewals for those objects, especially within a large dataset.
 
 ```sql
 select
@@ -105,6 +114,7 @@ where
 ```
 
 ### List the object data of those objects that are 'Delete Marker'
+Determine the areas in which certain objects are marked for deletion within a specific account and bucket. This is particularly useful in identifying and managing potential data removals.
 
 ```sql
 select

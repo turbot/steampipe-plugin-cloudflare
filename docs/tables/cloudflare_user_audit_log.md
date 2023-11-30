@@ -1,10 +1,20 @@
-# Table: cloudflare_user_audit_log
+---
+title: "Steampipe Table: cloudflare_user_audit_log - Query Cloudflare User Audit Logs using SQL"
+description: "Allows users to query User Audit Logs in Cloudflare, providing insights into user activities, changes made, and potential security issues."
+---
 
-Information about the actions performed by users in the Cloudflare account.
+# Table: cloudflare_user_audit_log - Query Cloudflare User Audit Logs using SQL
+
+Cloudflare User Audit Log is a feature within Cloudflare that allows you to monitor and track user activities and changes within your Cloudflare account. It provides a comprehensive and searchable log of all actions performed by users, helping to identify potential security issues and ensure compliance. Cloudflare User Audit Log is an essential tool for maintaining visibility and control over your Cloudflare account.
+
+## Table Usage Guide
+
+The `cloudflare_user_audit_log` table provides insights into user activities and changes within Cloudflare. As a security analyst, explore detailed logs through this table, including the actions performed, the user who performed them, and the time of the action. Utilize it to monitor user behavior, identify potential security issues, and ensure compliance with security policies.
 
 ## Examples
 
 ### Basic info
+Explore the recent changes made by users in your Cloudflare account. This query helps you monitor user activity, providing insights into what modifications were made, when, and by whom, enhancing your account's security and accountability.
 
 ```sql
 select
@@ -21,6 +31,7 @@ from
 ```
 
 ### Get all the users' activities in the last 10 days
+Explore the recent activities of all users in the past 10 days. This allows for a comprehensive review of user actions, helping to identify any unusual patterns or potential security concerns.
 
 ```sql
 select
@@ -39,6 +50,7 @@ where
 ```
 
 ### Get all the users' activities for a particular timeline
+Explore the user activity within a specific timeframe to gain insights into their actions and results. This is beneficial for auditing purposes, understanding user behavior, and identifying any unusual or suspicious activity.
 
 ```sql
 select
@@ -57,6 +69,7 @@ where
 ```
 
 ### Get all the activities of a particular user
+Explore the actions of a specific user to gain insights into their activities and changes made. This can assist in auditing user behavior, identifying potential security risks, and ensuring compliance with company policies.
 
 ```sql
 select
@@ -75,6 +88,7 @@ where
 ```
 
 ### Get all the activities performed on a particular resource
+This query allows you to monitor and track all the activities carried out on a specific resource. It is beneficial for auditing purposes, such as identifying unauthorized changes or understanding user behavior.
 
 ```sql
 select
@@ -93,6 +107,7 @@ where
 ```
 
 ### Get all the activities performed on DNS records
+Explore the actions performed on DNS records to gain insights into user activity and monitor changes. This can help in identifying unusual behavior or unauthorized modifications, enhancing the security and integrity of your DNS records.
 
 ```sql
 select
