@@ -11,6 +11,10 @@ Cloudflare R2 is a storage service that offers a simple, scalable, and cost-effe
 
 The `cloudflare_r2_object_data` table provides insights into the objects stored in Cloudflare R2 storage. As a data analyst or a DevOps engineer, you can explore object-specific details through this table, including object metadata, storage class, and associated data. Utilize it to uncover information about objects, such as their size, last modified date, and the storage class they belong to.
 
+**Important Notes**
+- You must specify both the `key` and `bucket` in the `where` clause to query this table.
+- Using this table adds to cost to your monthly bill from Cloudflare. Optimizations have been put in place to minimize the impact as much as possible. Please refer to [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/platform/pricing/) to understand the cost implications.
+
 ## Examples
 
 ### Basic info
@@ -124,7 +128,7 @@ select
 from
   cloudflare_r2_object_data
 where
-  delete_marker 
+  delete_marker
   and account_id = 'fb1696f453testaccount39e734f5f96e9'
   and bucket = 'logs'
   and key = 'logs/application_logs/2020/11/04/14/40/dashboard/db_logs.json.gz';

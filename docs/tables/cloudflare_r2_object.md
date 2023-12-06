@@ -11,6 +11,9 @@ Cloudflare R2 is a storage service that provides fast, reliable, and cost-effect
 
 The `cloudflare_r2_object` table provides insights into the R2 Objects within Cloudflare. As a DevOps engineer, explore object-specific details through this table, such as the object ID, object type, and object content. Utilize it to manage and monitor your Cloudflare R2 Objects, ensuring optimal data storage and retrieval.
 
+**Important Notes**
+- Using this table adds to cost to your monthly bill from Cloudflare. Optimizations have been put in place to minimize the impact as much as possible. Please refer to Cloudflare R2 Pricing to understand the cost implications.
+
 ## Examples
 
 ### Basic info

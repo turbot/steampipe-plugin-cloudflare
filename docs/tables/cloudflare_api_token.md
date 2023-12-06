@@ -11,6 +11,9 @@ Cloudflare API Tokens are a resource within Cloudflare that allows you to manage
 
 The `cloudflare_api_token` table provides insights into the API Tokens within Cloudflare. As a DevOps engineer, explore token-specific details through this table, including permissions, associated policies, and metadata. Utilize it to uncover information about tokens, such as those with extensive permissions, the specific resources they can access, and the verification of associated policies.
 
+**Important Notes**
+- This table is only available when using `email` and `api_key` for authentication credentials. It does not work when using `api_token` for access.
+
 ## Examples
 
 ### Query all API tokens for this user

@@ -11,6 +11,9 @@ Cloudflare DNS is a service that provides global, fast, and secure Domain Name S
 
 The `cloudflare_dns_record` table provides insights into DNS records within Cloudflare. As a network administrator, you can explore record-specific details through this table, including the type of record, associated zone, and configuration settings. Utilize it to uncover information about DNS records, such as those with certain configurations, the zones they are associated with, and their current status.
 
+**Important Notes**
+- You must specify the `zone_id` in the `where` clause to query this table.
+
 ## Examples
 
 ### Query all DNS records for the zone
