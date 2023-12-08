@@ -16,7 +16,7 @@ The `cloudflare_load_balancer_pool` table provides insights into Load Balancer P
 ### Basic info
 Explore the status and details of Cloudflare load balancer pools, such as their names, identifiers, and whether they are enabled or not. This information can be useful in understanding and managing the distribution of network traffic across multiple servers.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -28,10 +28,22 @@ from
   cloudflare_load_balancer_pool;
 ```
 
+```sql+sqlite
+select
+  name,
+  id,
+  enabled,
+  description,
+  created_on,
+  origins
+from
+  cloudflare_load_balancer_pool;
+```
+
 ### List active pools
 Analyze the settings to understand the active load balancer pools in your Cloudflare account. This can help you manage your resources effectively by identifying which pools are currently in use.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -40,4 +52,15 @@ from
   cloudflare_load_balancer_pool
 where
   enabled;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  monitor
+from
+  cloudflare_load_balancer_pool
+where
+  enabled = 1;
 ```

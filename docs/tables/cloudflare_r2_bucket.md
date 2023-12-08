@@ -16,7 +16,19 @@ The `cloudflare_r2_bucket` table provides insights into R2 buckets within Cloudf
 ### Basic info
 Explore which Cloudflare resources were created in a specific region within a given account. This could be useful to manage resource allocation and understand usage patterns across different regions.
 
-```sql
+```sql+postgres
+select
+  name,
+  creation_date,
+  region,
+  account_id
+from
+  cloudflare_r2_bucket
+where
+  account_id = 'fb1696f453testaccount39e734f5f96e9';
+```
+
+```sql+sqlite
 select
   name,
   creation_date,
@@ -31,7 +43,18 @@ where
 ### List buckets with default encryption disabled
 Explore which Cloudflare R2 buckets lack default encryption, which could potentially expose sensitive data. This query is particularly useful for identifying security vulnerabilities in your storage configuration.
 
-```sql
+```sql+postgres
+select
+  name,
+  server_side_encryption_configuration
+from
+  cloudflare_r2_bucket
+where
+  server_side_encryption_configuration is null
+  and account_id = 'fb1696f453testaccount39e734f5f96e9';
+```
+
+```sql+sqlite
 select
   name,
   server_side_encryption_configuration
@@ -45,7 +68,7 @@ where
 ### List buckets created in the last 30 days
 Explore which buckets have been created in the last 30 days for a specific account. This allows you to keep track of recent additions and understand the level of server-side encryption configuration for each of these new buckets.
 
-```sql
+```sql+postgres
 select
   name,
   server_side_encryption_configuration
@@ -53,5 +76,16 @@ from
   cloudflare_r2_bucket
 where
   creation_date >= now() - interval '30' day
+  and account_id = 'fb1696f453testaccount39e734f5f96e9';
+```
+
+```sql+sqlite
+select
+  name,
+  server_side_encryption_configuration
+from
+  cloudflare_r2_bucket
+where
+  creation_date >= datetime('now', '-30 days')
   and account_id = 'fb1696f453testaccount39e734f5f96e9';
 ```

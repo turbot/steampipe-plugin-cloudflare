@@ -16,11 +16,20 @@ The `cloudflare_account_role` table provides insights into the roles within Clou
 ### Basic info
 Explore which roles are associated with different accounts on Cloudflare, enabling you to manage and organize permissions effectively.
 
-```sql
+```sql+postgres
 select
   name,
   id,
   account_id,
+from
+  cloudflare_account_role;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  account_id
 from
   cloudflare_account_role;
 ```

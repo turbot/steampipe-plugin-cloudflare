@@ -16,7 +16,7 @@ The `cloudflare_user_audit_log` table provides insights into user activities and
 ### Basic info
 Explore the recent changes made by users in your Cloudflare account. This query helps you monitor user activity, providing insights into what modifications were made, when, and by whom, enhancing your account's security and accountability.
 
-```sql
+```sql+postgres
 select
   actor_email,
   actor_type,
@@ -30,10 +30,24 @@ from
   cloudflare_user_audit_log l;
 ```
 
+```sql+sqlite
+select
+  actor_email,
+  actor_type,
+  l.when,
+  json_extract(action, '$.type') as action_type,
+  json_extract(action, '$.result') as action_result,
+  new_value_json as new_value,
+  old_value_json as old_value,
+  owner_id
+from
+  cloudflare_user_audit_log l;
+```
+
 ### Get all the users' activities in the last 10 days
 Explore the recent activities of all users in the past 10 days. This allows for a comprehensive review of user actions, helping to identify any unusual patterns or potential security concerns.
 
-```sql
+```sql+postgres
 select
   actor_email,
   actor_type,
@@ -49,10 +63,26 @@ where
   l.when > now() - interval '10' day;
 ```
 
+```sql+sqlite
+select
+  actor_email,
+  actor_type,
+  l.when,
+  json_extract(action, '$.type') as action_type,
+  json_extract(action, '$.result') as action_result,
+  new_value_json as new_value,
+  old_value_json as old_value,
+  owner_id
+from
+  cloudflare_user_audit_log l
+where
+  l.when > datetime('now','-10 day');
+```
+
 ### Get all the users' activities for a particular timeline
 Explore the user activity within a specific timeframe to gain insights into their actions and results. This is beneficial for auditing purposes, understanding user behavior, and identifying any unusual or suspicious activity.
 
-```sql
+```sql+postgres
 select
   actor_email,
   actor_type,
@@ -68,10 +98,26 @@ where
   l.when > '2023-06-04' and l.when < '2023-06-07';
 ```
 
+```sql+sqlite
+select
+  actor_email,
+  actor_type,
+  l.when,
+  json_extract(action, '$.type') as action_type,
+  json_extract(action, '$.result') as action_result,
+  new_value_json as new_value,
+  old_value_json as old_value,
+  owner_id
+from
+  cloudflare_user_audit_log l
+where
+  l.when > '2023-06-04' and l.when < '2023-06-07';
+```
+
 ### Get all the activities of a particular user
 Explore the actions of a specific user to gain insights into their activities and changes made. This can assist in auditing user behavior, identifying potential security risks, and ensuring compliance with company policies.
 
-```sql
+```sql+postgres
 select
   actor_email,
   actor_type,
@@ -87,10 +133,26 @@ where
   actor_email = 'user@domain.com';
 ```
 
+```sql+sqlite
+select
+  actor_email,
+  actor_type,
+  l.when,
+  json_extract(action, '$.type') as action_type,
+  json_extract(action, '$.result') as action_result,
+  new_value_json as new_value,
+  old_value_json as old_value,
+  owner_id
+from
+  cloudflare_user_audit_log l
+where
+  actor_email = 'user@domain.com';
+```
+
 ### Get all the activities performed on a particular resource
 This query allows you to monitor and track all the activities carried out on a specific resource. It is beneficial for auditing purposes, such as identifying unauthorized changes or understanding user behavior.
 
-```sql
+```sql+postgres
 select
   actor_email,
   actor_type,
@@ -106,10 +168,26 @@ where
   resource ->> 'id' = 'abcd13dcd91e9755b20ea5883fdd59ac';
 ```
 
+```sql+sqlite
+select
+  actor_email,
+  actor_type,
+  l.when,
+  json_extract(action, '$.type') as action_type,
+  json_extract(action, '$.result') as action_result,
+  new_value_json as new_value,
+  old_value_json as old_value,
+  owner_id
+from
+  cloudflare_user_audit_log l
+where
+  json_extract(resource, '$.id') = 'abcd13dcd91e9755b20ea5883fdd59ac';
+```
+
 ### Get all the activities performed on DNS records
 Explore the actions performed on DNS records to gain insights into user activity and monitor changes. This can help in identifying unusual behavior or unauthorized modifications, enhancing the security and integrity of your DNS records.
 
-```sql
+```sql+postgres
 select
   actor_email,
   actor_type,
@@ -123,4 +201,20 @@ from
   cloudflare_user_audit_log l
 where
   resource ->> 'type' = 'DNS_record';
+```
+
+```sql+sqlite
+select
+  actor_email,
+  actor_type,
+  l.when,
+  json_extract(action, '$.type') as action_type,
+  json_extract(action, '$.result') as action_result,
+  new_value_json as new_value,
+  old_value_json as old_value,
+  owner_id
+from
+  cloudflare_user_audit_log l
+where
+  json_extract(resource, '$.type') = 'DNS_record';
 ```

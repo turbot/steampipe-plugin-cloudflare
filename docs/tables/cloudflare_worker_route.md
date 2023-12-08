@@ -16,7 +16,17 @@ The `cloudflare_worker_route` table provides insights into Worker Routes within 
 ### Basic info
 Explore which Cloudflare worker routes are currently in place. This can help identify potential areas for optimization or troubleshooting.
 
-```sql
+```sql+postgres
+select
+  id,
+  zone_name,
+  pattern,
+  script
+from
+  cloudflare_worker_route;
+```
+
+```sql+sqlite
 select
   id,
   zone_name,
@@ -29,13 +39,24 @@ from
 ### List idle worker routes (i.e. not attached to any worker)
 Discover the segments that consist of idle worker routes that are not attached to any worker. This is beneficial for identifying unused resources and optimizing your Cloudflare configuration.
 
-```sql
+```sql+postgres
 select
   id,
   zone_name,
   pattern
 from
   cloudflare.cloudflare_worker_route
+where
+  script = '';
+```
+
+```sql+sqlite
+select
+  id,
+  zone_name,
+  pattern
+from
+  cloudflare_worker_route
 where
   script = '';
 ```

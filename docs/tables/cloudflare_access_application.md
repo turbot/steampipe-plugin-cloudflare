@@ -16,7 +16,17 @@ The `cloudflare_access_application` table provides insights into Access Applicat
 ### Basic info
 Explore which Cloudflare access applications have been created, along with their respective names, IDs and domains. This can be beneficial in managing access control and understanding the distribution of applications across different domains.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  domain,
+  created_at
+from
+  cloudflare_access_application;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,17 @@ from
 ### Get application count by account
 Gain insights into the distribution of applications across different accounts. This query is useful for understanding the usage patterns and managing resources efficiently.
 
-```sql
+```sql+postgres
+select
+  count(*),
+  type
+from
+  cloudflare_access_application
+group by
+  account_id;
+```
+
+```sql+sqlite
 select
   count(*),
   type
@@ -42,7 +62,7 @@ group by
 ### List applications with binding cookie enabled for increased security
 Analyze the settings to understand which applications have the binding cookie enabled for increased security. This is useful for identifying potential vulnerabilities and ensuring optimal security configurations.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -51,4 +71,15 @@ from
   cloudflare_access_application
 where
   enable_binding_cookie;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  domain
+from
+  cloudflare_access_application
+where
+  enable_binding_cookie = 1;
 ```

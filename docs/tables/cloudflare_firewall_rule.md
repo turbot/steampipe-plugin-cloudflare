@@ -16,7 +16,16 @@ The `cloudflare_firewall_rule` table provides insights into Firewall Rules withi
 ### Basic info
 Explore the creation dates of specific firewall rules to gain insights into their historical context and assess potential patterns or anomalies. This may assist in troubleshooting or optimizing your firewall configuration.
 
-```sql
+```sql+postgres
+select
+  id,
+  zone_id,
+  created_on
+from
+  cloudflare_firewall_rule;
+```
+
+```sql+sqlite
 select
   id,
   zone_id,
@@ -28,7 +37,7 @@ from
 ### List paused firewall rules
 Discover the segments that have paused firewall rules. This can be useful for identifying potential security vulnerabilities or areas where firewall protection is currently inactive.
 
-```sql
+```sql+postgres
 select
   id,
   zone_id,
@@ -39,10 +48,21 @@ where
   paused;
 ```
 
+```sql+sqlite
+select
+  id,
+  zone_id,
+  paused
+from
+  cloudflare_firewall_rule
+where
+  paused = 1;
+```
+
 ### List firewall rules that block requests based on IP reputation
 Analyze firewall rules to understand which ones are set to block based on IP reputation, helping to enhance security by identifying potential threats. This is particularly useful in preventing access from high-risk IP addresses.
 
-```sql
+```sql+postgres
 select
   id,
   zone_id,
@@ -53,4 +73,17 @@ from
 where
   action = 'block'
   and filter ->> 'expression' = '(cf.threat_score gt 1)';
+```
+
+```sql+sqlite
+select
+  id,
+  zone_id,
+  filter,
+  action
+from
+  cloudflare_firewall_rule
+where
+  action = 'block'
+  and json_extract(filter, '$.expression') = '(cf.threat_score gt 1)';
 ```

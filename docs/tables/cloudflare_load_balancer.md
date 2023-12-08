@@ -16,7 +16,20 @@ The `cloudflare_load_balancer` table provides insights into the load balancing c
 ### Basic info
 Explore the setup of your load balancers in Cloudflare to understand their configuration and creation details, which can help in assessing their performance and identifying potential areas for optimization.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  zone_name,
+  zone_id,
+  created_on,
+  ttl,
+  steering_policy
+from
+  cloudflare_load_balancer;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -32,7 +45,7 @@ from
 ### List proxied load balancers
 Explore which load balancers are set to be proxied. This can be useful to determine the areas in your network that may be susceptible to certain security risks or performance issues.
 
-```sql
+```sql+postgres
 select
   name,
   zone_id,
@@ -43,16 +56,38 @@ where
   proxied;
 ```
 
+```sql+sqlite
+select
+  name,
+  zone_id,
+  ttl
+from
+  cloudflare_load_balancer
+where
+  proxied = 1;
+```
+
 ### Get session_affinity details for load balancers
 Analyze the settings to understand the session affinity details of your load balancers. This can provide insights into how your web traffic is distributed and managed across multiple servers, aiding in efficient load balancing.
 
-```sql
+```sql+postgres
 select
   name,
   zone_name,
   session_affinity,
   session_affinity_ttl,
   jsonb_pretty(session_affinity_attributes) as session_affinity_attributes
+from
+  cloudflare_load_balancer;
+```
+
+```sql+sqlite
+select
+  name,
+  zone_name,
+  session_affinity,
+  session_affinity_ttl,
+  session_affinity_attributes
 from
   cloudflare_load_balancer;
 ```

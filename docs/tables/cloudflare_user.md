@@ -16,7 +16,14 @@ The `cloudflare_user` table provides insights into User data within Cloudflare. 
 ### Query information about the user
 Discover the details of your user profile on Cloudflare to better understand account status and settings. This can be useful for auditing purposes or for troubleshooting account related issues.
 
-```sql
+```sql+postgres
+select
+  *
+from
+  cloudflare_user
+```
+
+```sql+sqlite
 select
   *
 from
@@ -26,7 +33,16 @@ from
 ### Check if two factor authentication is enabled for the user
 Explore whether two-factor authentication is activated for users, enhancing account security and reducing the risk of unauthorized access.
 
-```sql
+```sql+postgres
+select
+  id,
+  email,
+  two_factor_authentication_enabled
+from
+  cloudflare_user
+```
+
+```sql+sqlite
 select
   id,
   email,

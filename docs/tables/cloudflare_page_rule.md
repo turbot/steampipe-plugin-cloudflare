@@ -16,7 +16,17 @@ The `cloudflare_page_rule` table provides insights into the rules set up for spe
 ### Basic info
 Explore which rules are active within your Cloudflare settings to prioritize their importance and manage your web traffic effectively. This can help optimize your website's performance and security.
 
-```sql
+```sql+postgres
+select
+  id,
+  zone_id,
+  status,
+  priority
+from
+  cloudflare_page_rule;
+```
+
+```sql+sqlite
 select
   id,
   zone_id,
@@ -29,7 +39,18 @@ from
 ### List disabled page rules
 Explore which page rules are currently disabled in your Cloudflare settings. This information can help you understand potential vulnerabilities or areas of your website that are not currently protected by active rules.
 
-```sql
+```sql+postgres
+select
+  id,
+  zone_id,
+  status
+from
+  cloudflare_page_rule
+where
+  status = 'disabled';
+```
+
+```sql+sqlite
 select
   id,
   zone_id,
@@ -43,7 +64,7 @@ where
 ### List page rules that do not have the Always Online feature enabled
 Assess the elements within your website's page rules to identify those that lack the Always Online feature. This can be useful to ensure your site remains accessible even when your server goes offline, enhancing user experience and site reliability.
 
-```sql
+```sql+postgres
 select
   id,
   zone_id,
@@ -54,4 +75,17 @@ from
 where
   action ->> 'id' = 'always_online'
   and action ->> 'value' = 'off';
+```
+
+```sql+sqlite
+select
+  id,
+  zone_id,
+  json_extract(action.value, '$.value') as always_online
+from
+  cloudflare_page_rule,
+  json_each(actions) as action
+where
+  json_extract(action.value, '$.id') = 'always_online'
+  and json_extract(action.value, '$.value') = 'off';
 ```

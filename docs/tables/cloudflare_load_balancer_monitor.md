@@ -16,7 +16,21 @@ The `cloudflare_load_balancer_monitor` table provides insights into the configur
 ### Basic info
 Explore which Cloudflare load balancer monitors have certain configurations to optimize performance and reliability. This can help in identifying any monitors that may need adjustments for better load balancing and error handling.
 
-```sql
+```sql+postgres
+select
+  id,
+  type,
+  path,
+  timeout,
+  retries,
+  interval,
+  port,
+  expected_codes
+from
+  cloudflare_load_balancer_monitor;
+```
+
+```sql+sqlite
 select
   id,
   type,
@@ -33,7 +47,7 @@ from
 ### Get information of monitors attached to pool
 Explore which monitors are attached to specific load balancer pools in Cloudflare. This query is useful for gaining insights into the configuration and status of your load balancing setup, including details like pool ID, name, and notification email.
 
-```sql
+```sql+postgres
 select
   p.id as pool_id,
   p.name as pool_name,
@@ -44,6 +58,21 @@ select
 from
   cloudflare_load_balancer_pool p,
   cloudflare_load_balancer_monitor as m
+where
+  p.monitor = m.id;
+```
+
+```sql+sqlite
+select
+  p.id as pool_id,
+  p.name as pool_name,
+  p.enabled as pool_enabled,
+  p.notification_email,
+  m.id as monitor_id,
+  m.description as monitor_description
+from
+  cloudflare_load_balancer_pool p,
+  cloudflare_load_balancer_monitor m
 where
   p.monitor = m.id;
 ```

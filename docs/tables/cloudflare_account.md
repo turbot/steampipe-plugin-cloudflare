@@ -16,20 +16,35 @@ The `cloudflare_account` table provides insights into accounts within Cloudflare
 ### Query all accounts the user has access to
 Determine the range of accounts to which a user has access. This allows for a comprehensive overview of user permissions, aiding in account management and security audits.
 
-```sql
+```sql+postgres
 select
   *
 from
-  cloudflare_account
+  cloudflare_account;
+```
+
+```sql+sqlite
+select
+  *
+from
+  cloudflare_account;
 ```
 
 ### Check if two factor authentication is enforced for accounts
 Analyze the settings to understand whether two-factor authentication is being enforced for accounts, thereby enhancing security measures.
 
-```sql
+```sql+postgres
 select
   name,
   settings -> 'enforce_twofactor' as enforce_mfa
 from
-  cloudflare_account
+  cloudflare_account;
+```
+
+```sql+sqlite
+select
+  name,
+  json_extract(settings, '$.enforce_twofactor') as enforce_mfa
+from
+  cloudflare_account;
 ```

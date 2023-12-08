@@ -17,7 +17,16 @@ The `cloudflare_access_group` table provides insights into Access Groups within 
 ### Basic info
 Determine the areas in which Cloudflare access groups were established by examining their creation dates. This can help in understanding the timeline of security group deployment and aid in managing access control.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  created_at
+from
+  cloudflare_access_group;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,13 +38,24 @@ from
 ### List access group rules
 Analyze the settings to understand the rules of your access groups. This can help you pinpoint specific locations where access is granted or denied, providing a comprehensive view of your security configurations.
 
-```sql
+```sql+postgres
 select
   name,
   id,
   jsonb_pretty(include) as include,
   jsonb_pretty(exclude) as exclude,
   jsonb_pretty(require) as require
+from
+  cloudflare_access_group;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  include,
+  exclude,
+  require
 from
   cloudflare_access_group;
 ```

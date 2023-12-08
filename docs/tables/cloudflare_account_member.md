@@ -16,7 +16,16 @@ The `cloudflare_account_member` table provides insights into individual users wi
 ### List all members in an account
 Explore which members are associated with your account to manage user access and permissions more effectively. This is useful for maintaining security and ensuring the right people have access to the right resources.
 
-```sql
+```sql+postgres
+select
+  title,
+  account_id,
+  user_email
+from
+  cloudflare_account_member;
+```
+
+```sql+sqlite
 select
   title,
   account_id,
@@ -28,7 +37,7 @@ from
 ### List of members with Administrator access
 Discover the segments that have members with Administrator access. This query can be used to identify potential security risks by highlighting accounts where users have been granted high-level permissions.
 
-```sql
+```sql+postgres
 select
   title,
   account_id,
@@ -41,10 +50,35 @@ where
   attached_roles ->> 'name' = 'Administrator';
 ```
 
+```sql+sqlite
+select
+  title,
+  account_id,
+  user_email,
+  json_extract(attached_roles.value, '$.name') as attached_role_name
+from
+  cloudflare_account_member,
+  json_each(roles) as attached_roles
+where
+  json_extract(attached_roles.value, '$.name') = 'Administrator';
+```
+
 ### List of members yet to accept the join request
 Discover the segments that include members who have not yet accepted their requests to join your Cloudflare account. This is useful for tracking pending invitations and managing team access to your account.
 
-```sql
+```sql+postgres
+select
+  title,
+  account_id,
+  user_email,
+  status
+from
+  cloudflare_account_member
+where
+  status = 'pending';
+```
+
+```sql+sqlite
 select
   title,
   account_id,

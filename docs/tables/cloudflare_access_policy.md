@@ -16,7 +16,19 @@ The `cloudflare_access_policy` table provides insights into Access Policies with
 ### Basic info
 Explore which access policies are in place within your Cloudflare application. This is useful for assessing the precedence of these policies and understanding the decision-making process of your application's security.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  application_id,
+  application_name,
+  decision,
+  precedence
+from
+  cloudflare_access_policy;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -31,7 +43,7 @@ from
 ### List policies that require justification for accessing resources
 Explore which policies necessitate a justification when accessing resources. This can be useful in enhancing security measures by identifying areas where additional user accountability is needed.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -42,4 +54,17 @@ from
   cloudflare_access_policy
 where
   purpose_justification_required;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  application_name,
+  decision,
+  precedence
+from
+  cloudflare_access_policy
+where
+  purpose_justification_required = 1;
 ```
