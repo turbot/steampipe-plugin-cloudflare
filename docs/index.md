@@ -8,6 +8,7 @@ name: cloudflare
 description: Steampipe plugin for querying Cloudflare databases, networks, and other resources.
 og_description: Query cloudflare databases, networks, and other resources with SQL! Open source CLI. No DB required.
 og_image: "/images/plugins/turbot/cloudflare-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Cloudflare + Steampipe
