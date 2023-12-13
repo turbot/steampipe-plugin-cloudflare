@@ -8,6 +8,7 @@ name: cloudflare
 description: Steampipe plugin for querying Cloudflare databases, networks, and other resources.
 og_description: Query cloudflare databases, networks, and other resources with SQL! Open source CLI. No DB required.
 og_image: "/images/plugins/turbot/cloudflare-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Cloudflare + Steampipe
@@ -82,7 +83,4 @@ connection "cloudflare" {
 
 A Cloudflare connection is scoped to a single Cloudflare account, with a single set of credentials.
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-cloudflare
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
