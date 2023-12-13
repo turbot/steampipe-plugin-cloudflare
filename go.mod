@@ -3,11 +3,11 @@ module github.com/turbot/steampipe-plugin-cloudflare
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.18.1
+	github.com/aws/aws-sdk-go-v2 v1.24.0
 	github.com/aws/aws-sdk-go-v2/config v1.18.27
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.26
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.29.3
-	github.com/aws/smithy-go v1.13.5
+	github.com/aws/smithy-go v1.19.0
 	github.com/cloudflare/cloudflare-go v0.27.0
 	github.com/turbot/go-kit v0.9.0-rc.1
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.8.0
