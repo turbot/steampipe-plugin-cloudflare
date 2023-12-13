@@ -20,14 +20,14 @@ Explore all zones associated with your user account on Cloudflare. This allows y
 select
   *
 from
-  cloudflare_zone
+  cloudflare_zone;
 ```
 
 ```sql+sqlite
 select
   *
 from
-  cloudflare_zone
+  cloudflare_zone;
 ```
 
 ### List all settings for the zone
@@ -40,7 +40,7 @@ select
   setting.value
 from
   cloudflare_zone,
-  jsonb_each_text(settings) as setting
+  jsonb_each_text(settings) as setting;
 ```
 
 ```sql+sqlite
@@ -50,7 +50,7 @@ select
   setting.value
 from
   cloudflare_zone,
-  json_each(settings) as setting
+  json_each(settings) as setting;
 ```
 
 ### Get details of the TLS 1.3 setting
@@ -61,7 +61,7 @@ select
   name,
   settings ->> 'tls_1_3'
 from
-  cloudflare_zone
+  cloudflare_zone;
 ```
 
 ```sql+sqlite
@@ -69,7 +69,7 @@ select
   name,
   json_extract(settings, '$.tls_1_3')
 from
-  cloudflare_zone
+  cloudflare_zone;
 ```
 
 ### List all permissions available to the user for this zone
@@ -81,7 +81,7 @@ select
   perm
 from
   cloudflare_zone,
-  jsonb_array_elements_text(permissions) as perm
+  jsonb_array_elements_text(permissions) as perm;
 ```
 
 ```sql+sqlite
@@ -90,7 +90,7 @@ select
   perm.value
 from
   cloudflare_zone,
-  json_each(permissions) as perm
+  json_each(permissions) as perm;
 ```
 
 ### Check DNSSEC status for zones
@@ -101,7 +101,7 @@ select
   name,
   dnssec ->> 'status'
 from
-  cloudflare_zone
+  cloudflare_zone;
 ```
 
 ```sql+sqlite
@@ -109,5 +109,5 @@ select
   name,
   json_extract(dnssec, '$.status')
 from
-  cloudflare_zone
+  cloudflare_zone;
 ```
