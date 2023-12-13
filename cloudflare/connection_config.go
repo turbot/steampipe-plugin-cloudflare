@@ -2,33 +2,14 @@ package cloudflare
 
 import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/schema"
 )
 
 type cloudflareConfig struct {
-	Token     *string `cty:"token"`
-	Email     *string `cty:"email"`
-	APIKey    *string `cty:"api_key"`
-	AccessKey *string `cty:"access_key"`
-	SecretKey *string `cty:"secret_key"`
-}
-
-var ConfigSchema = map[string]*schema.Attribute{
-	"token": {
-		Type: schema.TypeString,
-	},
-	"email": {
-		Type: schema.TypeString,
-	},
-	"api_key": {
-		Type: schema.TypeString,
-	},
-	"access_key": {
-		Type: schema.TypeString,
-	},
-	"secret_key": {
-		Type: schema.TypeString,
-	},
+	Token     *string `hcl:"token"`
+	Email     *string `hcl:"email"`
+	APIKey    *string `hcl:"api_key"`
+	AccessKey *string `hcl:"access_key"`
+	SecretKey *string `hcl:"secret_key"`
 }
 
 func ConfigInstance() interface{} {
