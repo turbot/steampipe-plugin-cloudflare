@@ -90,7 +90,7 @@ func listTunnels(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	for _, t := range resp {
 
 		configuration := cloudflare.TunnelConfigurationResult{}
-		if showConfig == true {
+		if showConfig {
 			configuration, err = conn.GetTunnelConfiguration(ctx, cloudflare.AccountIdentifier(account.ID), t.ID)
 			if err != nil {
 				continue
