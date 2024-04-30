@@ -2,7 +2,6 @@ package cloudflare
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/cloudflare/cloudflare-go"
