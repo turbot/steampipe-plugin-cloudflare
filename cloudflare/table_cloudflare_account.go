@@ -38,7 +38,7 @@ func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	if err != nil {
 		return nil, err
 	}
-	items, _, err := conn.Accounts(ctx, cloudflare.PaginationOptions{})
+	items, _, err := conn.Accounts(ctx, cloudflare.AccountsListParams{})
 	if err != nil {
 		return nil, err
 	}

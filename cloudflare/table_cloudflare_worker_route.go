@@ -48,7 +48,7 @@ func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	resp, err := conn.ListWorkerRoutes(ctx, zoneDetails.ID)
+	resp, err := conn.ListWorkerRoutes(ctx, cloudflare.ZoneIdentifier(zoneDetails.ID), cloudflare.ListWorkerRoutesParams{})
 	if err != nil {
 		logger.Error("listWorkerRoutes", "api call error", err)
 		return nil, err

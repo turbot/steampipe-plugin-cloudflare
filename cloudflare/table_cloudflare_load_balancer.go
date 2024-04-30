@@ -54,7 +54,7 @@ func listLoadBalancers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		logger.Error("listLoadBalancers", "connection_error", err)
 		return nil, err
 	}
-	loadBalancers, err := conn.ListLoadBalancers(ctx, zoneID)
+	loadBalancers, err := conn.ListLoadBalancers(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.ListLoadBalancerParams{})
 	if err != nil {
 		logger.Error("ListLoadBalancers", "api error", err)
 		return nil, err

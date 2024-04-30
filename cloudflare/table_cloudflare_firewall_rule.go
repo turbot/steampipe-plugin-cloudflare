@@ -69,7 +69,7 @@ func listFirewallRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 	zoneDetails := h.Item.(cloudflare.Zone)
 
-	resp, err := conn.FirewallRules(ctx, zoneDetails.ID, cloudflare.PaginationOptions{})
+	resp, _, err := conn.FirewallRules(ctx, cloudflare.ZoneIdentifier(zoneDetails.ID), cloudflare.FirewallRuleListParams{})
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	op, err := conn.FirewallRule(ctx, zoneID, id)
+	op, err := conn.FirewallRule(ctx, cloudflare.ZoneIdentifier(zoneID), id)
 	if err != nil {
 		return nil, err
 	}

@@ -69,14 +69,16 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := cloudflare.ListAccessPoliciesParams{
+		ResultInfo: cloudflare.ResultInfo{
+			PerPage: 100,
+			Page:    1,
+		},
 	}
 
 	for {
 		// items, result_info, err := conn.AccessPolicy(ctx, accountID, appID, opts)
-		items, result_info, err := conn.AccessPolicies(ctx, accountID, appID, opts)
+		items, result_info, err := conn.ListAccessPolicies(ctx, cloudflare.AccountIdentifier(accountID), opts)
 		if err != nil {
 			logger.Error("listAccessPolicies", "AccessPolicies api error", err)
 			return nil, err
@@ -104,9 +106,11 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := cloudflare.ListAccessApplicationsParams{
+		ResultInfo: cloudflare.ResultInfo{
+			PerPage: 100,
+			Page:    1,
+		},
 	}
 
 	type ListPageResponse struct {
@@ -115,19 +119,19 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, accountID, opts)
+		applications, resp, err := conn.ListAccessApplications(ctx, cloudflare.AccountIdentifier(accountID), opts)
 		return ListPageResponse{
 			Applications: applications,
-			resp:         resp,
+			resp:         *resp,
 		}, err
 	}
 
 	for {
 		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
 		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
+			var cloudFlareErr *cloudflare.Error
 			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
 					logger.Warn("listParentAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
 					return nil, nil
 				}

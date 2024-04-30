@@ -3,6 +3,7 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -41,6 +42,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 
 func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
+	zoneID := h.Item.(cloudflare.Zone).ID
 
 	conn, err := connect(ctx, d)
 	if err != nil {
@@ -48,7 +50,7 @@ func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 	// Rest api only supports monitor as an input.
-	loadBalancersPools, err := conn.ListLoadBalancerPools(ctx)
+	loadBalancersPools, err := conn.ListLoadBalancerPools(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.ListLoadBalancerPoolParams{})
 	if err != nil {
 		logger.Error("ListLoadBalancers", "api error", err)
 		return nil, err

@@ -35,6 +35,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_user_audit_log":        tableCloudflareUserAuditLog(ctx),
 			"cloudflare_worker_route":          tableCloudflareWorkerRoute(ctx),
 			"cloudflare_zone":                  tableCloudflareZone(ctx),
+			"cloudflare_ztna_tunnel":           tableCloudflareZtnaTunnel(ctx),
 		},
 	}
 	return p
