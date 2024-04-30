@@ -120,7 +120,7 @@ func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 }
 
 func shouldRetryError(err error) bool {
-	if cloudflareErr, ok := err.(*cloudflare.APIRequestError); ok {
+	if cloudflareErr, ok := err.(*cloudflare.Error); ok {
 		return cloudflareErr.ClientRateLimited()
 	}
 	return false

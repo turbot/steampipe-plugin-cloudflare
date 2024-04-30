@@ -63,9 +63,11 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := cloudflare.ListAccessGroupsParams{
+		ResultInfo: cloudflare.ResultInfo{
+			PerPage: 100,
+			Page:    1,
+		},
 	}
 
 	type ListPageResponse struct {
@@ -81,19 +83,19 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		groups, resp, err := conn.AccessGroups(ctx, account.ID, opts)
+		groups, resp, err := conn.ListAccessGroups(ctx, cloudflare.AccountIdentifier(account.ID), opts)
 		return ListPageResponse{
 			Groups: groups,
-			resp:   resp,
+			resp:   *resp,
 		}, err
 	}
 
 	for {
 		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
 		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
+			var cloudFlareErr *cloudflare.Error
 			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
 					logger.Warn("listAccessGroups", fmt.Sprintf("AccessGroups api error for account: %s", account.ID), err)
 					return nil, nil
 				}

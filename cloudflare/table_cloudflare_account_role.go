@@ -89,7 +89,7 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, err
 	}
 
-	resp, err := conn.AccountRoles(ctx, account.ID)
+	resp, err := conn.ListAccountRoles(ctx, cloudflare.AccountIdentifier(account.ID), cloudflare.ListAccountRolesParams{})
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	accountID := d.EqualsQuals["account_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	data, err := conn.AccountRole(ctx, accountID, id)
+	data, err := conn.GetAccountRole(ctx, cloudflare.AccountIdentifier(accountID), id)
 	if err != nil {
 		return nil, err
 	}

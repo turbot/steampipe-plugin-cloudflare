@@ -54,7 +54,7 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
-	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
+	items, _, err := conn.ListDNSRecords(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.ListDNSRecordsParams{})
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
 	id := quals["id"].GetStringValue()
-	item, err := conn.DNSRecord(ctx, zoneID, id)
+	item, err := conn.GetDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), id)
 	if err != nil {
 		return nil, err
 	}

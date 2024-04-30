@@ -25,7 +25,7 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 		return nil
 	}
 
-	items, _, err := conn.Accounts(ctx, cloudflare.PaginationOptions{})
+	items, _, err := conn.Accounts(ctx, cloudflare.AccountsListParams{})
 	if err != nil {
 		return nil
 	}

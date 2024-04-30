@@ -69,9 +69,11 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := cloudflare.ListAccessApplicationsParams{
+		ResultInfo: cloudflare.ResultInfo{
+			Page:    1,
+			PerPage: 100,
+		},
 	}
 
 	type ListPageResponse struct {
@@ -87,19 +89,19 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, account.ID, opts)
+		applications, resp, err := conn.ListAccessApplications(ctx, cloudflare.AccountIdentifier(account.ID), opts)
 		return ListPageResponse{
 			Applications: applications,
-			resp:         resp,
+			resp:         *resp,
 		}, err
 	}
 
 	for {
 		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
 		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
+			var cloudFlareErr *cloudflare.Error
 			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
 					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
 					return nil, nil
 				}
