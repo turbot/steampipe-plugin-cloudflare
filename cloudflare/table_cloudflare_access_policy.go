@@ -25,7 +25,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildAccountmatrix,
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Access policy unique API identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The name of the policy. Only used in the UI."},
@@ -46,7 +46,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 			{Name: "exclude", Type: proto.ColumnType_JSON, Description: "The exclude policy works like a NOT logical operator. The user must not satisfy all of the rules in exclude."},
 			{Name: "include", Type: proto.ColumnType_JSON, Description: "The include policy works like an OR logical operator. The user must satisfy one of the rules in includes."},
 			{Name: "require", Type: proto.ColumnType_JSON, Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
-		},
+		}),
 	}
 }
 

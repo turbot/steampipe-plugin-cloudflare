@@ -14,7 +14,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listUser,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the user."},
 			{Name: "email", Type: proto.ColumnType_STRING, Description: "Email of the user."},
@@ -34,16 +34,12 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 			// JSON columns
 			{Name: "betas", Type: proto.ColumnType_JSON, Description: "Beta feature flags associated with the user."},
 			{Name: "organizations", Type: proto.ColumnType_JSON, Description: "Organizations the user is a member of."},
-		},
+		}),
 	}
 }
 
-func listUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	item, err := conn.UserDetails(ctx)
+func listUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	item, err := getUserInfo(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}

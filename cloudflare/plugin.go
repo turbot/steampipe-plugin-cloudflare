@@ -13,6 +13,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 		},
+		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
+			{
+				Name:    "user_id",
+				Hydrate: getUserId,
+			},
+		},
 		DefaultTransform: transform.FromJSONTag(),
 		TableMap: map[string]*plugin.Table{
 			"cloudflare_access_application":    tableCloudflareAccessApplication(ctx),

@@ -20,14 +20,14 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 				{Name: "zone_id", Require: plugin.Optional},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "API item identifier tag."},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Hydrate: getParentZoneDetails, Transform: transform.FromField("Name"), Description: "Specifies the zone name."},
 			{Name: "pattern", Type: proto.ColumnType_STRING, Description: "Patterns decide what (if any) script is matched based on the URL of that request."},
 			{Name: "script", Type: proto.ColumnType_STRING, Description: "Name of the script to apply when the route is matched. The route is skipped when this is blank/missing."},
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Hydrate: getParentZoneDetails, Transform: transform.FromField("ID"), Description: "Specifies the zone identifier."},
-		},
+		}),
 	}
 }
 

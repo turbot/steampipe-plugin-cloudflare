@@ -37,7 +37,7 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           getPageRule,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Specifies the Page Rule identifier."},
 			{Name: "status", Type: proto.ColumnType_STRING, Description: "Specifies the status of the page rule."},
@@ -52,7 +52,7 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 			// JSON columns
 			{Name: "actions", Type: proto.ColumnType_JSON, Description: "A list of actions to perform if the targets of this rule match the request. Actions can redirect the url to another url or override settings (but not both)."},
 			{Name: "targets", Type: proto.ColumnType_JSON, Description: "A list of targets to evaluate on a request."},
-		},
+		}),
 	}
 }
 
