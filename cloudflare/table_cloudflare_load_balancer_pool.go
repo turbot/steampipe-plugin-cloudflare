@@ -15,7 +15,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 			Hydrate:       listLoadBalancerPools,
 			ParentHydrate: listZones,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "The API item identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "A short name for the pool."},
@@ -35,7 +35,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 			{Name: "check_regions", Type: proto.ColumnType_JSON, Description: "A list of regions (specified by region code) from which to run health checks."},
 			{Name: "load_shedding", Type: proto.ColumnType_JSON, Description: "Setting for controlling load shedding for this pool."},
 			{Name: "origins", Type: proto.ColumnType_JSON, Description: "The list of origins within this pool. Traffic directed at this pool is balanced across all currently healthy origins, provided the pool itself is healthy."},
-		},
+		}),
 	}
 }
 

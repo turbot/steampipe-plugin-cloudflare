@@ -39,7 +39,7 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 			},
 			Hydrate: listUserAuditLogs,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{
 				Name:        "actor_email",
 				Description: "Email of the actor.",
@@ -119,7 +119,7 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 				Description: "Target resource the action was performed on.",
 				Type:        proto.ColumnType_JSON,
 			},
-		},
+		}),
 	}
 }
 

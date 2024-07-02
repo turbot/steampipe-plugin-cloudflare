@@ -39,7 +39,7 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           getFirewallRule,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Specifies the Firewall Rule identifier."},
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "Specifies the zone identifier."},
@@ -56,7 +56,7 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 			// JSON columns
 			{Name: "filter", Type: proto.ColumnType_JSON, Description: "A set of firewall properties."},
 			{Name: "products", Type: proto.ColumnType_JSON, Description: "A list of products to bypass for a request when the bypass action is used."},
-		},
+		}),
 	}
 }
 

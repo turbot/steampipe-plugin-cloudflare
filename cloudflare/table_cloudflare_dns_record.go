@@ -22,7 +22,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 			Hydrate:           getDNSRecord,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined."},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "Name of the zone where the record is defined."},
@@ -43,7 +43,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			// JSON columns
 			{Name: "data", Type: proto.ColumnType_JSON, Description: "Map of attributes that constitute the record value. Primarily used for LOC and SRV record types."},
 			{Name: "meta", Type: proto.ColumnType_JSON, Description: "Cloudflare metadata for this record."},
-		},
+		}),
 	}
 }
 

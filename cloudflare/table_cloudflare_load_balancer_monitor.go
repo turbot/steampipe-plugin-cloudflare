@@ -14,7 +14,7 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listLoadBalancerMonitors,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Load balancer monitor API item identifier."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the load balancer monitor was created."},
@@ -35,7 +35,7 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 			{Name: "follow_redirects", Type: proto.ColumnType_BOOL, Description: "Follow redirects if returned by the origin. Only valid if type is \"http\" or \"https\"."},
 			{Name: "allow_insecure", Type: proto.ColumnType_BOOL, Description: "Do not validate the certificate when monitor use HTTPS. Only valid if type is \"http\" or \"https\"."},
 			{Name: "probe_zone", Type: proto.ColumnType_STRING, Description: "Assign this monitor to emulate the specified zone while probing. Only valid if type is \"http\" or \"https\"."},
-		},
+		}),
 	}
 }
 

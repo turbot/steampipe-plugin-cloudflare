@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	// "github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
@@ -124,4 +125,46 @@ func shouldRetryError(err error) bool {
 		return cloudflareErr.ClientRateLimited()
 	}
 	return false
+}
+
+// if the caching is required other than per connection, build a cache key for the call and use it in Memoize
+// since getUser is a call, caching should be per connection
+var getUserMemoized = plugin.HydrateFunc(getUserUncached).Memoize(memoize.WithCacheKeyFunction(getUserCacheKey))
+
+// Build a cache key for the call to getUser.
+func getUserCacheKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	key := "getUserInfo"
+	return key, nil
+}
+
+func getUserId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (any, error) {
+	res, err := getUserInfo(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	data := res.(cloudflare.User)
+	return data.ID, nil
+}
+
+func getUserInfo(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (any, error) {
+	UserId, err := getUserMemoized(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	return UserId, nil
+}
+
+func getUserUncached(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	conn, err := connect(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	item, err := conn.UserDetails(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return item, nil
 }

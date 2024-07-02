@@ -35,7 +35,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{
 				Name:        "id",
@@ -72,7 +72,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
-		},
+		}),
 	}
 }
 

@@ -34,7 +34,7 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403", "HTTP status 404"}),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{
 				Name:        "user_email",
 				Description: "Specifies the user email.",
@@ -81,7 +81,7 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.From(accountMemberTitle),
 			},
-		},
+		}),
 	}
 }
 

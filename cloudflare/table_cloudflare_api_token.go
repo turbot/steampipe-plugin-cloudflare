@@ -14,7 +14,7 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listAPIToken,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the API token."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the API token."},
@@ -29,7 +29,7 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 
 			// JSON columns
 			{Name: "policies", Type: proto.ColumnType_JSON, Description: "Policies associated with this API token."},
-		},
+		}),
 	}
 }
 

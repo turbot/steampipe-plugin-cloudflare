@@ -21,7 +21,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 			Hydrate:           getAccount,
 			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the account."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the account."},
@@ -29,7 +29,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 
 			// JSON columns
 			{Name: "settings", Type: proto.ColumnType_JSON, Description: "Settings for the account."},
-		},
+		}),
 	}
 }
 

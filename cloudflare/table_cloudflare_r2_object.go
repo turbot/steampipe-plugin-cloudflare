@@ -30,7 +30,7 @@ func tableCloudflareR2Object(ctx context.Context) *plugin.Table {
 				{Name: "prefix", Require: plugin.Optional},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{
 				Name:        "key",
 				Description: "The name assigned to an object.",
@@ -153,7 +153,7 @@ func tableCloudflareR2Object(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromQual("prefix"),
 			},
-		},
+		}),
 	}
 }
 
