@@ -29,7 +29,7 @@ func tableCloudflareR2Bucket(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.AllColumns([]string{"name", "account_id"}),
 			Hydrate:    getR2Bucket,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The user friendly name of the bucket.",
@@ -75,7 +75,7 @@ func tableCloudflareR2Bucket(ctx context.Context) *plugin.Table {
 				Hydrate:     getBucketLocation,
 				Transform:   transform.FromField("LocationConstraint"),
 			},
-		},
+		}),
 	}
 }
 

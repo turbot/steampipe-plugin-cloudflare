@@ -22,7 +22,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"Invalid zone identifier"}),
 			Hydrate:           getZone,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Zone identifier tag."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The domain name."},
@@ -53,7 +53,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			//{Name: "universal_ssl_settings", Type: proto.ColumnType_JSON, Hydrate: getZoneUniversalSSLSettings, Transform: transform.FromValue(), Description: "Universal SSL settings for a zone."},
 			{Name: "vanity_name_servers", Type: proto.ColumnType_JSON, Description: "Custom name servers for the zone."},
 			// TODO - It's unclear when this is set {Name: "verification_key", Type: proto.ColumnType_STRING, Description: "TODO"},
-		},
+		}),
 	}
 }
 

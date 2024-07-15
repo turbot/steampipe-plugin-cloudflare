@@ -29,7 +29,7 @@ func tableCloudflareR2ObjectData(ctx context.Context) *plugin.Table {
 				{Name: "key", Require: plugin.Required},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			{
 				Name:        "key",
 				Description: "The name assigned to an object.",
@@ -250,7 +250,7 @@ func tableCloudflareR2ObjectData(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromQual("bucket"),
 			},
-		},
+		}),
 	}
 }
 

@@ -26,7 +26,7 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 			},
 		},
 		// Get Config - Currently SDK is not supporting get call
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Identifier of the access group."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access group."},
@@ -41,7 +41,7 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 			{Name: "exclude", Type: proto.ColumnType_JSON, Description: "The exclude policy works like a NOT logical operator. The user must not satisfy all of the rules in exclude."},
 			{Name: "include", Type: proto.ColumnType_JSON, Description: "The include policy works like an OR logical operator. The user must satisfy one of the rules in includes."},
 			{Name: "require", Type: proto.ColumnType_JSON, Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
-		},
+		}),
 	}
 }
 

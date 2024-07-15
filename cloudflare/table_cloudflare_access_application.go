@@ -26,7 +26,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 			},
 		},
 		// Get Config - Currently SDK is not supporting get call
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "Application API uuid."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access application."},
@@ -47,7 +47,7 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 			// JSON columns
 			{Name: "allowed_idps", Type: proto.ColumnType_JSON, Description: "The identity providers selected for the application."},
 			{Name: "cors_headers", Type: proto.ColumnType_JSON, Description: "CORS configuration for the access application. See below for reference structure."},
-		},
+		}),
 	}
 }
 

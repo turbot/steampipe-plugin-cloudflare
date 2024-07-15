@@ -17,7 +17,7 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 			Hydrate:       listLoadBalancers,
 			ParentHydrate: listZones,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "API item identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The DNS hostname to associate with your Load Balancer."},
@@ -41,7 +41,7 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 			{Name: "pop_pools", Type: proto.ColumnType_JSON, Description: "A mapping of Cloudflare PoP identifiers to a list of pool IDs (ordered by their failover priority) for the PoP (datacenter). This feature is only available to enterprise customers."},
 			{Name: "region_pools", Type: proto.ColumnType_JSON, Description: "A mapping of region/country codes to a list of pool IDs (ordered by their failover priority) for the given region. Any regions not explicitly defined will fall back to using default_pools."},
 			{Name: "session_affinity_attributes", Type: proto.ColumnType_JSON, Description: "session affinity cookie attributes."},
-		},
+		}),
 	}
 }
 
