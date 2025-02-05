@@ -25,7 +25,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined."},
-			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "Name of the zone where the record is defined."},
+			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "[Deprecated] Name of the zone where the record is defined."},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the record."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the record (e.g. A, MX, CNAME)."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Domain name for the record (e.g. steampipe.io)."},
@@ -54,11 +54,22 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
+	
+	// Empty check
+	if zoneID == "" {
+		return nil, nil
+	}
+
 	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
 	if err != nil {
 		return nil, err
 	}
 	for _, i := range items {
+		// Cloudflare list records API no longer support Zone Id and Zone Name in its response, so we are assigning the value of Zone ID from it's parent.
+		// https://developers.cloudflare.com/changelog/
+		// https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/list/
+		i.ZoneID = zoneID
+
 		d.StreamListItem(ctx, i)
 	}
 	return nil, nil
