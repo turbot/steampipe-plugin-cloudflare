@@ -7,6 +7,8 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/query_cache"
 )
 
 func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
@@ -14,8 +16,10 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_dns_record",
 		Description: "DNS records for a zone.",
 		List: &plugin.ListConfig{
-			KeyColumns: plugin.SingleColumn("zone_id"),
-			Hydrate:    listDNSRecord,
+			KeyColumns: plugin.KeyColumnSlice{
+				{Name: "zone_id", Require: plugin.Required, CacheMatch: query_cache.CacheMatchExact},
+			},
+			Hydrate: listDNSRecord,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
@@ -24,7 +28,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined.", Transform: transform.FromQual("zone_id")},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "[Deprecated] Name of the zone where the record is defined."},
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the record."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the record (e.g. A, MX, CNAME)."},
@@ -54,7 +58,7 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
-	
+
 	// Empty check
 	if zoneID == "" {
 		return nil, nil
@@ -65,10 +69,6 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 	for _, i := range items {
-		// Cloudflare list records API no longer support Zone Id and Zone Name in its response, so we are assigning the value of Zone ID from it's parent.
-		// https://developers.cloudflare.com/changelog/
-		// https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/list/
-		i.ZoneID = zoneID
 
 		d.StreamListItem(ctx, i)
 	}
