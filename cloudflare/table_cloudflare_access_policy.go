@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/shared"
+	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -54,41 +56,40 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	logger := plugin.Logger(ctx)
 
 	accountID := d.EqualsQualString(matrixKeyAccount)
-	appID := h.Item.(cloudflare.AccessApplication).ID
+	app := h.Item.(zero_trust.AccessApplicationListResponse)
 	inputAppID := d.EqualsQuals["application_id"].GetStringValue()
 
 	// Avoid getting access policies for other applications id
 	// "application_id" mentioned in where clause
-	if inputAppID != "" && appID != inputAppID {
+	if inputAppID != "" && app.ID != inputAppID {
 		return nil, nil
 	}
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("listAccessPolicies", "connection error", err)
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := zero_trust.AccessApplicationPolicyListParams{
+		AccountID: cloudflare.String(accountID),
 	}
 
-	for {
-		// items, result_info, err := conn.AccessPolicy(ctx, accountID, appID, opts)
-		items, result_info, err := conn.AccessPolicies(ctx, accountID, appID, opts)
-		if err != nil {
-			logger.Error("listAccessPolicies", "AccessPolicies api error", err)
-			return nil, err
-		}
-		for _, i := range items {
-			d.StreamListItem(ctx, i)
-		}
+	iter := conn.ZeroTrust.Access.Applications.Policies.ListAutoPaging(ctx, app.ID, opts)
 
-		if result_info.Page >= result_info.TotalPages {
-			break
+	if err := iter.Err(); err != nil {
+		logger.Error("listAccessPolicies", "AccessPolicies api error", err)
+		return nil, err
+	}
+
+	for iter.Next() {
+		policy := iter.Current()
+		d.StreamListItem(ctx, policy)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
 		}
-		opts.Page = opts.Page + 1
 	}
 
 	return nil, nil
@@ -98,57 +99,43 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 	logger := plugin.Logger(ctx)
 	accountID := d.EqualsQualString(matrixKeyAccount)
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("listParentAccessApplications", "connection error", err)
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := zero_trust.AccessApplicationListParams{
+		AccountID: cloudflare.String(accountID),
 	}
 
-	type ListPageResponse struct {
-		Applications []cloudflare.AccessApplication
-		resp         cloudflare.ResultInfo
-	}
+	iter := conn.ZeroTrust.Access.Applications.ListAutoPaging(ctx, opts)
 
-	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, accountID, opts)
-		return ListPageResponse{
-			Applications: applications,
-			resp:         resp,
-		}, err
-	}
-
-	for {
-		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if slices.Contains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					logger.Warn("listParentAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
-					return nil, nil
-				}
+	if err := iter.Err(); err != nil {
+		var cloudFlareErr *shared.ErrorData
+		if errors.As(err, &cloudFlareErr) {
+			if slices.Contains([]string{cloudFlareErr.Message}, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				logger.Warn("listParentAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
+				return nil, nil
 			}
-			logger.Error("listParentAccessApplications", "AccessApplications api error", err)
-			return nil, err
 		}
-		listResponse := listPageResponse.(ListPageResponse)
-		for _, i := range listResponse.Applications {
-			d.StreamListItem(ctx, i)
-		}
+		logger.Error("listParentAccessApplications", "AccessApplications api error", err)
+		return nil, err
+	}
 
-		if listResponse.resp.Page >= listResponse.resp.TotalPages {
-			break
+	for iter.Next() {
+		application := iter.Current()
+		d.StreamListItem(ctx, application)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
 		}
-		opts.Page = opts.Page + 1
 	}
 
 	return nil, nil
 }
 
 func getParentApplicationDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return h.ParentItem.(cloudflare.AccessApplication), nil
+	return h.ParentItem.(zero_trust.AccessApplicationListResponse), nil
 }

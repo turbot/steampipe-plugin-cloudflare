@@ -3,6 +3,10 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/load_balancers"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -12,7 +16,8 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_load_balancer_monitor",
 		Description: "A monitor issues health checks at regular intervals to evaluate the health of an origin pool.",
 		List: &plugin.ListConfig{
-			Hydrate: listLoadBalancerMonitors,
+			Hydrate:       listLoadBalancerMonitors,
+			ParentHydrate: listAccount,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
@@ -42,19 +47,31 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 func listLoadBalancerMonitors(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 
-	conn, err := connect(ctx, d)
+	account := h.ParentItem.(accounts.Account)
+
+	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
+		logger.Error("listLoadBalancerMonitors", "connection_error", err)
 		return nil, err
 	}
-	// Paging not supported by rest api
-	loadBalancersPools, err := conn.ListLoadBalancerMonitors(ctx)
-	if err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
+
+	input := load_balancers.MonitorListParams{
+		AccountID: cloudflare.String(account.ID),
+	}
+
+	iter := conn.LoadBalancers.Monitors.ListAutoPaging(ctx, input)
+	if err := iter.Err(); err != nil {
+		logger.Error("listLoadBalancerMonitors", "api error", err)
 		return nil, err
 	}
-	for _, resource := range loadBalancersPools {
+	for iter.Next() {
+		resource := iter.Current()
 		d.StreamListItem(ctx, resource)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
 	return nil, nil
 }

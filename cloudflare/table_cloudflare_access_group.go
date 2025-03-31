@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/shared"
+	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -47,7 +50,7 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 
 func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	account := h.Item.(cloudflare.Account)
+	account := h.Item.(accounts.Account)
 
 	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
@@ -57,63 +60,46 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, nil
 	}
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("listAccessGroups", "connection error", err)
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
-	}
-
-	type ListPageResponse struct {
-		Groups []cloudflare.AccessGroup
-		resp   cloudflare.ResultInfo
-	}
-
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < int64(opts.PerPage) {
-			opts.PerPage = int(*limit)
+	maxLimit := int32(100)
+	if d.QueryContext.Limit != nil {
+		limit := int32(*d.QueryContext.Limit)
+		if limit < maxLimit {
+			maxLimit = limit
 		}
 	}
 
-	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		groups, resp, err := conn.AccessGroups(ctx, account.ID, opts)
-		return ListPageResponse{
-			Groups: groups,
-			resp:   resp,
-		}, err
+	opts := zero_trust.AccessGroupListParams{
+		AccountID: cloudflare.String(account.ID),
 	}
 
-	for {
-		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if slices.Contains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					logger.Warn("listAccessGroups", fmt.Sprintf("AccessGroups api error for account: %s", account.ID), err)
-					return nil, nil
-				}
+	iter := conn.ZeroTrust.Access.Groups.ListAutoPaging(ctx, opts)
+
+	if err := iter.Err(); err != nil {
+		var cloudFlareErr *shared.ErrorData
+		if errors.As(err, &cloudFlareErr) {
+			if slices.Contains([]string{cloudFlareErr.Message}, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				logger.Warn("listAccessGroups", fmt.Sprintf("AccessGroups api error for account: %s", account.ID), err)
+				return nil, nil
 			}
-			logger.Error("listAccessGroups", "AccessGroups api error", err)
-			return nil, err
 		}
-		listResponse := listPageResponse.(ListPageResponse)
-		for _, i := range listResponse.Groups {
-			d.StreamListItem(ctx, i)
-		}
+		logger.Error("listAccessGroups", "AccessGroups api error", err)
+		return nil, err
+	}
+
+	for iter.Next() {
+		group := iter.Current()
+		d.StreamListItem(ctx, group)
+
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
-
-		if listResponse.resp.Page >= listResponse.resp.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
 	}
 
 	return nil, nil

@@ -3,7 +3,8 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -25,7 +26,8 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the account."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the account."},
-			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the account."},
+			// {Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the account."},
+			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The create time when account was created."},
 
 			// JSON columns
 			{Name: "settings", Type: proto.ColumnType_JSON, Description: "Settings for the account."},
@@ -34,28 +36,51 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 }
 
 func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-	items, _, err := conn.Accounts(ctx, cloudflare.PaginationOptions{})
-	if err != nil {
+	maxLimit := int32(500)
+	if d.QueryContext.Limit != nil {
+		limit := int32(*d.QueryContext.Limit)
+		if limit < maxLimit {
+			maxLimit = limit
+		}
+	}
+
+	input := accounts.AccountListParams{
+		PerPage: cloudflare.F(float64(maxLimit)),
+	}
+
+	iter := conn.Accounts.ListAutoPaging(ctx, input)
+	for iter.Next() {
+		account := iter.Current()
+		d.StreamListItem(ctx, account)
+		
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
+	}
+	if err := iter.Err(); err != nil {
 		return nil, err
 	}
-	for _, i := range items {
-		d.StreamListItem(ctx, i)
-	}
+
 	return nil, nil
 }
 
 func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 	quals := d.EqualsQuals
 	id := quals["id"].GetStringValue()
-	account, _, err := conn.Account(ctx, id)
+
+	input := accounts.AccountGetParams{
+		AccountID: cloudflare.F(id),
+	}
+	account, err := conn.Accounts.Get(ctx, input)
 	if err != nil {
 		return nil, err
 	}
