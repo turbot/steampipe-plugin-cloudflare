@@ -19,7 +19,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Hydrate: getUserId,
 			},
 		},
-		DefaultTransform: transform.FromJSONTag(),
+		DefaultTransform: transform.FromCamel(),
 		TableMap: map[string]*plugin.Table{
 			"cloudflare_access_application":    tableCloudflareAccessApplication(ctx),
 			"cloudflare_access_group":          tableCloudflareAccessGroup(ctx),

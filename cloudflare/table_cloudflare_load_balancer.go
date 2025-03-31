@@ -22,7 +22,7 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "API item identifier."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "API item identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The DNS hostname to associate with your Load Balancer."},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Hydrate: getParentZoneDetails, Transform: transform.FromField("Name"), Description: "The zone name to which load balancer belongs."},
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Hydrate: getParentZoneDetails, Transform: transform.FromField("ID"), Description: "The zone ID to which load balancer belongs."},

@@ -31,7 +31,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined.", Transform: transform.FromQual("zone_id")},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "[Deprecated] Name of the zone where the record is defined."},
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the record."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the record."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the record (e.g. A, MX, CNAME)."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Domain name for the record (e.g. steampipe.io)."},
 			{Name: "content", Type: proto.ColumnType_STRING, Description: "Content or value of the record. Changes by type, including IP address for A records and domain for CNAME records."},
@@ -105,7 +105,7 @@ func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	id := quals["id"].GetStringValue()
 
 	input := dns.RecordGetParams{
-		ZoneID:   cloudflare.F(zoneID),
+		ZoneID: cloudflare.F(zoneID),
 	}
 
 	record, err := conn.DNS.Records.Get(ctx, id, input)

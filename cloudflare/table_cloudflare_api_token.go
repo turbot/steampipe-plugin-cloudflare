@@ -7,6 +7,7 @@ import (
 	"github.com/cloudflare/cloudflare-go/v4/accounts"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
@@ -19,7 +20,7 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the API token."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the API token."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the API token."},
 			{Name: "status", Type: proto.ColumnType_STRING, Description: "Status of the API token."},
 
@@ -46,7 +47,7 @@ func listAPIToken(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 
 	iter := conn.Accounts.Tokens.ListAutoPaging(ctx, accounts.TokenListParams{
 		AccountID: cloudflare.String(account.ID),
-	})		
+	})
 	if err := iter.Err(); err != nil {
 		return nil, err
 	}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareAccount(ctx context.Context) *plugin.Table {
@@ -24,7 +25,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the account."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the account."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the account."},
 			// {Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the account."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The create time when account was created."},
@@ -56,7 +57,7 @@ func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	for iter.Next() {
 		account := iter.Current()
 		d.StreamListItem(ctx, account)
-		
+
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil

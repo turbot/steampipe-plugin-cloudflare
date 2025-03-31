@@ -194,8 +194,6 @@ func getUserUncached(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	// Create a default UserDetails object
 	userDetails := &UserDetails{}
 
-	plugin.Logger(ctx).Error("getUserUncached user info ==>>>", *resp)
-
 	// Try to extract ID from the response
 	if resp != nil {
 		// For debugging purposes
