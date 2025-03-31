@@ -7,6 +7,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareUser(ctx context.Context) *plugin.Table {
@@ -18,7 +19,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the user."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the user."},
 			{Name: "email", Type: proto.ColumnType_STRING, Description: "Email of the user."},
 			{Name: "username", Type: proto.ColumnType_STRING, Description: "Username (actually often in ID style) of the user."},
 

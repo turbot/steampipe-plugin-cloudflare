@@ -31,7 +31,7 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 		// Get Config - Currently SDK is not supporting get call
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Identifier of the access group."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Identifier of the access group."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access group."},
 			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access group belongs."},
 			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account, access group belongs."},

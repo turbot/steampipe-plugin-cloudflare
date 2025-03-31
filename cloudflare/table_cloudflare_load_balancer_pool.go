@@ -9,6 +9,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
@@ -21,7 +22,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "The API item identifier."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "The API item identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "A short name for the pool."},
 			{Name: "enabled", Type: proto.ColumnType_BOOL, Description: "Status of this pool. Disabled pools will not receive traffic and are excluded from health checks."},
 			{Name: "monitor", Type: proto.ColumnType_STRING, Description: "The ID of the Monitor to use for health checking origins within this pool."},

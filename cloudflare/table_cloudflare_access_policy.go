@@ -29,7 +29,7 @@ func tableCloudflareAccessPolicy(ctx context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildAccountmatrix,
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Access policy unique API identifier."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Access policy unique API identifier."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "The name of the policy. Only used in the UI."},
 			{Name: "application_id", Type: proto.ColumnType_STRING, Hydrate: getParentApplicationDetails, Transform: transform.FromField("ID"), Description: "The id of application to which policy belongs."},
 			{Name: "application_name", Type: proto.ColumnType_STRING, Hydrate: getParentApplicationDetails, Transform: transform.FromField("Name"), Description: "The name of application to which policy belongs."},

@@ -9,6 +9,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
@@ -21,7 +22,7 @@ func tableCloudflareLoadBalancerMonitor(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Load balancer monitor API item identifier."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Load balancer monitor API item identifier."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the load balancer monitor was created."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the load balancer monitor was last modified."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "The protocol to use for the healthcheck. Currently supported protocols are \"HTTP\", \"HTTPS\" and \"TCP\". Default: \"http\"."},
