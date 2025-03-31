@@ -3,7 +3,10 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/load_balancers"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -47,19 +50,25 @@ func tableCloudflareLoadBalancer(ctx context.Context) *plugin.Table {
 
 func listLoadBalancers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	zoneID := h.Item.(cloudflare.Zone).ID
+	zoneID := h.Item.(zones.Zone).ID
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("listLoadBalancers", "connection_error", err)
 		return nil, err
 	}
-	loadBalancers, err := conn.ListLoadBalancers(ctx, zoneID)
-	if err != nil {
+
+	input := load_balancers.LoadBalancerListParams{
+		ZoneID: cloudflare.F(zoneID),
+	}
+
+	iter := conn.LoadBalancers.ListAutoPaging(ctx, input)
+	if err := iter.Err(); err != nil {
 		logger.Error("ListLoadBalancers", "api error", err)
 		return nil, err
 	}
-	for _, resource := range loadBalancers {
+	for iter.Next() {
+		resource := iter.Current()
 		d.StreamListItem(ctx, resource)
 	}
 	return nil, nil

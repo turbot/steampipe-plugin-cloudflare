@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/page_rules"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -13,9 +15,9 @@ import (
 
 type pageRuleInfo = struct {
 	ID         string                      `json:"id,omitempty"`
-	Targets    []cloudflare.PageRuleTarget `json:"targets"`
-	Actions    []cloudflare.PageRuleAction `json:"actions"`
-	Priority   int                         `json:"priority"`
+	Targets    []page_rules.Target         `json:"targets"`
+	Actions    []page_rules.PageRuleAction `json:"actions"`
+	Priority   int64                       `json:"priority"`
 	Status     string                      `json:"status"`
 	ModifiedOn time.Time                   `json:"modified_on,omitempty"`
 	CreatedOn  time.Time                   `json:"created_on,omitempty"`
@@ -59,25 +61,30 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-	zoneDetails := h.Item.(cloudflare.Zone)
+	zoneDetails := h.Item.(zones.Zone)
 
-	resp, err := conn.ListPageRules(ctx, zoneDetails.ID)
+	input := page_rules.PageRuleListParams{
+		ZoneID: cloudflare.F(zoneDetails.ID),
+	}
+
+	resp, err := conn.PageRules.List(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	for _, i := range resp {
+
+	for _, rule := range *resp {
 		d.StreamLeafListItem(ctx, pageRuleInfo{
-			ID:         i.ID,
-			Status:     i.Status,
-			CreatedOn:  i.CreatedOn,
-			ModifiedOn: i.ModifiedOn,
-			Priority:   i.Priority,
-			Actions:    i.Actions,
-			Targets:    i.Targets,
+			ID:         rule.ID,
+			Status:     string(rule.Status),
+			CreatedOn:  rule.CreatedOn,
+			ModifiedOn: rule.ModifiedOn,
+			Priority:   rule.Priority,
+			Actions:    rule.Actions,
+			Targets:    rule.Targets,
 			ZoneID:     zoneDetails.ID,
 		})
 	}
@@ -88,7 +95,7 @@ func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 //// HYDRATE FUNCTIONS
 
 func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -96,18 +103,22 @@ func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	op, err := conn.PageRule(ctx, zoneID, id)
+	input := page_rules.PageRuleGetParams{
+		ZoneID: cloudflare.F(zoneID),
+	}
+
+	rule, err := conn.PageRules.Get(ctx, id, input)
 	if err != nil {
 		return nil, err
 	}
 	return pageRuleInfo{
-		ID:         op.ID,
-		Status:     op.Status,
-		CreatedOn:  op.CreatedOn,
-		ModifiedOn: op.ModifiedOn,
-		Priority:   op.Priority,
-		Actions:    op.Actions,
-		Targets:    op.Targets,
+		ID:         rule.ID,
+		Status:     string(rule.Status),
+		CreatedOn:  rule.CreatedOn,
+		ModifiedOn: rule.ModifiedOn,
+		Priority:   rule.Priority,
+		Actions:    rule.Actions,
+		Targets:    rule.Targets,
 		ZoneID:     zoneID,
 	}, nil
 }

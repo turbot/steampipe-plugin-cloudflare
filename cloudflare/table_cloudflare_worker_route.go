@@ -3,7 +3,9 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/workers"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -33,7 +35,7 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 
 func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	zoneDetails := h.Item.(cloudflare.Zone)
+	zoneDetails := h.Item.(zones.Zone)
 
 	inputZoneId := d.EqualsQualString("zone_id")
 
@@ -42,23 +44,29 @@ func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, nil
 	}
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("listWorkerRoutes", "connect error", err)
 		return nil, err
 	}
 
-	resp, err := conn.ListWorkerRoutes(ctx, zoneDetails.ID)
-	if err != nil {
+	input := workers.RouteListParams{
+		ZoneID: cloudflare.F(zoneDetails.ID),
+	}
+
+	iter := conn.Workers.Routes.ListAutoPaging(ctx, input)
+	if err := iter.Err(); err != nil {
 		logger.Error("listWorkerRoutes", "api call error", err)
 		return nil, err
 	}
-	for _, resource := range resp.Routes {
+
+	for iter.Next() {	
+		resource := iter.Current()
 		d.StreamListItem(ctx, resource)
 	}
 	return nil, nil
 }
 
 func getParentZoneDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return h.ParentItem.(cloudflare.Zone), nil
+	return h.ParentItem.(zones.Zone), nil
 }

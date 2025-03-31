@@ -2,9 +2,10 @@ package cloudflare
 
 import (
 	"context"
-	"time"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/firewall"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -12,15 +13,13 @@ import (
 )
 
 type firewallRuleInfo = struct {
-	ID          string            `json:"id,omitempty"`
-	Paused      bool              `json:"paused"`
-	Description string            `json:"description"`
-	Action      string            `json:"action"`
-	Priority    interface{}       `json:"priority"`
-	Filter      cloudflare.Filter `json:"filter"`
-	Products    []string          `json:"products,omitempty"`
-	CreatedOn   time.Time         `json:"created_on,omitempty"`
-	ModifiedOn  time.Time         `json:"modified_on,omitempty"`
+	ID          string                      `json:"id,omitempty"`
+	Paused      bool                        `json:"paused"`
+	Description string                      `json:"description"`
+	Action      string                      `json:"action"`
+	Priority    interface{}                 `json:"priority"`
+	Filter      firewall.FirewallRuleFilter `json:"filter"`
+	Products    []firewall.Product          `json:"products,omitempty"`
 	ZoneID      string
 }
 
@@ -48,9 +47,9 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 			{Name: "action", Type: proto.ColumnType_STRING, Description: "The action to apply to a matched request."},
 
 			// Other columns
-			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is created."},
+			// {Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is created."},
 			{Name: "description", Type: proto.ColumnType_STRING, Description: "A description of the rule to help identify it."},
-			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is updated."},
+			// {Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the firewall rule is updated."},
 			{Name: "title", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Title of the resource."},
 
 			// JSON columns
@@ -63,27 +62,30 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listFirewallRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-	zoneDetails := h.Item.(cloudflare.Zone)
+	zoneDetails := h.Item.(zones.Zone)
 
-	resp, err := conn.FirewallRules(ctx, zoneDetails.ID, cloudflare.PaginationOptions{})
-	if err != nil {
+	input := firewall.RuleListParams{
+		ZoneID: cloudflare.F(zoneDetails.ID),
+	}
+
+	iter := conn.Firewall.Rules.ListAutoPaging(ctx, input)
+	if err := iter.Err(); err != nil {
 		return nil, err
 	}
-	for _, i := range resp {
+	for iter.Next() {
+		rule := iter.Current()
 		d.StreamLeafListItem(ctx, firewallRuleInfo{
-			ID:          i.ID,
-			Paused:      i.Paused,
-			Description: i.Description,
-			Action:      i.Action,
-			Priority:    i.Priority,
-			Filter:      i.Filter,
-			Products:    i.Products,
-			CreatedOn:   i.CreatedOn,
-			ModifiedOn:  i.ModifiedOn,
+			ID:          rule.ID,
+			Paused:      rule.Paused,
+			Description: rule.Description,
+			Action:      string(rule.Action),
+			Priority:    rule.Priority,
+			Filter:      rule.Filter,
+			Products:    rule.Products,
 			ZoneID:      zoneDetails.ID,
 		})
 	}
@@ -94,7 +96,7 @@ func listFirewallRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 //// HYDRATE FUNCTIONS
 
 func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +104,11 @@ func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	op, err := conn.FirewallRule(ctx, zoneID, id)
+	input := firewall.RuleGetParams{
+		ZoneID: cloudflare.F(zoneID),
+	}
+
+	op, err := conn.Firewall.Rules.Get(ctx, id, input)
 	if err != nil {
 		return nil, err
 	}
@@ -110,12 +116,10 @@ func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		ID:          op.ID,
 		Paused:      op.Paused,
 		Description: op.Description,
-		Action:      op.Action,
+		Action:      string(op.Action),
 		Priority:    op.Priority,
 		Filter:      op.Filter,
 		Products:    op.Products,
-		CreatedOn:   op.CreatedOn,
-		ModifiedOn:  op.ModifiedOn,
 		ZoneID:      zoneID,
 	}, nil
 }
