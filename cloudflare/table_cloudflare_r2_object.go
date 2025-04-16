@@ -3,12 +3,12 @@ package cloudflare
 import (
 	"context"
 	"errors"
+	"slices"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -202,7 +202,7 @@ func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	// the owner field is not present in listV2 by default
 	// set it true if the column is passed in qual
-	if helpers.StringSliceContains(d.QueryContext.Columns, "owner") {
+	if slices.Contains(d.QueryContext.Columns, "owner") {
 		input.FetchOwner = true
 	}
 

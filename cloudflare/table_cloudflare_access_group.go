@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/cloudflare/cloudflare-go"
-	"github.com/turbot/go-kit/helpers"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -93,7 +93,7 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		if err != nil {
 			var cloudFlareErr *cloudflare.APIRequestError
 			if errors.As(err, &cloudFlareErr) {
-				if helpers.StringSliceContains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				if slices.Contains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
 					logger.Warn("listAccessGroups", fmt.Sprintf("AccessGroups api error for account: %s", account.ID), err)
 					return nil, nil
 				}
