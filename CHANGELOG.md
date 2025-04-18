@@ -1,4 +1,12 @@
-## v1.1.0 [2025-04-17]
+## v1.1.0 [2025-04-18]
+
+_Deprecations_
+
+- Deprecated the `zone_name` column in the `cloudflare_dns_record` table.
+
+_Bug fixes_
+
+- Fixed the `zone_id` column in the `cloudflare_dns_record` table to be a required qualifier when querying the table. ([#158](https://github.com/turbot/steampipe-plugin-cloudflare/pull/158))
 
 _Dependencies_
 
