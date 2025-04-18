@@ -1,3 +1,18 @@
+## v1.1.0 [2025-04-18]
+
+_Deprecations_
+
+- Deprecated the `zone_name` column in the `cloudflare_dns_record` table.
+
+_Bug fixes_
+
+- Fixed the `zone_id` column in the `cloudflare_dns_record` table to be a required qualifier when querying the table. ([#158](https://github.com/turbot/steampipe-plugin-cloudflare/pull/158))
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.23.1`. ([#160](https://github.com/turbot/steampipe-plugin-cloudflare/pull/160))
+- Recompiled plugin with [steampipe-plugin-sdk v5.11.5](https://github.com/turbot/steampipe-plugin-sdk/blob/v5.11.5/CHANGELOG.md#v5115-2025-03-31) that addresses critical and high vulnerabilities in dependent packages. ([#160](https://github.com/turbot/steampipe-plugin-cloudflare/pull/160))
+
 ## v1.0.0 [2024-10-22]
 
 There are no significant changes in this plugin version; it has been released to align with [Steampipe's v1.0.0](https://steampipe.io/changelog/steampipe-cli-v1-0-0) release. This plugin adheres to [semantic versioning](https://semver.org/#semantic-versioning-specification-semver), ensuring backward compatibility within each major version.
