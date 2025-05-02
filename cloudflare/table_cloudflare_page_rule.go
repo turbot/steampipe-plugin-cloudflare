@@ -2,112 +2,70 @@ package cloudflare
 
 import (
 	"context"
-	"time"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/page_rules"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-type pageRuleInfo = struct {
-	ID         string                      `json:"id,omitempty"`
-	Targets    []cloudflare.PageRuleTarget `json:"targets"`
-	Actions    []cloudflare.PageRuleAction `json:"actions"`
-	Priority   int                         `json:"priority"`
-	Status     string                      `json:"status"`
-	ModifiedOn time.Time                   `json:"modified_on,omitempty"`
-	CreatedOn  time.Time                   `json:"created_on,omitempty"`
-	ZoneID     string
-}
-
-//// TABLE DEFINITION
-
-func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
+func tableCloudflarePageRule() *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_page_rule",
-		Description: "Page Rules gives the ability to control how Cloudflare works on a URL or subdomain basis.",
+		Description: "Page rules allow you to control how Cloudflare works on a URL or subdomain basis.",
 		List: &plugin.ListConfig{
-			Hydrate:       listPageRules,
 			ParentHydrate: listZones,
+			Hydrate:       listPageRules,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           getPageRule,
+			KeyColumns: plugin.AllColumns([]string{"zone_id", "id"}),
+			Hydrate:    getPageRule,
 		},
-		Columns: commonColumns([]*plugin.Column{
+		Columns: []*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Specifies the Page Rule identifier."},
-			{Name: "status", Type: proto.ColumnType_STRING, Description: "Specifies the status of the page rule."},
-
-			// Other columns
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "Specifies the zone identifier."},
-			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the page rule is created."},
-			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "The time when the page rule was last modified."},
-			{Name: "priority", Type: proto.ColumnType_INT, Description: "A number that indicates the preference for a page rule over another."},
-			{Name: "title", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Title of the resource."},
-
-			// JSON columns
-			{Name: "actions", Type: proto.ColumnType_JSON, Description: "A list of actions to perform if the targets of this rule match the request. Actions can redirect the url to another url or override settings (but not both)."},
-			{Name: "targets", Type: proto.ColumnType_JSON, Description: "A list of targets to evaluate on a request."},
-		}),
+			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier of the page rule."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "The zone ID where the page rule is configured."},
+			{Name: "status", Type: proto.ColumnType_STRING, Description: "The status of the page rule (active/disabled)."},
+			{Name: "priority", Type: proto.ColumnType_INT, Description: "The priority of the page rule."},
+			{Name: "targets", Type: proto.ColumnType_JSON, Description: "The URL patterns that trigger the page rule."},
+			{Name: "actions", Type: proto.ColumnType_JSON, Description: "The actions to perform when the page rule is triggered."},
+		},
 	}
 }
 
-//// LIST FUNCTION
-
 func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	zoneDetails := h.Item.(cloudflare.Zone)
+	zoneData := h.Item.(zones.Zone)
 
-	resp, err := conn.ListPageRules(ctx, zoneDetails.ID)
+	prService := page_rules.NewPageRuleService()
+	result, err := prService.List(ctx, page_rules.PageRuleListParams{
+		ZoneID: cloudflare.F(zoneData.ID),
+	})
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_page_rule.listPageRules", "list_error", err)
 		return nil, err
 	}
-	for _, i := range resp {
-		d.StreamLeafListItem(ctx, pageRuleInfo{
-			ID:         i.ID,
-			Status:     i.Status,
-			CreatedOn:  i.CreatedOn,
-			ModifiedOn: i.ModifiedOn,
-			Priority:   i.Priority,
-			Actions:    i.Actions,
-			Targets:    i.Targets,
-			ZoneID:     zoneDetails.ID,
-		})
+
+	for _, rule := range *result {
+		d.StreamListItem(ctx, rule)
 	}
 
 	return nil, nil
 }
 
-//// HYDRATE FUNCTIONS
-
-func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
+func getPageRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	op, err := conn.PageRule(ctx, zoneID, id)
+	prService := page_rules.NewPageRuleService()
+	rule, err := prService.Get(ctx, id, page_rules.PageRuleGetParams{
+		ZoneID: cloudflare.F(zoneID),
+	})
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_page_rule.getPageRule", "get_error", err)
 		return nil, err
 	}
-	return pageRuleInfo{
-		ID:         op.ID,
-		Status:     op.Status,
-		CreatedOn:  op.CreatedOn,
-		ModifiedOn: op.ModifiedOn,
-		Priority:   op.Priority,
-		Actions:    op.Actions,
-		Targets:    op.Targets,
-		ZoneID:     zoneID,
-	}, nil
+
+	return rule, nil
 }

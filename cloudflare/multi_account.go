@@ -3,7 +3,10 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
@@ -25,8 +28,20 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 		return nil
 	}
 
-	items, _, err := conn.Accounts(ctx, cloudflare.PaginationOptions{})
-	if err != nil {
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	accountService := accounts.NewAccountService(opts...)
+	iter := accountService.ListAutoPaging(ctx, accounts.AccountListParams{})
+
+	var items []accounts.Account
+	for iter.Next() {
+		items = append(items, iter.Current())
+	}
+	if err := iter.Err(); err != nil {
 		return nil
 	}
 
@@ -38,4 +53,52 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 	// set cache
 	d.ConnectionManager.Cache.Set(cacheKey, matrix)
 	return matrix
+}
+
+func listAccountForParent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	conn, err := connect(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	accountService := accounts.NewAccountService(opts...)
+	iter := accountService.ListAutoPaging(ctx, accounts.AccountListParams{})
+	for iter.Next() {
+		account := iter.Current()
+		d.StreamListItem(ctx, account)
+	}
+	if err := iter.Err(); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func getAccountForParent(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	conn, err := connect(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	accountService := accounts.NewAccountService(opts...)
+	account, err := accountService.Get(ctx, accounts.AccountGetParams{
+		AccountID: cloudflare.F(h.Item.(string)),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return account, nil
 }

@@ -2,7 +2,7 @@ module github.com/turbot/steampipe-plugin-cloudflare
 
 go 1.23.1
 
-toolchain go1.23.2
+toolchain go1.24.1
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.18.1
@@ -10,7 +10,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.26
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.29.3
 	github.com/aws/smithy-go v1.13.5
-	github.com/cloudflare/cloudflare-go v0.27.0
+	github.com/cloudflare/cloudflare-go v0.115.0
+	github.com/cloudflare/cloudflare-go/v4 v4.2.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.11.5
 )
 
@@ -55,10 +56,12 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
@@ -93,6 +96,10 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sethvargo/go-retry v0.2.4 // indirect
 	github.com/stevenle/topsort v0.2.0 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/turbot/go-kit v1.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
@@ -117,7 +124,7 @@ require (
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
+	golang.org/x/time v0.9.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	google.golang.org/api v0.171.0 // indirect
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect

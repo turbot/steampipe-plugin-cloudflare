@@ -3,17 +3,21 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/shared"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type accountRoleInfo = struct {
-	ID          string                                      `json:"id"`
-	Name        string                                      `json:"name"`
-	Description string                                      `json:"description"`
-	Permissions map[string]cloudflare.AccountRolePermission `json:"permissions"`
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Permissions shared.RolePermissions `json:"permissions"`
 	AccountID   string
 }
 
@@ -24,8 +28,8 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_account_role",
 		Description: "A Role defines what permissions a Member of an Account has.",
 		List: &plugin.ListConfig{
+			ParentHydrate: listAccountForParent,
 			Hydrate:       listRoles,
-			ParentHydrate: listAccount,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "account_id", Require: plugin.Optional},
 			},
@@ -79,7 +83,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.Item.(cloudflare.Account)
+	account := h.Item.(accounts.Account)
 	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
 	}
@@ -89,12 +93,19 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, err
 	}
 
-	resp, err := conn.AccountRoles(ctx, account.ID)
-	if err != nil {
-		return nil, err
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
 	}
 
-	for _, role := range resp {
+	roleService := accounts.NewRoleService(opts...)
+	iter := roleService.ListAutoPaging(ctx, accounts.RoleListParams{
+		AccountID: cloudflare.F(account.ID),
+	})
+
+	for iter.Next() {
+		role := iter.Current()
 		d.StreamLeafListItem(ctx, accountRoleInfo{
 			ID:          role.ID,
 			Name:        role.Name,
@@ -103,6 +114,10 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 			AccountID:   account.ID,
 		})
 	}
+	if err := iter.Err(); err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
@@ -114,18 +129,28 @@ func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
 	accountID := d.EqualsQuals["account_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	data, err := conn.AccountRole(ctx, accountID, id)
+	roleService := accounts.NewRoleService(opts...)
+	role, err := roleService.Get(ctx, id, accounts.RoleGetParams{
+		AccountID: cloudflare.F(accountID),
+	}, opts...)
 	if err != nil {
 		return nil, err
 	}
+
 	return accountRoleInfo{
-		ID:          data.ID,
-		Name:        data.Name,
-		Description: data.Description,
-		Permissions: data.Permissions,
+		ID:          role.ID,
+		Name:        role.Name,
+		Description: role.Description,
+		Permissions: role.Permissions,
 		AccountID:   accountID,
 	}, nil
 }

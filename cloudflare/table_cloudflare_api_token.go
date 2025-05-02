@@ -3,6 +3,8 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/user"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -36,14 +38,25 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 func listAPIToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	conn, err := connect(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_api_token.listAPIToken", "connection_error", err)
 		return nil, err
 	}
-	items, err := conn.APITokens(ctx)
-	if err != nil {
+
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	userService := user.NewUserService(opts...)
+	iter := userService.Tokens.ListAutoPaging(ctx, user.TokenListParams{}, opts...)
+	for iter.Next() {
+		token := iter.Current()
+		d.StreamListItem(ctx, token)
+	}
+	if err := iter.Err(); err != nil {
+		plugin.Logger(ctx).Error("cloudflare_api_token.listAPIToken", "api_error", err)
 		return nil, err
 	}
-	for _, i := range items {
-		d.StreamListItem(ctx, i)
-	}
+
 	return nil, nil
 }

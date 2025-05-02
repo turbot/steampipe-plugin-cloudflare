@@ -3,6 +3,8 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/user"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -39,10 +41,24 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 }
 
 func listUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	item, err := getUserInfo(ctx, d, h)
+	conn, err := connect(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-	d.StreamListItem(ctx, item)
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	userService := user.NewUserService(opts...)
+	userDetails, err := userService.Get(ctx)
+	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_user.listUser", "api_error", err)
+		return nil, err
+	}
+
+	d.StreamListItem(ctx, userDetails)
 	return nil, nil
 }

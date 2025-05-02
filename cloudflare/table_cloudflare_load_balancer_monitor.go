@@ -3,6 +3,10 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/load_balancers"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -44,17 +48,29 @@ func listLoadBalancerMonitors(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	conn, err := connect(ctx, d)
 	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
+		logger.Error("listLoadBalancerMonitors", "connection_error", err)
 		return nil, err
 	}
-	// Paging not supported by rest api
-	loadBalancersPools, err := conn.ListLoadBalancerMonitors(ctx)
-	if err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	monitorService := load_balancers.NewMonitorService(opts...)
+	iter := monitorService.ListAutoPaging(ctx, load_balancers.MonitorListParams{
+		AccountID: cloudflare.F(d.EqualsQualString(matrixKeyAccount)),
+	})
+
+	for iter.Next() {
+		monitor := iter.Current()
+		d.StreamListItem(ctx, monitor)
+	}
+	if err := iter.Err(); err != nil {
+		logger.Error("listLoadBalancerMonitors", "api error", err)
 		return nil, err
 	}
-	for _, resource := range loadBalancersPools {
-		d.StreamListItem(ctx, resource)
-	}
+
 	return nil, nil
 }

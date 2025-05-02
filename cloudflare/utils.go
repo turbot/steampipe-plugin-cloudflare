@@ -7,7 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/user"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -19,24 +21,34 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
-func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) {
-
+func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.Client, error) {
 	cloudflareConfig := GetConfig(d.Connection)
+
+	var opts []option.RequestOption
 
 	// First: check for the token
 	if cloudflareConfig.Token != nil {
-		return cloudflare.NewWithAPIToken(*cloudflareConfig.Token)
+		opts = append(opts, option.WithAPIToken(*cloudflareConfig.Token))
+		client := cloudflare.NewClient(opts...)
+		return client, nil
 	}
 
 	// Second: Email + API Key
 	if cloudflareConfig.Email != nil && cloudflareConfig.APIKey != nil {
-		return cloudflare.New(*cloudflareConfig.APIKey, *cloudflareConfig.Email)
+		opts = append(opts,
+			option.WithAPIKey(*cloudflareConfig.APIKey),
+			option.WithAPIEmail(*cloudflareConfig.Email),
+		)
+		client := cloudflare.NewClient(opts...)
+		return client, nil
 	}
 
 	// Third: CLOUDFLARE_API_TOKEN (like Terraform)
 	token, ok := os.LookupEnv("CLOUDFLARE_API_TOKEN")
 	if ok && token != "" {
-		return cloudflare.NewWithAPIToken(token)
+		opts = append(opts, option.WithAPIToken(token))
+		client := cloudflare.NewClient(opts...)
+		return client, nil
 	}
 
 	// Fourth: CLOUDFLARE_EMAIL / CLOUDFLARE_API_KEY (like Terraform)
@@ -44,14 +56,21 @@ func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) 
 	if ok && email != "" {
 		key, ok := os.LookupEnv("CLOUDFLARE_API_KEY")
 		if ok && key != "" {
-			return cloudflare.New(key, email)
+			opts = append(opts,
+				option.WithAPIKey(key),
+				option.WithAPIEmail(email),
+			)
+			client := cloudflare.NewClient(opts...)
+			return client, nil
 		}
 	}
 
 	// Fifth: CF_API_TOKEN (like flarectl and Go SDK)
 	token, ok = os.LookupEnv("CF_API_TOKEN")
 	if ok && token != "" {
-		return cloudflare.NewWithAPIToken(token)
+		opts = append(opts, option.WithAPIToken(token))
+		client := cloudflare.NewClient(opts...)
+		return client, nil
 	}
 
 	// Sixth: CF_EMAIL / CF_API_KEY (like flarectl / Go SDK)
@@ -59,7 +78,12 @@ func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) 
 	if ok && email != "" {
 		key, ok := os.LookupEnv("CF_API_KEY")
 		if ok && key != "" {
-			return cloudflare.New(key, email)
+			opts = append(opts,
+				option.WithAPIKey(key),
+				option.WithAPIEmail(email),
+			)
+			client := cloudflare.NewClient(opts...)
+			return client, nil
 		}
 	}
 
@@ -121,8 +145,9 @@ func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 }
 
 func shouldRetryError(err error) bool {
-	if cloudflareErr, ok := err.(*cloudflare.APIRequestError); ok {
-		return cloudflareErr.ClientRateLimited()
+	var cfErr *cloudflare.Error
+	if errors.As(err, &cfErr) {
+		return strings.Contains(cfErr.Error(), "rate limit") // Check for rate limit error in message
 	}
 	return false
 }
@@ -143,8 +168,8 @@ func getUserId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, err
 	}
 
-	data := res.(cloudflare.User)
-	return data.ID, nil
+	data := res.(map[string]interface{})
+	return data["id"], nil
 }
 
 func getUserInfo(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (any, error) {
@@ -161,10 +186,21 @@ func getUserUncached(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	item, err := conn.UserDetails(ctx)
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	userService := user.NewUserService(opts...)
+	resp, err := userService.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return item, nil
+	if resp != nil {
+		return resp, nil
+	}
+	return nil, errors.New("failed to get user details")
 }

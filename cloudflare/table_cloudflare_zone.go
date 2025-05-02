@@ -3,14 +3,17 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/dns"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-func tableCloudflareZone(ctx context.Context) *plugin.Table {
+func TableCloudflareZone() *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_zone",
 		Description: "A Zone is a domain name along with its subdomains and other identities.",
@@ -64,13 +67,22 @@ func listZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		logger.Error("listZones", "connection_error", err)
 		return nil, err
 	}
-	resp, err := conn.ListZonesContext(ctx)
-	if err != nil {
-		logger.Error("listZones", "ListZonesContext api error", err)
-		return nil, err
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
 	}
-	for _, i := range resp.Result {
-		d.StreamListItem(ctx, i)
+
+	zoneService := zones.NewZoneService(opts...)
+	iter := zoneService.ListAutoPaging(ctx, zones.ZoneListParams{})
+	for iter.Next() {
+		zone := iter.Current()
+		d.StreamListItem(ctx, zone)
+	}
+	if err := iter.Err(); err != nil {
+		logger.Error("listZones", "ListZones api error", err)
+		return nil, err
 	}
 	return nil, nil
 }
@@ -80,13 +92,24 @@ func getZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	if err != nil {
 		return nil, err
 	}
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
 	quals := d.EqualsQuals
 	zoneID := quals["id"].GetStringValue()
-	item, err := conn.ZoneDetails(ctx, zoneID)
+
+	zoneService := zones.NewZoneService(opts...)
+	zone, err := zoneService.Get(ctx, zones.ZoneGetParams{
+		ZoneID: cloudflare.F(zoneID),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return item, nil
+	return zone, nil
 }
 
 func getZoneSettings(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -94,21 +117,28 @@ func getZoneSettings(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	zone := h.Item.(cloudflare.Zone)
-	item, err := conn.ZoneSettings(ctx, zone.ID)
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	zone := h.Item.(*zones.Zone)
+
+	settingService := zones.NewSettingService(opts...)
+	settings, err := settingService.Get(ctx, zone.ID, zones.SettingGetParams{})
 	if err != nil {
 		return nil, err
 	}
-	return item.Result, nil
+	return settings, nil
 }
 
 func settingsToStandard(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	settings := d.HydrateItem.([]cloudflare.ZoneSetting)
+	settings := d.HydrateItem.(*zones.SettingGetResponse)
 	// Convert the settings into a map, which makes them a lot easier to query by name
 	settingsMap := map[string]interface{}{}
-	for _, i := range settings {
-		settingsMap[i.ID] = i.Value
-	}
+	settingsMap[string(settings.ID)] = settings.Value
 	return settingsMap, nil
 }
 
@@ -117,10 +147,22 @@ func getZoneDNSSEC(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	if err != nil {
 		return nil, err
 	}
-	zone := h.Item.(cloudflare.Zone)
-	item, err := conn.ZoneDNSSECSetting(ctx, zone.ID)
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	zone := h.Item.(*zones.Zone)
+
+	// DNSSEC is now part of the DNS service
+	dnssecService := dns.NewDNSSECService(opts...)
+	dnssec, err := dnssecService.Get(ctx, dns.DNSSECGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return item, nil
+	return dnssec, nil
 }

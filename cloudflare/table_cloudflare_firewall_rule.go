@@ -2,9 +2,11 @@ package cloudflare
 
 import (
 	"context"
-	"time"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/firewall"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -12,15 +14,14 @@ import (
 )
 
 type firewallRuleInfo = struct {
-	ID          string            `json:"id,omitempty"`
-	Paused      bool              `json:"paused"`
-	Description string            `json:"description"`
-	Action      string            `json:"action"`
-	Priority    interface{}       `json:"priority"`
-	Filter      cloudflare.Filter `json:"filter"`
-	Products    []string          `json:"products,omitempty"`
-	CreatedOn   time.Time         `json:"created_on,omitempty"`
-	ModifiedOn  time.Time         `json:"modified_on,omitempty"`
+	ID          string                      `json:"id,omitempty"`
+	Paused      bool                        `json:"paused"`
+	Description string                      `json:"description"`
+	Action      string                      `json:"action"`
+	Priority    float64                     `json:"priority"`
+	Filter      firewall.FirewallRuleFilter `json:"filter"`
+	Products    []firewall.Product          `json:"products,omitempty"`
+	Ref         string                      `json:"ref"`
 	ZoneID      string
 }
 
@@ -67,25 +68,35 @@ func listFirewallRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	if err != nil {
 		return nil, err
 	}
-	zoneDetails := h.Item.(cloudflare.Zone)
+	zoneDetails := h.Item.(*zones.Zone)
 
-	resp, err := conn.FirewallRules(ctx, zoneDetails.ID, cloudflare.PaginationOptions{})
-	if err != nil {
-		return nil, err
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
 	}
-	for _, i := range resp {
+
+	ruleService := firewall.NewRuleService(opts...)
+	iter := ruleService.ListAutoPaging(ctx, firewall.RuleListParams{
+		ZoneID: cloudflare.F(zoneDetails.ID),
+	})
+
+	for iter.Next() {
+		rule := iter.Current()
 		d.StreamLeafListItem(ctx, firewallRuleInfo{
-			ID:          i.ID,
-			Paused:      i.Paused,
-			Description: i.Description,
-			Action:      i.Action,
-			Priority:    i.Priority,
-			Filter:      i.Filter,
-			Products:    i.Products,
-			CreatedOn:   i.CreatedOn,
-			ModifiedOn:  i.ModifiedOn,
+			ID:          rule.ID,
+			Paused:      rule.Paused,
+			Description: rule.Description,
+			Action:      string(rule.Action),
+			Priority:    rule.Priority,
+			Filter:      rule.Filter,
+			Products:    rule.Products,
+			Ref:         rule.Ref,
 			ZoneID:      zoneDetails.ID,
 		})
+	}
+	if err := iter.Err(); err != nil {
+		return nil, err
 	}
 
 	return nil, nil
@@ -99,23 +110,30 @@ func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
 	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	op, err := conn.FirewallRule(ctx, zoneID, id)
+	ruleService := firewall.NewRuleService(opts...)
+	rule, err := ruleService.Get(ctx, id, firewall.RuleGetParams{}, opts...)
 	if err != nil {
 		return nil, err
 	}
+
 	return firewallRuleInfo{
-		ID:          op.ID,
-		Paused:      op.Paused,
-		Description: op.Description,
-		Action:      op.Action,
-		Priority:    op.Priority,
-		Filter:      op.Filter,
-		Products:    op.Products,
-		CreatedOn:   op.CreatedOn,
-		ModifiedOn:  op.ModifiedOn,
+		ID:          rule.ID,
+		Paused:      rule.Paused,
+		Description: rule.Description,
+		Action:      string(rule.Action),
+		Priority:    rule.Priority,
+		Filter:      rule.Filter,
+		Products:    rule.Products,
+		Ref:         rule.Ref,
 		ZoneID:      zoneID,
 	}, nil
 }

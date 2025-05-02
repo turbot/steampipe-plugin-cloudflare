@@ -3,6 +3,8 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go/v4/load_balancers"
+	"github.com/cloudflare/cloudflare-go/v4/option"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -40,21 +42,26 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 }
 
 func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-
 	conn, err := connect(ctx, d)
 	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
+		plugin.Logger(ctx).Error("cloudflare_load_balancer_pool.listLoadBalancerPools", "connection_error", err)
 		return nil, err
 	}
-	// Rest api only supports monitor as an input.
-	loadBalancersPools, err := conn.ListLoadBalancerPools(ctx)
-	if err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
+
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	iter := conn.LoadBalancers.Pools.ListAutoPaging(ctx, load_balancers.PoolListParams{}, opts...)
+	for iter.Next() {
+		pool := iter.Current()
+		d.StreamListItem(ctx, pool)
+	}
+	if err := iter.Err(); err != nil {
+		plugin.Logger(ctx).Error("cloudflare_load_balancer_pool.listLoadBalancerPools", "api_error", err)
 		return nil, err
 	}
-	for _, resource := range loadBalancersPools {
-		d.StreamListItem(ctx, resource)
-	}
+
 	return nil, nil
 }

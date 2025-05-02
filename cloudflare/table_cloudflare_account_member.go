@@ -2,117 +2,77 @@ package cloudflare
 
 import (
 	"context"
-	"strings"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/shared"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-type accountMemberInfo = struct {
-	ID        string                              `json:"id"`
-	Code      string                              `json:"code"`
-	User      cloudflare.AccountMemberUserDetails `json:"user"`
-	Status    string                              `json:"status"`
-	Roles     []cloudflare.AccountRole            `json:"roles"`
+type accountMemberInfo struct {
+	ID        string                `json:"id"`
+	Status    shared.MemberStatus   `json:"status"`
+	User      shared.MemberUser     `json:"user"`
+	Roles     []shared.Role         `json:"roles"`
+	Policies  []shared.MemberPolicy `json:"policies"`
 	AccountID string
 }
 
 //// TABLE DEFINITION
 
-func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
+func tableCloudflareAccountMember() *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_account_member",
-		Description: "Cloudflare Account Member",
+		Description: "Account members are users that have been invited to access your account.",
 		List: &plugin.ListConfig{
+			ParentHydrate: listAccountForParent,
 			Hydrate:       listAccountMembers,
-			ParentHydrate: listAccount,
 		},
 		Get: &plugin.GetConfig{
-			Hydrate:           getAccountMember,
-			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403", "HTTP status 404"}),
+			KeyColumns: plugin.AllColumns([]string{"account_id", "id"}),
+			Hydrate:    getAccountMember,
 		},
-		Columns: commonColumns([]*plugin.Column{
-			{
-				Name:        "user_email",
-				Description: "Specifies the user email.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("User.Email"),
-			},
-			{
-				Name:        "id",
-				Description: "Specifies the account membership identifier.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromGo(),
-			},
-			{
-				Name:        "status",
-				Description: "A member's status in the account.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "account_id",
-				Description: "Specifies the account id, the member is associated with.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("AccountID"),
-			},
-			{
-				Name:        "code",
-				Description: "The unique activation code for the account membership.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "user",
-				Description: "A set of information about the user.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "roles",
-				Description: "A list of permissions that a Member of an Account has.",
-				Type:        proto.ColumnType_JSON,
-			},
-
-			// steampipe standard columns
-			{
-				Name:        "title",
-				Description: "Title of the resource.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(accountMemberTitle),
-			},
-		}),
+		Columns: []*plugin.Column{
+			// Top columns
+			{Name: "id", Type: proto.ColumnType_STRING, Description: "The unique identifier of the member."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Description: "The account ID associated with the member."},
+			{Name: "status", Type: proto.ColumnType_STRING, Description: "The status of the member (accepted/pending)."},
+			{Name: "user_email", Type: proto.ColumnType_STRING, Description: "The email address of the member.", Transform: transform.FromField("User.Email")},
+			{Name: "user_first_name", Type: proto.ColumnType_STRING, Description: "The first name of the member.", Transform: transform.FromField("User.FirstName")},
+			{Name: "user_last_name", Type: proto.ColumnType_STRING, Description: "The last name of the member.", Transform: transform.FromField("User.LastName")},
+			{Name: "user_id", Type: proto.ColumnType_STRING, Description: "The unique identifier of the member's user.", Transform: transform.FromField("User.ID")},
+			{Name: "roles", Type: proto.ColumnType_JSON, Description: "The roles assigned to the member."},
+			{Name: "policies", Type: proto.ColumnType_JSON, Description: "The access policies assigned to the member."},
+		},
 	}
 }
 
 //// LIST FUNCTIONS
 
 func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	accountData := h.Item.(accounts.Account)
+
+	memberService := accounts.NewMemberService()
+	result, err := memberService.List(ctx, accounts.MemberListParams{
+		AccountID: cloudflare.F(accountData.ID),
+	})
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_account_member.listAccountMembers", "list_error", err)
 		return nil, err
 	}
-	accountData := h.Item.(cloudflare.Account)
 
-	var pages cloudflare.PaginationOptions
-	for {
-		response, pageData, err := conn.AccountMembers(ctx, accountData.ID, pages)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, i := range response {
-			d.StreamListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
-
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil, nil
-			}
-		}
-		if pageData.Page == pageData.TotalPages {
-			break
-		}
-		pages.Page = pageData.Page + 1
+	for _, member := range result.Result {
+		d.StreamListItem(ctx, accountMemberInfo{
+			ID:        member.ID,
+			Status:    member.Status,
+			User:      member.User,
+			Roles:     member.Roles,
+			Policies:  member.Policies,
+			AccountID: accountData.ID,
+		})
 	}
 
 	return nil, nil
@@ -120,35 +80,25 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
+func getAccountMember(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	accountID := d.EqualsQuals["account_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	// empty check
-	if accountID == "" || id == "" {
-		return nil, nil
-	}
-
-	data, err := conn.AccountMember(ctx, accountID, id)
+	memberService := accounts.NewMemberService()
+	member, err := memberService.Get(ctx, id, accounts.MemberGetParams{
+		AccountID: cloudflare.F(accountID),
+	})
 	if err != nil {
+		plugin.Logger(ctx).Error("cloudflare_account_member.getAccountMember", "get_error", err)
 		return nil, err
 	}
 
-	return accountMemberInfo{data.ID, data.Code, data.User, data.Status, data.Roles, accountID}, nil
-}
-
-//// TRANSFORM FUNCTIONS
-
-func accountMemberTitle(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	data := d.HydrateItem.(accountMemberInfo)
-
-	if len(data.User.FirstName) > 0 && len(data.User.LastName) > 0 {
-		return data.User.FirstName + " " + data.User.LastName, nil
-	}
-	return strings.Split(data.User.Email, "@")[0], nil
+	return accountMemberInfo{
+		ID:        member.ID,
+		Status:    member.Status,
+		User:      member.User,
+		Roles:     member.Roles,
+		Policies:  member.Policies,
+		AccountID: accountID,
+	}, nil
 }

@@ -3,19 +3,23 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/workers"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
+func tableCloudflareWorkerRoute() *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_worker_route",
 		Description: "Routes are basic patterns used to enable or disable workers that match requests.",
 		List: &plugin.ListConfig{
 			Hydrate:       listWorkerRoutes,
-			ParentHydrate: listZones,
+			ParentHydrate: TableCloudflareZone().List.Hydrate,
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "zone_id", Require: plugin.Optional},
 			},
@@ -33,12 +37,12 @@ func tableCloudflareWorkerRoute(ctx context.Context) *plugin.Table {
 
 func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	zoneDetails := h.Item.(cloudflare.Zone)
+	zoneData := h.Item.(*zones.Zone)
 
 	inputZoneId := d.EqualsQualString("zone_id")
 
 	// Only list routes for zones stated in the input query
-	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
+	if inputZoneId != "" && inputZoneId != zoneData.ID {
 		return nil, nil
 	}
 
@@ -48,17 +52,27 @@ func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		return nil, err
 	}
 
-	resp, err := conn.ListWorkerRoutes(ctx, zoneDetails.ID)
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
+	routeService := workers.NewRouteService(opts...)
+	result, err := routeService.List(ctx, workers.RouteListParams{
+		ZoneID: cloudflare.F(zoneData.ID),
+	})
 	if err != nil {
 		logger.Error("listWorkerRoutes", "api call error", err)
 		return nil, err
 	}
-	for _, resource := range resp.Routes {
-		d.StreamListItem(ctx, resource)
+
+	for _, route := range result.Result {
+		d.StreamListItem(ctx, route)
 	}
 	return nil, nil
 }
 
 func getParentZoneDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return h.ParentItem.(cloudflare.Zone), nil
+	return h.ParentItem.(*zones.Zone), nil
 }

@@ -3,7 +3,9 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/dns"
+	"github.com/cloudflare/cloudflare-go/v4/option"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -11,7 +13,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/query_cache"
 )
 
-func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
+func tableCloudflareDNSRecord() *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_dns_record",
 		Description: "DNS records for a zone.",
@@ -56,6 +58,13 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	if err != nil {
 		return nil, err
 	}
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
 
@@ -64,14 +73,20 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, nil
 	}
 
-	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
-	if err != nil {
+	dnsService := dns.NewDNSService(opts...)
+	recordService := dnsService.Records
+	iter := recordService.ListAutoPaging(ctx, dns.RecordListParams{
+		ZoneID: cloudflare.F(zoneID),
+	})
+
+	for iter.Next() {
+		record := iter.Current()
+		d.StreamListItem(ctx, record)
+	}
+	if err := iter.Err(); err != nil {
 		return nil, err
 	}
-	for _, i := range items {
 
-		d.StreamListItem(ctx, i)
-	}
 	return nil, nil
 }
 
@@ -80,12 +95,24 @@ func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err != nil {
 		return nil, err
 	}
+
+	// Get the client's options from the connection
+	opts := []option.RequestOption{}
+	if conn != nil {
+		opts = append(opts, conn.Options...)
+	}
+
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
 	id := quals["id"].GetStringValue()
-	item, err := conn.DNSRecord(ctx, zoneID, id)
+
+	dnsService := dns.NewDNSService(opts...)
+	recordService := dnsService.Records
+	record, err := recordService.Get(ctx, id, dns.RecordGetParams{
+		ZoneID: cloudflare.F(zoneID),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return item, nil
+	return record, nil
 }
