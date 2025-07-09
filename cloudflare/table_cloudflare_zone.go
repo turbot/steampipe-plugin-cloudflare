@@ -42,10 +42,10 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			{Name: "original_registrar", Type: proto.ColumnType_STRING, Description: "Registrar for the domain at the time of switching to Cloudflare."},
 			{Name: "owner", Type: proto.ColumnType_JSON, Description: "Information about the user or organization that owns the zone."},
 			{Name: "paused", Type: proto.ColumnType_BOOL, Description: "Indicates if the zone is only using Cloudflare DNS services. A true value means the zone will not receive security or performance benefits."},
-			// {Name: "permissions", Type: proto.ColumnType_JSON, Description: "Available permissions on the zone for the current user requesting the item."},
+			{Name: "permissions", Type: proto.ColumnType_JSON, Description: "Available permissions on the zone for the current user requesting the item.", Transform: transform.FromP(getExtraFieldPermissionsFromAPIresponse, "permissions")},
 			{Name: "settings", Type: proto.ColumnType_JSON, Hydrate: getZoneSettings, Transform: transform.FromValue().Transform(settingsToStandard), Description: "Simple key value map of zone settings like advanced_ddos = on."},
 			{Name: "plan", Type: proto.ColumnType_JSON, Hydrate: getZonePlan, Transform: transform.FromValue(), Description: "Current plan associated with the zone."},
-			// {Name: "plan_pending", Type: proto.ColumnType_JSON, Description: "Pending plan change associated with the zone."},
+			{Name: "plan_pending", Type: proto.ColumnType_JSON, Description: "[DEPRECATED] Pending plan change associated with the zone."},
 			{Name: "status", Type: proto.ColumnType_STRING, Description: "Status of the zone."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "A full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup."},
 			{Name: "vanity_name_servers", Type: proto.ColumnType_JSON, Description: "Custom name servers for the zone."},
@@ -125,6 +125,9 @@ func getZoneSettings(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		item, err := conn.Zones.Settings.Get(ctx, settingId, zones.SettingGetParams{ZoneID: cloudflare.F(zone.ID)})
 		if err != nil {
 			// All of the setting could not be retrieved
+			if strings.Contains(err.Error(), "Undefined zone setting") {
+				continue
+			}
 			if strings.Contains(err.Error(), "Access denied") {
 				return nil, nil
 			}
@@ -180,4 +183,19 @@ func getZonePlan(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 	return plans, nil
+}
+
+
+//// TRANSFORM FUNCTIONS
+
+func getExtraFieldPermissionsFromAPIresponse(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	response := d.HydrateItem.(zones.Zone)
+	param := d.Param.(string)
+
+	extraFields, err := toMap(response.JSON.RawJSON())
+	if err != nil {
+		return nil, err
+	}
+
+	return extraFields[param], nil
 }

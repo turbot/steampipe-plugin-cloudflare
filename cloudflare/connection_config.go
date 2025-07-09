@@ -5,11 +5,13 @@ import (
 )
 
 type cloudflareConfig struct {
-	Token     *string `hcl:"token"`
-	Email     *string `hcl:"email"`
-	APIKey    *string `hcl:"api_key"`
-	AccessKey *string `hcl:"access_key"`
-	SecretKey *string `hcl:"secret_key"`
+	Token             *string `hcl:"token"`
+	Email             *string `hcl:"email"`
+	APIKey            *string `hcl:"api_key"`
+	AccessKey         *string `hcl:"access_key"`
+	SecretKey         *string `hcl:"secret_key"`
+	MaxRetries        *int    `hcl:"max_retries"`
+	MaxRequestTimeout *int    `hcl:"max_request_timeout"`
 }
 
 func ConfigInstance() interface{} {

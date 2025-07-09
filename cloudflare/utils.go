@@ -2,10 +2,14 @@ package cloudflare
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
+	"strconv"
 	"strings"
+	"time"
 
 	cloudflare4 "github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/option"
@@ -15,57 +19,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
-	// "github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
-
-// func connect(ctx context.Context, d *plugin.QueryData) (*cloudflare.API, error) {
-
-// 	cloudflareConfig := GetConfig(d.Connection)
-
-// 	// First: check for the token
-// 	if cloudflareConfig.Token != nil {
-// 		return cloudflare.NewWithAPIToken(*cloudflareConfig.Token)
-// 	}
-
-// 	// Second: Email + API Key
-// 	if cloudflareConfig.Email != nil && cloudflareConfig.APIKey != nil {
-// 		return cloudflare.New(*cloudflareConfig.APIKey, *cloudflareConfig.Email)
-// 	}
-
-// 	// Third: CLOUDFLARE_API_TOKEN (like Terraform)
-// 	token, ok := os.LookupEnv("CLOUDFLARE_API_TOKEN")
-// 	if ok && token != "" {
-// 		return cloudflare.NewWithAPIToken(token)
-// 	}
-
-// 	// Fourth: CLOUDFLARE_EMAIL / CLOUDFLARE_API_KEY (like Terraform)
-// 	email, ok := os.LookupEnv("CLOUDFLARE_EMAIL")
-// 	if ok && email != "" {
-// 		key, ok := os.LookupEnv("CLOUDFLARE_API_KEY")
-// 		if ok && key != "" {
-// 			return cloudflare.New(key, email)
-// 		}
-// 	}
-
-// 	// Fifth: CF_API_TOKEN (like flarectl and Go SDK)
-// 	token, ok = os.LookupEnv("CF_API_TOKEN")
-// 	if ok && token != "" {
-// 		return cloudflare.NewWithAPIToken(token)
-// 	}
-
-// 	// Sixth: CF_EMAIL / CF_API_KEY (like flarectl / Go SDK)
-// 	email, ok = os.LookupEnv("CF_API_EMAIL")
-// 	if ok && email != "" {
-// 		key, ok := os.LookupEnv("CF_API_KEY")
-// 		if ok && key != "" {
-// 			return cloudflare.New(key, email)
-// 		}
-// 	}
-
-// 	return nil, errors.New("Cloudflare API credentials not found. Edit your connection configuration file and then restart Steampipe.")
-// }
 
 type Organization struct {
 	ID          string   `json:"id"`
@@ -246,29 +202,77 @@ func getUserId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	return userDetails.ID, nil
 }
 
+// getRequestTimeout returns the request timeout from config or environment variables
+func getRequestTimeout(config cloudflareConfig) time.Duration {
+	// Default timeout
+	defaultTimeout := 30 * time.Second
+
+	// Get max MaxRequestTimeout
+	if config.MaxRequestTimeout != nil {
+		return time.Duration(*config.MaxRequestTimeout) * time.Second
+	}
+
+	if timeoutStr := os.Getenv("CLOUDFLARE_MAX_REQUEST_TIMEOUT"); timeoutStr != "" {
+		if timeout, err := strconv.Atoi(timeoutStr); err == nil && timeout > 0 {
+			return time.Duration(timeout) * time.Second
+		}
+	}
+
+	return defaultTimeout
+}
+
+// getMaxRetries returns the max retries from config or environment variables
+func getMaxRetries(config cloudflareConfig) int {
+	// Default retries
+	defaultRetries := 3
+
+	if config.MaxRetries != nil {
+		return *config.MaxRetries
+	}
+
+	// Check environment variable
+	if retriesStr := os.Getenv("CLOUDFLARE_MAX_RETRIES"); retriesStr != "" {
+		if retries, err := strconv.Atoi(retriesStr); err == nil && retries >= 0 {
+			return retries
+		}
+	}
+
+	return defaultRetries
+}
+
 func connectV4(ctx context.Context, d *plugin.QueryData) (*cloudflare4.Client, error) {
 	// Get the config
 	cloudflareConfig := GetConfig(d.Connection)
 
+	// Get timeout and retry configuration
+	requestTimeout := getRequestTimeout(cloudflareConfig)
+	maxRetries := getMaxRetries(cloudflareConfig)
+
+	// Prepare client options with timeout and retries
+	var clientOptions []option.RequestOption
+	clientOptions = append(clientOptions, option.WithRequestTimeout(requestTimeout))
+	clientOptions = append(clientOptions, option.WithMaxRetries(maxRetries))
+
 	// First: check for the token in config
 	if cloudflareConfig.Token != nil {
-		client := cloudflare4.NewClient(option.WithAPIToken(*cloudflareConfig.Token))
+		clientOptions = append(clientOptions, option.WithAPIToken(*cloudflareConfig.Token))
+		client := cloudflare4.NewClient(clientOptions...)
 		return client, nil
 	}
 
 	// Second: Email + API Key from config
 	if cloudflareConfig.Email != nil && cloudflareConfig.APIKey != nil {
-		client := cloudflare4.NewClient(
-			option.WithAPIKey(*cloudflareConfig.APIKey),
-			option.WithAPIEmail(*cloudflareConfig.Email),
-		)
+		clientOptions = append(clientOptions, option.WithAPIKey(*cloudflareConfig.APIKey))
+		clientOptions = append(clientOptions, option.WithAPIEmail(*cloudflareConfig.Email))
+		client := cloudflare4.NewClient(clientOptions...)
 		return client, nil
 	}
 
 	// Third: CLOUDFLARE_API_TOKEN (like Terraform)
 	token, ok := os.LookupEnv("CLOUDFLARE_API_TOKEN")
 	if ok && token != "" {
-		client := cloudflare4.NewClient(option.WithAPIToken(token))
+		clientOptions = append(clientOptions, option.WithAPIToken(token))
+		client := cloudflare4.NewClient(clientOptions...)
 		return client, nil
 	}
 
@@ -277,10 +281,9 @@ func connectV4(ctx context.Context, d *plugin.QueryData) (*cloudflare4.Client, e
 	if ok && email != "" {
 		key, ok := os.LookupEnv("CLOUDFLARE_API_KEY")
 		if ok && key != "" {
-			client := cloudflare4.NewClient(
-				option.WithAPIKey(key),
-				option.WithAPIEmail(email),
-			)
+			clientOptions = append(clientOptions, option.WithAPIKey(key))
+			clientOptions = append(clientOptions, option.WithAPIEmail(email))
+			client := cloudflare4.NewClient(clientOptions...)
 			return client, nil
 		}
 	}
@@ -288,7 +291,8 @@ func connectV4(ctx context.Context, d *plugin.QueryData) (*cloudflare4.Client, e
 	// Fifth: CF_API_TOKEN (like flarectl and Go SDK)
 	token, ok = os.LookupEnv("CF_API_TOKEN")
 	if ok && token != "" {
-		client := cloudflare4.NewClient(option.WithAPIToken(token))
+		clientOptions = append(clientOptions, option.WithAPIToken(token))
+		client := cloudflare4.NewClient(clientOptions...)
 		return client, nil
 	}
 
@@ -297,13 +301,65 @@ func connectV4(ctx context.Context, d *plugin.QueryData) (*cloudflare4.Client, e
 	if ok && email != "" {
 		key, ok := os.LookupEnv("CF_API_KEY")
 		if ok && key != "" {
-			client := cloudflare4.NewClient(
-				option.WithAPIKey(key),
-				option.WithAPIEmail(email),
-			)
+			clientOptions = append(clientOptions, option.WithAPIKey(key))
+			clientOptions = append(clientOptions, option.WithAPIEmail(email))
+			client := cloudflare4.NewClient(clientOptions...)
 			return client, nil
 		}
 	}
 
 	return nil, errors.New("Cloudflare API credentials not found. Edit your connection configuration file and then restart Steampipe.")
+}
+
+// This function is used to extract the extra field that are not in the part of API response structure.
+// To keep the table column backward compatible, we need to extract the extra field from the API response.
+// This function is used by the tables:
+//    - cloudflare_account
+//    - cloudflare_zone
+func toMap(in interface{}) (map[string]interface{}, error) {
+	// Nil guard – return nil map, nil error so callers can test for nil safely.
+	if in == nil {
+		return nil, nil
+	}
+
+	// Handle the most common cases first.
+	switch v := in.(type) {
+	case map[string]interface{}: // already what we want
+		return v, nil
+	case string: // JSON in string
+		return unmarshalString(v)
+	case []byte: // JSON in raw bytes
+		return unmarshalBytes(v)
+	case json.RawMessage: // alias of []byte
+		return unmarshalBytes(v)
+	}
+
+	// If we’re given a pointer, de-reference once and try again
+	// (covers *accounts.accountJSON, *SomeStruct, etc.).
+	rv := reflect.ValueOf(in)
+	if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		return toMap(rv.Elem().Interface())
+	}
+
+	// Catch-all: try json.Marshal.  This works for:
+	//   • structs with exported fields
+	//   • types that implement json.Marshaler (e.g. apijson.Field)
+	//   • maps/arrays/slices of the above
+	b, err := json.Marshal(in)
+	if err != nil {
+		return nil, fmt.Errorf("toMap: unsupported type %T: %w", in, err)
+	}
+	return unmarshalBytes(b)
+}
+
+func unmarshalString(s string) (map[string]interface{}, error) {
+	var m map[string]interface{}
+	err := json.Unmarshal([]byte(s), &m)
+	return m, err
+}
+
+func unmarshalBytes(b []byte) (map[string]interface{}, error) {
+	var m map[string]interface{}
+	err := json.Unmarshal(b, &m)
+	return m, err
 }

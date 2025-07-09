@@ -31,7 +31,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 			{Name: "zipcode", Type: proto.ColumnType_STRING, Description: "Zipcode of the user."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the user was created."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the user was last modified."},
-			// {Name: "api_key", Type: proto.ColumnType_STRING, Description: "API Key for the user."},
+			{Name: "api_key", Type: proto.ColumnType_STRING, Description: "[DEPRECATED] API Key for the user."},
 			{Name: "two_factor_authentication_enabled", Type: proto.ColumnType_BOOL, Description: "True if two factor authentication is enabled for this user."},
 
 			// JSON columns

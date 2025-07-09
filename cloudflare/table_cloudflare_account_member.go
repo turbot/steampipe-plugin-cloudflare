@@ -60,11 +60,11 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("AccountID"),
 			},
-			// {
-			// 	Name:        "code",
-			// 	Description: "The unique activation code for the account membership.",
-			// 	Type:        proto.ColumnType_STRING,
-			// },
+			{
+				Name:        "code",
+				Description: "[DEPRECATED] The unique activation code for the account membership.",
+				Type:        proto.ColumnType_STRING,
+			},
 			{
 				Name:        "user",
 				Description: "A set of information about the user.",

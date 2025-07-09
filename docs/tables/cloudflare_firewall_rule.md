@@ -5,6 +5,8 @@ description: "Allows users to query Cloudflare Firewall Rules, specifically rule
 
 # Table: cloudflare_firewall_rule - Query Cloudflare Firewall Rules using SQL
 
+**Deprecated. Use [cloudflare_ruleset](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_ruleset) instead.**
+
 Cloudflare Firewall Rules are a security feature that determines which traffic you want to allow to your website. They are customizable and can be used to mitigate against threats, control access, and block traffic from certain IP addresses or regions. Firewall rules can be set up to match against incoming HTTP traffic, and actions can be taken based on the rule match.
 
 ## Table Usage Guide

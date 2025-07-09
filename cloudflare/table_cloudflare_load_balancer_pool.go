@@ -47,7 +47,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 
-	account := h.ParentItem.(accounts.Account)
+	account := h.Item.(accounts.Account)
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {

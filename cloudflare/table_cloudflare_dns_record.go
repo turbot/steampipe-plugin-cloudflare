@@ -39,7 +39,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 
 			// Other columns
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the record was created."},
-			// {Name: "locked", Type: proto.ColumnType_BOOL, Description: "True if the record is locked."},
+			{Name: "locked", Type: proto.ColumnType_BOOL, Description: "[DEPRECATED] True if the record is locked."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the record was last modified."},
 			{Name: "priority", Type: proto.ColumnType_INT, Description: "Priority for this record, primarily used for MX records."},
 			{Name: "proxiable", Type: proto.ColumnType_BOOL, Description: "True if the record is eligible for Cloudflare's origin protection."},

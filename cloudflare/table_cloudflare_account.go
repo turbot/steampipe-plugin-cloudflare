@@ -27,7 +27,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the account."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the account."},
-			// {Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the account."},
+			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the account.", Transform: transform.FromP(getExtraFieldsFromAPIresponse, "type")},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "The create time when account was created."},
 
 			// JSON columns
@@ -86,4 +86,18 @@ func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		return nil, err
 	}
 	return account, nil
+}
+
+//// TRANSFORM FUNCTIONS
+
+func getExtraFieldsFromAPIresponse(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	response := d.HydrateItem.(accounts.Account)
+	param := d.Param.(string)
+
+	extraFields, err := toMap(response.JSON.RawJSON())
+	if err != nil {
+		return nil, err
+	}
+
+	return extraFields[param], nil
 }
