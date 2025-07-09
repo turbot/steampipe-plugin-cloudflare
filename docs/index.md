@@ -58,8 +58,11 @@ connection "cloudflare" {
   token   = "psth3GX0qHavRYE-hd5y7_iL7piII6C8jR3FOuW3"
 
   # Timeout and retry configuration
-  max_request_timeout = 60  # Maximum request timeout in seconds (default: 30)
-  max_retries         = 5   # Maximum number of retries for failed requests (default: 3)
+  # Maximum request timeout in seconds (default: 30).
+  max_request_timeout = 60
+
+  # Maximum number of retries for failed requests (default: 3)
+  max_retries         = 5   
 }
 ```
 

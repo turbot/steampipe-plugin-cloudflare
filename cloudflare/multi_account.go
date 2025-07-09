@@ -25,7 +25,7 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 		return nil
 	}
 
-	page, err := conn.Accounts.List(context.TODO(), accounts.AccountListParams{})
+	page, err := conn.Accounts.List(ctx, accounts.AccountListParams{})
 	if err != nil {
 		panic(err.Error())
 	}
