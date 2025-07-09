@@ -106,13 +106,6 @@ func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 	}
 }
 
-func shouldRetryError(err error) bool {
-	if err.Error() == "rate limit exceeded" {
-		return true
-	}
-	return false
-}
-
 // if the caching is required other than per connection, build a cache key for the call and use it in Memoize
 // since getUser is a call, caching should be per connection
 var getUserMemoized = plugin.HydrateFunc(getUserUncached).Memoize(memoize.WithCacheKeyFunction(getUserCacheKey))
@@ -308,14 +301,14 @@ func connectV4(ctx context.Context, d *plugin.QueryData) (*cloudflare4.Client, e
 		}
 	}
 
-	return nil, errors.New("Cloudflare API credentials not found. Edit your connection configuration file and then restart Steampipe.")
+	return nil, errors.New("cloudflare API credentials not found; edit your connection configuration file and then restart Steampipe")
 }
 
 // This function is used to extract the extra field that are not in the part of API response structure.
 // To keep the table column backward compatible, we need to extract the extra field from the API response.
 // This function is used by the tables:
-//    - cloudflare_account
-//    - cloudflare_zone
+//   - cloudflare_account
+//   - cloudflare_zone
 func toMap(in interface{}) (map[string]interface{}, error) {
 	// Nil guard – return nil map, nil error so callers can test for nil safely.
 	if in == nil {

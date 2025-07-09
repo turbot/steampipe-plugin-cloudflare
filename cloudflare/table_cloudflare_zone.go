@@ -185,7 +185,6 @@ func getZonePlan(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	return plans, nil
 }
 
-
 //// TRANSFORM FUNCTIONS
 
 func getExtraFieldPermissionsFromAPIresponse(ctx context.Context, d *transform.TransformData) (interface{}, error) {

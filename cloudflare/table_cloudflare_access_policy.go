@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
+	"strings"
 
 	"github.com/cloudflare/cloudflare-go/v4"
-	"github.com/cloudflare/cloudflare-go/v4/shared"
 	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -112,9 +111,9 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 	iter := conn.ZeroTrust.Access.Applications.ListAutoPaging(ctx, opts)
 
 	if err := iter.Err(); err != nil {
-		var cloudFlareErr *shared.ErrorData
-		if errors.As(err, &cloudFlareErr) {
-			if slices.Contains([]string{cloudFlareErr.Message}, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+		var apiErr *cloudflare.Error
+		if errors.As(err, &apiErr) {
+			if strings.Contains(apiErr.Error(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
 				logger.Warn("listParentAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", accountID), err)
 				return nil, nil
 			}

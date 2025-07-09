@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
+	"strings"
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/accounts"
 
-	"github.com/cloudflare/cloudflare-go/v4/shared"
 	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -73,14 +72,6 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	maxLimit := int32(500)
-	if d.QueryContext.Limit != nil {
-		limit := int32(*d.QueryContext.Limit)
-		if limit < maxLimit {
-			maxLimit = limit
-		}
-	}
-
 	opts := zero_trust.AccessApplicationListParams{
 		AccountID: cloudflare.String(account.ID),
 	}
@@ -88,9 +79,9 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 	iter := conn.ZeroTrust.Access.Applications.ListAutoPaging(ctx, opts)
 
 	if err := iter.Err(); err != nil {
-		var cloudFlareErr *shared.ErrorData
-		if errors.As(err, &cloudFlareErr) {
-			if slices.Contains([]string{cloudFlareErr.Message}, "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+		var apiErr *cloudflare.Error
+		if errors.As(err, &apiErr) {
+			if strings.Contains(apiErr.Error(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
 				logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
 				return nil, nil
 			}
@@ -113,6 +104,6 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 }
 
 func getAccountDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.ParentItem.(accounts.Account)
+	account := h.Item.(accounts.Account)
 	return account, nil
 }

@@ -44,6 +44,6 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listFirewallRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	err := errors.New("The cloudflare_firewall_rule table has been deprecated and removed, please use cloudflare_ruleset table instead.")
+	err := errors.New("the cloudflare_firewall_rule table has been deprecated and removed; please use cloudflare_ruleset table instead")
 	return nil, err
 }

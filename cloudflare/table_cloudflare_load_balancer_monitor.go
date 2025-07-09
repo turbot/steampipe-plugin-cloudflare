@@ -57,7 +57,7 @@ func listLoadBalancerMonitors(ctx context.Context, d *plugin.QueryData, h *plugi
 	}
 
 	input := load_balancers.MonitorListParams{
-		AccountID: cloudflare.String(account.ID),
+		AccountID: cloudflare.F(account.ID),
 	}
 
 	iter := conn.LoadBalancers.Monitors.ListAutoPaging(ctx, input)

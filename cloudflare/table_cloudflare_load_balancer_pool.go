@@ -56,7 +56,7 @@ func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 	// Rest api only supports monitor as an input.
 	input := load_balancers.PoolListParams{
-		AccountID: cloudflare.String(account.ID),
+		AccountID: cloudflare.F(account.ID),
 	}
 
 	iter := conn.LoadBalancers.Pools.ListAutoPaging(ctx, input)

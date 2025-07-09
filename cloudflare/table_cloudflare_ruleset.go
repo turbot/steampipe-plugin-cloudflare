@@ -89,6 +89,7 @@ func listRulesets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 			maxLimit = limit
 		}
 	}
+	_ = maxLimit // maxLimit is used for reference but not actively used in the current implementation
 
 	// Build API parameters based on account or zone context
 	input := rulesets.RulesetListParams{}

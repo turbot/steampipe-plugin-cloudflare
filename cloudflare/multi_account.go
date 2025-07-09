@@ -34,7 +34,9 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 		for i, account := range page.Result {
 			matrix[i] = map[string]interface{}{matrixKeyAccount: account.ID}
 		}
-		page, err = page.GetNextPage()
+		if page, err = page.GetNextPage(); err != nil {
+			panic(err.Error())
+		}
 	}
 
 	// set cache

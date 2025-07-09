@@ -57,7 +57,9 @@ func listUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (
 	if err != nil {
 		return UserDetails{}, fmt.Errorf("failed to marshal: %w", err)
 	}
-	err = json.Unmarshal(jsonBytes, &userDetails)
+	if err = json.Unmarshal(jsonBytes, &userDetails); err != nil {
+		return UserDetails{}, fmt.Errorf("failed to unmarshal: %w", err)
+	}
 
 	d.StreamListItem(ctx, userDetails)
 	return nil, nil
