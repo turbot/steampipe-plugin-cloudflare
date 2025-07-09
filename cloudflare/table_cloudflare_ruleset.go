@@ -81,16 +81,7 @@ func listRulesets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		zoneID = quals["zone_id"].GetStringValue()
 	}
 
-	// Set pagination limit
-	maxLimit := int32(500)
-	if d.QueryContext.Limit != nil {
-		limit := int32(*d.QueryContext.Limit)
-		if limit < maxLimit {
-			maxLimit = limit
-		}
-	}
-	_ = maxLimit // maxLimit is used for reference but not actively used in the current implementation
-
+	
 	// Build API parameters based on account or zone context
 	input := rulesets.RulesetListParams{}
 	if accountID != "" {
