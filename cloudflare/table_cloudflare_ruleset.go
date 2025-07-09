@@ -81,7 +81,6 @@ func listRulesets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		zoneID = quals["zone_id"].GetStringValue()
 	}
 
-	
 	// Build API parameters based on account or zone context
 	input := rulesets.RulesetListParams{}
 	if accountID != "" {
