@@ -81,6 +81,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	account := h.Item.(accounts.Account)
 	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
@@ -88,6 +89,7 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_role.listRoles", "connection error", err)
 		return nil, err
 	}
 
@@ -104,6 +106,7 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		AccountID: cloudflare.F(account.ID),
 	})
 	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_account_role.listRoles", "AccountRoles api error", err)
 		return nil, err
 	}
 
@@ -129,8 +132,10 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 //// HYDRATE FUNCTIONS
 
 func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_role.getAccountRole", "connection error", err)
 		return nil, err
 	}
 
@@ -141,6 +146,7 @@ func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		AccountID: cloudflare.F(accountID),
 	})
 	if err != nil {
+		logger.Error("cloudflare_account_role.getAccountRole", "AccountRole api error", err)
 		return nil, err
 	}
 	return accountRoleInfo{

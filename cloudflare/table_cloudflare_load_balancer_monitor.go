@@ -52,7 +52,7 @@ func listLoadBalancerMonitors(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listLoadBalancerMonitors", "connection_error", err)
+		logger.Error("cloudflare_load_balancer_monitor.listLoadBalancerMonitors", "connection_error", err)
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func listLoadBalancerMonitors(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	iter := conn.LoadBalancers.Monitors.ListAutoPaging(ctx, input)
 	if err := iter.Err(); err != nil {
-		logger.Error("listLoadBalancerMonitors", "api error", err)
+		logger.Error("cloudflare_load_balancer_monitor.listLoadBalancerMonitors", "api error", err)
 		return nil, err
 	}
 	for iter.Next() {

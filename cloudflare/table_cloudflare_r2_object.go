@@ -166,6 +166,7 @@ type s3ObjectMetadata = struct {
 //// LIST FUNCTION
 
 func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	accountID := d.EqualsQualString("account_id")
 	bucketName := d.EqualsQualString("bucket")
 
@@ -177,6 +178,7 @@ func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	// get R2 client
 	conn, err := getR2Client(ctx, d, accountID)
 	if err != nil {
+		logger.Error("cloudflare_r2_object.listR2Objects", "R2 client error", err)
 		return nil, err
 	}
 
@@ -214,7 +216,7 @@ func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 				return nil, nil
 			}
 		}
-		plugin.Logger(ctx).Error("cloudflare_r2_object.getR2Object", "api_error", err)
+		logger.Error("cloudflare_r2_object.getR2Object", "api_error", err)
 		return nil, err
 	}
 

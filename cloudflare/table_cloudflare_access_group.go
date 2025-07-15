@@ -61,7 +61,7 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listAccessGroups", "connection error", err)
+		logger.Error("cloudflare_access_group.listAccessGroups", "connection error", err)
 		return nil, err
 	}
 
@@ -79,7 +79,7 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 				return nil, nil
 			}
 		}
-		logger.Error("listAccessGroups", "AccessGroups api error", err)
+		logger.Error("cloudflare_access_group.listAccessGroups", "AccessGroups api error", err)
 		return nil, err
 	}
 

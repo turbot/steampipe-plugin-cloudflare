@@ -37,8 +37,10 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 }
 
 func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account.listAccount", "connection error", err)
 		return nil, err
 	}
 	maxLimit := int32(500)
@@ -64,6 +66,7 @@ func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 	}
 	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_account.listAccount", "Accounts api error", err)
 		return nil, err
 	}
 
@@ -71,8 +74,10 @@ func listAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 }
 
 func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account.getAccount", "connection error", err)
 		return nil, err
 	}
 	quals := d.EqualsQuals
@@ -83,6 +88,7 @@ func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	}
 	account, err := conn.Accounts.Get(ctx, input)
 	if err != nil {
+		logger.Error("cloudflare_account.getAccount", "Account api error", err)
 		return nil, err
 	}
 	return account, nil
@@ -91,11 +97,13 @@ func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 //// TRANSFORM FUNCTIONS
 
 func getExtraFieldsFromAPIresponse(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	response := d.HydrateItem.(accounts.Account)
 	param := d.Param.(string)
 
 	extraFields, err := toMap(response.JSON.RawJSON())
 	if err != nil {
+		logger.Error("cloudflare_account.getExtraFieldsFromAPIresponse", "JSON parsing error", err)
 		return nil, err
 	}
 

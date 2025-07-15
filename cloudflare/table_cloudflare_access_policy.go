@@ -66,7 +66,7 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listAccessPolicies", "connection error", err)
+		logger.Error("cloudflare_access_policy.listAccessPolicies", "connection error", err)
 		return nil, err
 	}
 
@@ -77,7 +77,7 @@ func listAccessPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	iter := conn.ZeroTrust.Access.Applications.Policies.ListAutoPaging(ctx, app.ID, opts)
 
 	if err := iter.Err(); err != nil {
-		logger.Error("listAccessPolicies", "AccessPolicies api error", err)
+		logger.Error("cloudflare_access_policy.listAccessPolicies", "AccessPolicies api error", err)
 		return nil, err
 	}
 
@@ -100,7 +100,7 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listParentAccessApplications", "connection error", err)
+		logger.Error("cloudflare_access_policy.listParentAccessApplications", "connection error", err)
 		return nil, err
 	}
 
@@ -118,7 +118,7 @@ func listParentAccessApplications(ctx context.Context, d *plugin.QueryData, h *p
 				return nil, nil
 			}
 		}
-		logger.Error("listParentAccessApplications", "AccessApplications api error", err)
+		logger.Error("cloudflare_access_policy.listParentAccessApplications", "AccessApplications api error", err)
 		return nil, err
 	}
 

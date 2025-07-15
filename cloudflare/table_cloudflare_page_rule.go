@@ -61,8 +61,10 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_page_rule.listPageRules", "connection error", err)
 		return nil, err
 	}
 	zoneDetails := h.Item.(zones.Zone)
@@ -73,6 +75,7 @@ func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	resp, err := conn.PageRules.List(ctx, input)
 	if err != nil {
+		logger.Error("cloudflare_page_rule.listPageRules", "PageRules api error", err)
 		return nil, err
 	}
 
@@ -95,8 +98,10 @@ func listPageRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 //// HYDRATE FUNCTIONS
 
 func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_page_rule.getPageRule", "connection error", err)
 		return nil, err
 	}
 
@@ -109,6 +114,7 @@ func getPageRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	rule, err := conn.PageRules.Get(ctx, id, input)
 	if err != nil {
+		logger.Error("cloudflare_page_rule.getPageRule", "PageRule api error", err)
 		return nil, err
 	}
 	return pageRuleInfo{

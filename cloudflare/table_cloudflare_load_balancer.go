@@ -54,7 +54,7 @@ func listLoadBalancers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listLoadBalancers", "connection_error", err)
+		logger.Error("cloudflare_load_balancer.listLoadBalancers", "connection_error", err)
 		return nil, err
 	}
 
@@ -64,7 +64,7 @@ func listLoadBalancers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 	iter := conn.LoadBalancers.ListAutoPaging(ctx, input)
 	if err := iter.Err(); err != nil {
-		logger.Error("ListLoadBalancers", "api error", err)
+		logger.Error("cloudflare_load_balancer.ListLoadBalancers", "api error", err)
 		return nil, err
 	}
 	for iter.Next() {

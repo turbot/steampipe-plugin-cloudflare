@@ -68,7 +68,7 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listAccessApplications", "connection error", err)
+		logger.Error("cloudflare_access_application.listAccessApplications", "connection error", err)
 		return nil, err
 	}
 
@@ -86,7 +86,7 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 				return nil, nil
 			}
 		}
-		logger.Error("listAccessApplications", "AccessApplications api error", err)
+		logger.Error("cloudflare_access_application.listAccessApplications", "AccessApplications api error", err)
 		return nil, err
 	}
 

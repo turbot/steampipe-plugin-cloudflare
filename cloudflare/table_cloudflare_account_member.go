@@ -90,8 +90,10 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_member.listAccountMembers", "connection error", err)
 		return nil, err
 	}
 	accountData := h.Item.(accounts.Account)
@@ -108,6 +110,7 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		PerPage:   cloudflare.F(float64(maxLimit)),
 	})
 	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_account_member.listAccountMembers", "AccountMembers api error", err)
 		return nil, err
 	}
 
@@ -126,8 +129,10 @@ func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 //// HYDRATE FUNCTIONS
 
 func getAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_member.getAccountMember", "connection error", err)
 		return nil, err
 	}
 
@@ -143,6 +148,7 @@ func getAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		AccountID: cloudflare.F(accountID),
 	})
 	if err != nil {
+		logger.Error("cloudflare_account_member.getAccountMember", "AccountMember api error", err)
 		return nil, err
 	}
 

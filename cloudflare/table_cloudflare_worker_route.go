@@ -46,7 +46,7 @@ func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listWorkerRoutes", "connect error", err)
+		logger.Error("cloudflare_worker_route.listWorkerRoutes", "connect error", err)
 		return nil, err
 	}
 
@@ -56,7 +56,7 @@ func listWorkerRoutes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	iter := conn.Workers.Routes.ListAutoPaging(ctx, input)
 	if err := iter.Err(); err != nil {
-		logger.Error("listWorkerRoutes", "api call error", err)
+		logger.Error("cloudflare_worker_route.listWorkerRoutes", "api call error", err)
 		return nil, err
 	}
 

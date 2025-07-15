@@ -57,7 +57,7 @@ func listZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listZones", "connection_error", err)
+		logger.Error("cloudflare_zone.listZones", "connection_error", err)
 		return nil, err
 	}
 
@@ -84,7 +84,7 @@ func listZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		}
 	}
 	if err := iter.Err(); err != nil {
-		logger.Error("listZones", "ListAutoPaging error", err)
+		logger.Error("cloudflare_zone.listZones", "ListAutoPaging error", err)
 		return nil, err
 	}
 

@@ -38,8 +38,10 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 }
 
 func listAPIToken(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_api_token.listAPIToken", "connection error", err)
 		return nil, err
 	}
 
@@ -49,6 +51,7 @@ func listAPIToken(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 		AccountID: cloudflare.String(account.ID),
 	})
 	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_api_token.listAPIToken", "APITokens api error", err)
 		return nil, err
 	}
 

@@ -51,7 +51,7 @@ func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listLoadBalancerPools", "connection_error", err)
+		logger.Error("cloudflare_load_balancer_pool.listLoadBalancerPools", "connection_error", err)
 		return nil, err
 	}
 	// Rest api only supports monitor as an input.
@@ -61,7 +61,7 @@ func listLoadBalancerPools(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	iter := conn.LoadBalancers.Pools.ListAutoPaging(ctx, input)
 	if err := iter.Err(); err != nil {
-		logger.Error("listLoadBalancerPools", "api error", err)
+		logger.Error("cloudflare_load_balancer_pool.listLoadBalancerPools", "api error", err)
 		return nil, err
 	}
 	for iter.Next() {

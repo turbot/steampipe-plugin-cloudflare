@@ -126,10 +126,10 @@ func tableCloudflareUserAuditLog(ctx context.Context) *plugin.Table {
 }
 
 func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("cloudflare_user_audit_log.listUserAuditLogs", "connection_error", err)
+		logger.Error("cloudflare_user_audit_log.listUserAuditLogs", "connection_error", err)
 		return nil, err
 	}
 
@@ -167,7 +167,7 @@ func listUserAuditLogs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	iter := conn.User.AuditLogs.ListAutoPaging(ctx, opts)
 	if err := iter.Err(); err != nil {
-		plugin.Logger(ctx).Error("cloudflare_user_audit_log.listUserAuditLogs", "api_error", err)
+		logger.Error("cloudflare_user_audit_log.listUserAuditLogs", "api_error", err)
 		return nil, err
 	}
 

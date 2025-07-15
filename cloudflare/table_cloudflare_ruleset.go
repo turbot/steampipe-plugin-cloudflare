@@ -65,7 +65,7 @@ func listRulesets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listRulesets", "connection_error", err)
+		logger.Error("cloudflare_ruleset.listRulesets", "connection_error", err)
 		return nil, err
 	}
 
@@ -102,7 +102,7 @@ func listRulesets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 	}
 	if err := iter.Err(); err != nil {
-		logger.Error("listRulesets", "ListAutoPaging error", err)
+		logger.Error("cloudflare_ruleset.listRulesets", "ListAutoPaging error", err)
 		return nil, err
 	}
 
@@ -124,7 +124,7 @@ func getRuleset(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("getRuleset", "connection_error", err)
+		logger.Error("cloudflare_ruleset.getRuleset", "connection_error", err)
 		return nil, err
 	}
 
@@ -150,7 +150,7 @@ func getRuleset(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	// Execute API call to get the specific ruleset
 	ruleset, err := conn.Rulesets.Get(ctx, rulesetID, input)
 	if err != nil {
-		logger.Error("getRuleset", "error", err)
+		logger.Error("cloudflare_ruleset.getRuleset", "error", err)
 		return nil, err
 	}
 

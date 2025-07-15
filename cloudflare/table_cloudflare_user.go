@@ -42,13 +42,16 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 }
 
 func listUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_user.listUser", "connection error", err)
 		return nil, err
 	}
 
 	user, err := conn.User.Get(ctx)
 	if err != nil {
+		logger.Error("cloudflare_user.listUser", "User api error", err)
 		return nil, err
 	}
 

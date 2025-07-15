@@ -53,8 +53,10 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 }
 
 func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_dns_record.listDNSRecord", "connection error", err)
 		return nil, err
 	}
 	quals := d.EqualsQuals
@@ -89,6 +91,7 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		}
 	}
 	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_dns_record.listDNSRecord", "DNSRecords api error", err)
 		return nil, err
 	}
 
@@ -96,8 +99,10 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 }
 
 func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_dns_record.getDNSRecord", "connection error", err)
 		return nil, err
 	}
 	quals := d.EqualsQuals
@@ -110,6 +115,7 @@ func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	record, err := conn.DNS.Records.Get(ctx, id, input)
 	if err != nil {
+		logger.Error("cloudflare_dns_record.getDNSRecord", "DNSRecord api error", err)
 		return nil, err
 	}
 	return &record, nil
