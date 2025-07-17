@@ -32,8 +32,8 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Identifier of the access group."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access group."},
-			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access group belongs."},
-			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account, access group belongs."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Account.ID"), Description: "ID of the account, access group belongs."},
+			{Name: "account_name", Type: proto.ColumnType_STRING, Transform: transform.FromField("Account.Name"), Description: "Name of the account, access group belongs."},
 
 			// Other columns
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when access group was created."},
@@ -45,6 +45,10 @@ func tableCloudflareAccessGroup(ctx context.Context) *plugin.Table {
 			{Name: "require", Type: proto.ColumnType_JSON, Description: "The require policy works like a AND logical operator. The user must satisfy all of the rules in require."},
 		}),
 	}
+}
+type AccessGroupInfo struct {
+	Account accounts.Account
+	zero_trust.AccessGroupListResponse
 }
 
 func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -85,7 +89,10 @@ func listAccessGroups(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	for iter.Next() {
 		group := iter.Current()
-		d.StreamListItem(ctx, group)
+		d.StreamListItem(ctx, AccessGroupInfo{
+			account,
+			group,
+		})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
