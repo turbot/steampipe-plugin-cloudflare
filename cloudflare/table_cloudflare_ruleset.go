@@ -49,7 +49,7 @@ func tableCloudflareRuleset(ctx context.Context) *plugin.Table {
 			{Name: "version", Type: proto.ColumnType_STRING, Description: "The version of the ruleset."},
 
 			// JSON columns
-			{Name: "rules", Type: proto.ColumnType_JSON, Description: "The list of rules in the ruleset."},
+			{Name: "rules", Type: proto.ColumnType_JSON, Hydrate: getRuleset, Transform: transform.FromField("Rules"), Description: "The list of rules in the ruleset."},
 		}),
 	}
 }
@@ -120,7 +120,7 @@ func listRulesets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 // Parameters:
 // - id: The ruleset identifier (required)
 // - account_id OR zone_id: The account or zone context (at least one required)
-func getRuleset(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getRuleset(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
@@ -128,10 +128,19 @@ func getRuleset(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		return nil, err
 	}
 
+	var rulesetInfo rulesets.RulesetListResponse
+	if h.Item != nil {
+		rulesetInfo = h.Item.(rulesets.RulesetListResponse)
+	}
+
 	quals := d.EqualsQuals
 	rulesetID := quals["id"].GetStringValue()
 	accountID := quals["account_id"].GetStringValue()
 	zoneID := quals["zone_id"].GetStringValue()
+
+	if rulesetID == "" {
+		rulesetID = rulesetInfo.ID
+	}
 
 	// Validate required parameters
 	if rulesetID == "" {
@@ -154,5 +163,5 @@ func getRuleset(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		return nil, err
 	}
 
-	return &ruleset, nil
+	return ruleset, nil
 }
