@@ -3,17 +3,19 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/shared"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type accountRoleInfo = struct {
-	ID          string                                      `json:"id"`
-	Name        string                                      `json:"name"`
-	Description string                                      `json:"description"`
-	Permissions map[string]cloudflare.AccountRolePermission `json:"permissions"`
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Permissions shared.RolePermissions `json:"permissions"`
 	AccountID   string
 }
 
@@ -79,22 +81,37 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.Item.(cloudflare.Account)
+	logger := plugin.Logger(ctx)
+	account := h.Item.(accounts.Account)
 	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
 	}
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_role.listRoles", "connection error", err)
 		return nil, err
 	}
 
-	resp, err := conn.AccountRoles(ctx, account.ID)
-	if err != nil {
+	maxLimit := int32(500)
+	if d.QueryContext.Limit != nil {
+		limit := int32(*d.QueryContext.Limit)
+		if limit < maxLimit {
+			maxLimit = limit
+		}
+	}
+
+	iter := conn.Accounts.Roles.ListAutoPaging(ctx, accounts.RoleListParams{
+		PerPage:   cloudflare.F(float64(maxLimit)),
+		AccountID: cloudflare.F(account.ID),
+	})
+	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_account_role.listRoles", "AccountRoles api error", err)
 		return nil, err
 	}
 
-	for _, role := range resp {
+	for iter.Next() {
+		role := iter.Current()
 		d.StreamLeafListItem(ctx, accountRoleInfo{
 			ID:          role.ID,
 			Name:        role.Name,
@@ -102,23 +119,34 @@ func listRoles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 			Permissions: role.Permissions,
 			AccountID:   account.ID,
 		})
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
+
 	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
 
 func getAccountRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_role.getAccountRole", "connection error", err)
 		return nil, err
 	}
 
 	accountID := d.EqualsQuals["account_id"].GetStringValue()
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	data, err := conn.AccountRole(ctx, accountID, id)
+	data, err := conn.Accounts.Roles.Get(ctx, id, accounts.RoleGetParams{
+		AccountID: cloudflare.F(accountID),
+	})
 	if err != nil {
+		logger.Error("cloudflare_account_role.getAccountRole", "AccountRole api error", err)
 		return nil, err
 	}
 	return accountRoleInfo{

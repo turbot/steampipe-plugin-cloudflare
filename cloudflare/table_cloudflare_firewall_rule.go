@@ -2,42 +2,23 @@ package cloudflare
 
 import (
 	"context"
-	"time"
-
-	"github.com/cloudflare/cloudflare-go"
+	"errors"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-type firewallRuleInfo = struct {
-	ID          string            `json:"id,omitempty"`
-	Paused      bool              `json:"paused"`
-	Description string            `json:"description"`
-	Action      string            `json:"action"`
-	Priority    interface{}       `json:"priority"`
-	Filter      cloudflare.Filter `json:"filter"`
-	Products    []string          `json:"products,omitempty"`
-	CreatedOn   time.Time         `json:"created_on,omitempty"`
-	ModifiedOn  time.Time         `json:"modified_on,omitempty"`
-	ZoneID      string
-}
-
 //// TABLE DEFINITION
 
+// The Firewall Rules API and Filters API will still work until 2025-06-15. There will be a single list of rules for both firewall rules and WAF custom rules, and this list contains WAF custom rules.
+// https://developers.cloudflare.com/waf/reference/legacy/firewall-rules-upgrade/#new-api-and-terraform-resources
 func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "cloudflare_firewall_rule",
-		Description: "Cloudflare Firewall Rules is a flexible and intuitive framework for filtering HTTP requests.",
+		Description: "[DEPRECATED] Cloudflare Firewall Rules is a flexible and intuitive framework for filtering HTTP requests.",
 		List: &plugin.ListConfig{
-			Hydrate:       listFirewallRules,
-			ParentHydrate: listZones,
-		},
-		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
-			Hydrate:           getFirewallRule,
+			Hydrate: listFirewallRules,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
@@ -63,59 +44,6 @@ func tableCloudflareFirewallRule(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listFirewallRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-	zoneDetails := h.Item.(cloudflare.Zone)
-
-	resp, err := conn.FirewallRules(ctx, zoneDetails.ID, cloudflare.PaginationOptions{})
-	if err != nil {
-		return nil, err
-	}
-	for _, i := range resp {
-		d.StreamLeafListItem(ctx, firewallRuleInfo{
-			ID:          i.ID,
-			Paused:      i.Paused,
-			Description: i.Description,
-			Action:      i.Action,
-			Priority:    i.Priority,
-			Filter:      i.Filter,
-			Products:    i.Products,
-			CreatedOn:   i.CreatedOn,
-			ModifiedOn:  i.ModifiedOn,
-			ZoneID:      zoneDetails.ID,
-		})
-	}
-
-	return nil, nil
-}
-
-//// HYDRATE FUNCTIONS
-
-func getFirewallRule(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
-	if err != nil {
-		return nil, err
-	}
-
-	zoneID := d.EqualsQuals["zone_id"].GetStringValue()
-	id := d.EqualsQuals["id"].GetStringValue()
-
-	op, err := conn.FirewallRule(ctx, zoneID, id)
-	if err != nil {
-		return nil, err
-	}
-	return firewallRuleInfo{
-		ID:          op.ID,
-		Paused:      op.Paused,
-		Description: op.Description,
-		Action:      op.Action,
-		Priority:    op.Priority,
-		Filter:      op.Filter,
-		Products:    op.Products,
-		CreatedOn:   op.CreatedOn,
-		ModifiedOn:  op.ModifiedOn,
-		ZoneID:      zoneID,
-	}, nil
+	err := errors.New("the cloudflare_firewall_rule table has been deprecated and removed; please use cloudflare_ruleset table instead")
+	return nil, err
 }

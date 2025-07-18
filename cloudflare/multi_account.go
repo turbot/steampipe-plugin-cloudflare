@@ -3,7 +3,7 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
@@ -20,19 +20,23 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 		return cachedData.([]map[string]interface{})
 	}
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
 		return nil
 	}
 
-	items, _, err := conn.Accounts(ctx, cloudflare.PaginationOptions{})
+	page, err := conn.Accounts.List(ctx, accounts.AccountListParams{})
 	if err != nil {
-		return nil
+		panic(err.Error())
 	}
-
-	matrix := make([]map[string]interface{}, len(items))
-	for i, account := range items {
-		matrix[i] = map[string]interface{}{matrixKeyAccount: account.ID}
+	matrix := make([]map[string]interface{}, len(page.Result))
+	for page != nil {
+		for i, account := range page.Result {
+			matrix[i] = map[string]interface{}{matrixKeyAccount: account.ID}
+		}
+		if page, err = page.GetNextPage(); err != nil {
+			panic(err.Error())
+		}
 	}
 
 	// set cache

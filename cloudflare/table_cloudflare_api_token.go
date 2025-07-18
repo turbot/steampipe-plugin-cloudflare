@@ -3,8 +3,11 @@ package cloudflare
 import (
 	"context"
 
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
@@ -12,11 +15,12 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 		Name:        "cloudflare_api_token",
 		Description: "API tokens for the user.",
 		List: &plugin.ListConfig{
-			Hydrate: listAPIToken,
+			ParentHydrate: listAccount,
+			Hydrate:       listAPIToken,
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the API token."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the API token."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the API token."},
 			{Name: "status", Type: proto.ColumnType_STRING, Description: "Status of the API token."},
 
@@ -33,17 +37,33 @@ func tableCloudflareAPIToken(ctx context.Context) *plugin.Table {
 	}
 }
 
-func listAPIToken(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+func listAPIToken(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_api_token.listAPIToken", "connection error", err)
 		return nil, err
 	}
-	items, err := conn.APITokens(ctx)
-	if err != nil {
+
+	account := h.Item.(accounts.Account)
+
+	iter := conn.Accounts.Tokens.ListAutoPaging(ctx, accounts.TokenListParams{
+		AccountID: cloudflare.String(account.ID),
+	})
+	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_api_token.listAPIToken", "APITokens api error", err)
 		return nil, err
 	}
-	for _, i := range items {
-		d.StreamListItem(ctx, i)
+
+	for iter.Next() {
+		token := iter.Current()
+		d.StreamListItem(ctx, token)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
 	}
+
 	return nil, nil
 }

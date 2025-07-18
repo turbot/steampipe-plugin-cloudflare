@@ -2,9 +2,12 @@ package cloudflare
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 func tableCloudflareUser(ctx context.Context) *plugin.Table {
@@ -16,7 +19,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the user."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the user."},
 			{Name: "email", Type: proto.ColumnType_STRING, Description: "Email of the user."},
 			{Name: "username", Type: proto.ColumnType_STRING, Description: "Username (actually often in ID style) of the user."},
 
@@ -28,7 +31,7 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 			{Name: "zipcode", Type: proto.ColumnType_STRING, Description: "Zipcode of the user."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the user was created."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the user was last modified."},
-			{Name: "api_key", Type: proto.ColumnType_STRING, Description: "API Key for the user."},
+			{Name: "api_key", Type: proto.ColumnType_STRING, Description: "[DEPRECATED] API Key for the user."},
 			{Name: "two_factor_authentication_enabled", Type: proto.ColumnType_BOOL, Description: "True if two factor authentication is enabled for this user."},
 
 			// JSON columns
@@ -39,10 +42,28 @@ func tableCloudflareUser(ctx context.Context) *plugin.Table {
 }
 
 func listUser(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	item, err := getUserInfo(ctx, d, h)
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_user.listUser", "connection error", err)
 		return nil, err
 	}
-	d.StreamListItem(ctx, item)
+
+	user, err := conn.User.Get(ctx)
+	if err != nil {
+		logger.Error("cloudflare_user.listUser", "User api error", err)
+		return nil, err
+	}
+
+	var userDetails UserDetails
+	jsonBytes, err := json.Marshal(*user)
+	if err != nil {
+		return UserDetails{}, fmt.Errorf("failed to marshal: %w", err)
+	}
+	if err = json.Unmarshal(jsonBytes, &userDetails); err != nil {
+		return UserDetails{}, fmt.Errorf("failed to unmarshal: %w", err)
+	}
+
+	d.StreamListItem(ctx, userDetails)
 	return nil, nil
 }

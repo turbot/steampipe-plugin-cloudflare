@@ -19,7 +19,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 				Hydrate: getUserId,
 			},
 		},
-		DefaultTransform: transform.FromJSONTag(),
+		DefaultTransform: transform.FromCamel(),
 		TableMap: map[string]*plugin.Table{
 			"cloudflare_access_application":    tableCloudflareAccessApplication(ctx),
 			"cloudflare_access_group":          tableCloudflareAccessGroup(ctx),
@@ -37,6 +37,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_r2_bucket":             tableCloudflareR2Bucket(ctx),
 			"cloudflare_r2_object":             tableCloudflareR2Object(ctx),
 			"cloudflare_r2_object_data":        tableCloudflareR2ObjectData(ctx),
+			"cloudflare_ruleset":               tableCloudflareRuleset(ctx),
 			"cloudflare_user":                  tableCloudflareUser(ctx),
 			"cloudflare_user_audit_log":        tableCloudflareUserAuditLog(ctx),
 			"cloudflare_worker_route":          tableCloudflareWorkerRoute(ctx),

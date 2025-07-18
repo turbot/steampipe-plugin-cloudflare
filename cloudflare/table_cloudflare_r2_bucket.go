@@ -87,7 +87,7 @@ type BucketData = struct {
 //// LIST FUNCTION
 
 func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
+	logger := plugin.Logger(ctx)
 	// Get cloudflare account data
 	accountID := d.EqualsQualString("account_id")
 	if accountID == "" {
@@ -101,6 +101,7 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	// Get R2 client
 	conn, err := getR2Client(ctx, d, accountID)
 	if err != nil {
+		logger.Error("cloudflare_r2_bucket.listR2Buckets", "R2 client error", err)
 		return nil, err
 	}
 
@@ -113,7 +114,7 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 			return nil, nil
 		}
 
-		plugin.Logger(ctx).Error("cloudflare_r2_bucket.listR2Buckets", "api_error", err)
+		logger.Error("cloudflare_r2_bucket.listR2Buckets", "api_error", err)
 		return nil, err
 	}
 
@@ -134,6 +135,7 @@ func listR2Buckets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 // do not have a get call for R2 bucket.
 // using list api call to create get function
 func getR2Bucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	accountID := d.EqualsQualString("account_id")
 	bucketName := d.EqualsQualString("name")
 
@@ -145,6 +147,7 @@ func getR2Bucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	// Get R2 client
 	conn, err := getR2Client(ctx, d, accountID)
 	if err != nil {
+		logger.Error("cloudflare_r2_bucket.getR2Bucket", "R2 client error", err)
 		return nil, err
 	}
 
@@ -152,7 +155,7 @@ func getR2Bucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	input := &s3.ListBucketsInput{}
 	listBucketsOutput, err := conn.ListBuckets(ctx, input)
 	if err != nil {
-		plugin.Logger(ctx).Error("cloudflare_r2_bucket.getR2Bucket", "api_error", err)
+		logger.Error("cloudflare_r2_bucket.getR2Bucket", "api_error", err)
 		return nil, err
 	}
 
@@ -166,6 +169,7 @@ func getR2Bucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 }
 
 func getBucketLocation(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	// Get cloudflare account data
 	bucketData := h.Item.(BucketData)
 
@@ -181,7 +185,7 @@ func getBucketLocation(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 	location, err := conn.GetBucketLocation(ctx, input)
 	if err != nil {
-		plugin.Logger(ctx).Error("cloudflare_r2_bucket.getBucketLocation", "api_error", err)
+		logger.Error("cloudflare_r2_bucket.getBucketLocation", "api_error", err)
 		return nil, err
 	}
 

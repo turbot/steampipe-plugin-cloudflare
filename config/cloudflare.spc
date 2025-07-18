@@ -13,4 +13,10 @@ connection "cloudflare" {
   # See https://developers.cloudflare.com/r2/data-access/s3-api/tokens/
   # access_key = "40020a5ad749fef5293228bfbf773821"
   # secret_key = "41e8cf2638765531d7d1dfc77gb78a74b0a29996e89cdra169ec677db497g2e2"
+
+  # Maximum request timeout in seconds (default: 30). Also can be set using CLOUDFLARE_MAX_REQUEST_TIMEOUT environment variable.
+  # max_request_timeout = 30
+
+  # Maximum number of retries for failed requests (default: 3). Also can be set using CLOUDFLARE_MAX_RETRIES environment variable.
+  # max_retries = 3           
 }

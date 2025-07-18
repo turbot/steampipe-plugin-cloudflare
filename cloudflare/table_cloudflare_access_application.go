@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
+	"strings"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+
+	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -28,10 +31,10 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 		// Get Config - Currently SDK is not supporting get call
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "Application API uuid."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Application API uuid."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Friendly name of the access application."},
-			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("ID"), Description: "ID of the account, access application belongs."},
-			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getAccountDetails, Transform: transform.FromField("Name"), Description: "Name of the account, access application belongs."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("Account.ID"), Description: "ID of the account, access application belongs."},
+			{Name: "account_name", Type: proto.ColumnType_STRING, Transform: transform.FromField("Account.Name"), Description: "Name of the account, access application belongs."},
 			{Name: "domain", Type: proto.ColumnType_STRING, Description: "The domain and path that access will block."},
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the application was created."},
 
@@ -51,9 +54,14 @@ func tableCloudflareAccessApplication(ctx context.Context) *plugin.Table {
 	}
 }
 
+type AccessApplicationInfo struct {
+	Account accounts.Account
+	zero_trust.AccessApplicationListResponse
+}
+
 func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	account := h.Item.(cloudflare.Account)
+	account := h.Item.(accounts.Account)
 
 	if accountID := d.EqualsQualString("account_id"); accountID != "" && account.ID != accountID {
 		return nil, nil
@@ -63,73 +71,42 @@ func listAccessApplications(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, nil
 	}
 
-	conn, err := connect(ctx, d)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("listAccessApplications", "connection error", err)
+		logger.Error("cloudflare_access_application.listAccessApplications", "connection error", err)
 		return nil, err
 	}
 
-	opts := cloudflare.PaginationOptions{
-		PerPage: 100,
-		Page:    1,
+	opts := zero_trust.AccessApplicationListParams{
+		AccountID: cloudflare.String(account.ID),
 	}
 
-	type ListPageResponse struct {
-		Applications []cloudflare.AccessApplication
-		resp         cloudflare.ResultInfo
-	}
+	iter := conn.ZeroTrust.Access.Applications.ListAutoPaging(ctx, opts)
 
-	limit := d.QueryContext.Limit
-	if limit != nil {
-		if *limit < int64(opts.PerPage) {
-			opts.PerPage = int(*limit)
-		}
-	}
-
-	listPage := func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-		applications, resp, err := conn.AccessApplications(ctx, account.ID, opts)
-		return ListPageResponse{
-			Applications: applications,
-			resp:         resp,
-		}, err
-	}
-
-	for {
-		listPageResponse, err := plugin.RetryHydrate(ctx, d, h, listPage, &plugin.RetryConfig{ShouldRetryError: shouldRetryError})
-		if err != nil {
-			var cloudFlareErr *cloudflare.APIRequestError
-			if errors.As(err, &cloudFlareErr) {
-				if slices.Contains(cloudFlareErr.ErrorMessages(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
-					logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
-					return nil, nil
-				}
+	if err := iter.Err(); err != nil {
+		var apiErr *cloudflare.Error
+		if errors.As(err, &apiErr) {
+			if strings.Contains(apiErr.Error(), "Access is not enabled. Visit the Access dashboard at https://dash.cloudflare.com/ and click the 'Enable Access' button.") {
+				logger.Warn("listAccessApplications", fmt.Sprintf("AccessApplications api error for account: %s", account.ID), err)
+				return nil, nil
 			}
-			logger.Error("listAccessApplications", "AccessApplications api error", err)
-			return nil, err
 		}
+		logger.Error("cloudflare_access_application.listAccessApplications", "AccessApplications api error", err)
+		return nil, err
+	}
 
-		listResponse := listPageResponse.(ListPageResponse)
-		apps := listResponse.Applications
-		resp := listResponse.resp
-		for _, i := range apps {
-			d.StreamListItem(ctx, i)
-		}
+	for iter.Next() {
+		application := iter.Current()
+		d.StreamListItem(ctx, AccessApplicationInfo{
+			account,
+			application,
+		})
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
-
-		if resp.Page >= resp.TotalPages {
-			break
-		}
-		opts.Page = opts.Page + 1
 	}
 
 	return nil, nil
-}
-
-func getAccountDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	account := h.ParentItem.(cloudflare.Account)
-	return account, nil
 }

@@ -4,18 +4,20 @@ import (
 	"context"
 	"strings"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v4/shared"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 type accountMemberInfo = struct {
-	ID        string                              `json:"id"`
-	Code      string                              `json:"code"`
-	User      cloudflare.AccountMemberUserDetails `json:"user"`
-	Status    string                              `json:"status"`
-	Roles     []cloudflare.AccountRole            `json:"roles"`
+	ID        string              `json:"id"`
+	Code      string              `json:"code"`
+	User      shared.MemberUser   `json:"user"`
+	Status    shared.MemberStatus `json:"status"`
+	Roles     []shared.Role       `json:"roles"`
 	AccountID string
 }
 
@@ -60,7 +62,7 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 			},
 			{
 				Name:        "code",
-				Description: "The unique activation code for the account membership.",
+				Description: "[DEPRECATED] The unique activation code for the account membership.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -88,41 +90,49 @@ func tableCloudflareAccountMember(ctx context.Context) *plugin.Table {
 //// LIST FUNCTIONS
 
 func listAccountMembers(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_member.listAccountMembers", "connection error", err)
 		return nil, err
 	}
-	accountData := h.Item.(cloudflare.Account)
-
-	var pages cloudflare.PaginationOptions
-	for {
-		response, pageData, err := conn.AccountMembers(ctx, accountData.ID, pages)
-		if err != nil {
-			return nil, err
+	accountData := h.Item.(accounts.Account)
+	maxLimit := int32(500)
+	if d.QueryContext.Limit != nil {
+		limit := int32(*d.QueryContext.Limit)
+		if limit < maxLimit {
+			maxLimit = limit
 		}
-
-		for _, i := range response {
-			d.StreamListItem(ctx, accountMemberInfo{i.ID, i.Code, i.User, i.Status, i.Roles, accountData.ID})
-
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil, nil
-			}
-		}
-		if pageData.Page == pageData.TotalPages {
-			break
-		}
-		pages.Page = pageData.Page + 1
 	}
 
+	iter := conn.Accounts.Members.ListAutoPaging(ctx, accounts.MemberListParams{
+		AccountID: cloudflare.F(accountData.ID),
+		PerPage:   cloudflare.F(float64(maxLimit)),
+	})
+	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_account_member.listAccountMembers", "AccountMembers api error", err)
+		return nil, err
+	}
+
+	for iter.Next() {
+		member := iter.Current()
+		d.StreamLeafListItem(ctx, accountMemberInfo{member.ID, "", member.User, member.Status, member.Roles, accountData.ID})
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
+	}
 	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
 
 func getAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_account_member.getAccountMember", "connection error", err)
 		return nil, err
 	}
 
@@ -134,12 +144,15 @@ func getAccountMember(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, nil
 	}
 
-	data, err := conn.AccountMember(ctx, accountID, id)
+	data, err := conn.Accounts.Members.Get(ctx, id, accounts.MemberGetParams{
+		AccountID: cloudflare.F(accountID),
+	})
 	if err != nil {
+		logger.Error("cloudflare_account_member.getAccountMember", "AccountMember api error", err)
 		return nil, err
 	}
 
-	return accountMemberInfo{data.ID, data.Code, data.User, data.Status, data.Roles, accountID}, nil
+	return accountMemberInfo{data.ID, "", data.User, data.Status, data.Roles, accountID}, nil
 }
 
 //// TRANSFORM FUNCTIONS

@@ -48,6 +48,28 @@ connection "cloudflare" {
 }
 ```
 
+### Connection Configuration
+
+In addition to credentials, you can configure timeout and retry behavior:
+
+```hcl
+connection "cloudflare" {
+  plugin  = "cloudflare"
+  token   = "psth3GX0qHavRYE-hd5y7_iL7piII6C8jR3FOuW3"
+
+  # Timeout and retry configuration
+  # Maximum request timeout in seconds (default: 30).
+  max_request_timeout = 60
+
+  # Maximum number of retries for failed requests (default: 3)
+  max_retries         = 5   
+}
+```
+
+These settings help handle rate limiting and network issues gracefully by automatically retrying failed requests with exponential backoff.
+
+### Credential Resolution
+
 Credentials are resolved in this order:
 
 1. `token` in Steampipe config.
@@ -82,5 +104,3 @@ connection "cloudflare" {
 ## Scope
 
 A Cloudflare connection is scoped to a single Cloudflare account, with a single set of credentials.
-
-

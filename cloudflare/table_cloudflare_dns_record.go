@@ -3,7 +3,8 @@ package cloudflare
 import (
 	"context"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/dns"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -30,7 +31,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined.", Transform: transform.FromQual("zone_id")},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "[Deprecated] Name of the zone where the record is defined."},
-			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the record."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the record."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the record (e.g. A, MX, CNAME)."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Domain name for the record (e.g. steampipe.io)."},
 			{Name: "content", Type: proto.ColumnType_STRING, Description: "Content or value of the record. Changes by type, including IP address for A records and domain for CNAME records."},
@@ -38,7 +39,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 
 			// Other columns
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the record was created."},
-			{Name: "locked", Type: proto.ColumnType_BOOL, Description: "True if the record is locked."},
+			{Name: "locked", Type: proto.ColumnType_BOOL, Description: "[DEPRECATED] True if the record is locked."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the record was last modified."},
 			{Name: "priority", Type: proto.ColumnType_INT, Description: "Priority for this record, primarily used for MX records."},
 			{Name: "proxiable", Type: proto.ColumnType_BOOL, Description: "True if the record is eligible for Cloudflare's origin protection."},
@@ -52,8 +53,10 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 }
 
 func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_dns_record.listDNSRecord", "connection error", err)
 		return nil, err
 	}
 	quals := d.EqualsQuals
@@ -64,28 +67,56 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, nil
 	}
 
-	items, err := conn.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{})
-	if err != nil {
+	maxLimit := int32(500)
+	if d.QueryContext.Limit != nil {
+		limit := int32(*d.QueryContext.Limit)
+		if limit < maxLimit {
+			maxLimit = limit
+		}
+	}
+
+	input := dns.RecordListParams{
+		ZoneID:  cloudflare.F(zoneID),
+		PerPage: cloudflare.F(float64(maxLimit)),
+	}
+
+	iter := conn.DNS.Records.ListAutoPaging(ctx, input)
+	for iter.Next() {
+		record := iter.Current()
+		d.StreamListItem(ctx, record)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
+	}
+	if err := iter.Err(); err != nil {
+		logger.Error("cloudflare_dns_record.listDNSRecord", "DNSRecords api error", err)
 		return nil, err
 	}
-	for _, i := range items {
 
-		d.StreamListItem(ctx, i)
-	}
 	return nil, nil
 }
 
 func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	conn, err := connect(ctx, d)
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_dns_record.getDNSRecord", "connection error", err)
 		return nil, err
 	}
 	quals := d.EqualsQuals
 	zoneID := quals["zone_id"].GetStringValue()
 	id := quals["id"].GetStringValue()
-	item, err := conn.DNSRecord(ctx, zoneID, id)
+
+	input := dns.RecordGetParams{
+		ZoneID: cloudflare.F(zoneID),
+	}
+
+	record, err := conn.DNS.Records.Get(ctx, id, input)
 	if err != nil {
+		logger.Error("cloudflare_dns_record.getDNSRecord", "DNSRecord api error", err)
 		return nil, err
 	}
-	return item, nil
+	return &record, nil
 }
