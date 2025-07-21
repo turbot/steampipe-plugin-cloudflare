@@ -349,8 +349,8 @@ from
   join cloudflare_zone_setting zs2 on zs1.id = zs2.id
   join cloudflare_zone z2 on zs2.zone_id = z2.id
 where
-  z1.name = 'example1.com'
-  and z2.name = 'example2.com'
+  z1.name = 'pleasehelpme.com'
+  and z2.name = 'myactualdomain.com'
   and zs1.id in ('ssl', 'security_level', 'cache_level')
 order by
   zs1.id;
