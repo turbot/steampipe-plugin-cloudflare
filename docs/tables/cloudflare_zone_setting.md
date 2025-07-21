@@ -12,7 +12,7 @@ Cloudflare Zone Settings control various features and behaviors for a zone, such
 The `cloudflare_zone_setting` table provides insights into individual zone settings within Cloudflare. As a DevOps engineer or security analyst, explore setting-specific details through this table, including current values, editability, and modification timestamps. Utilize it to audit zone configurations, understand security policies, and manage feature settings across your zones.
 
 **Important Notes:**
-- By default this table fetch all settings across all zones.
+- By default this table fetches all settings across all zones.
 - For optimal performance and to reduce query time, always specify `zone_id` and/or `id` (setting ID) in your WHERE clause
 - Possible values for `id` are:
     - `0rtt`
