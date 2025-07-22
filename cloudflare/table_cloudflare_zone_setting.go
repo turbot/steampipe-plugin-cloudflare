@@ -2,6 +2,8 @@ package cloudflare
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"strings"
 	"sync"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/query_cache"
 )
 
 func tableCloudflareZoneSetting(ctx context.Context) *plugin.Table {
@@ -22,11 +25,13 @@ func tableCloudflareZoneSetting(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.KeyColumnSlice{
 				{Name: "zone_id", Require: plugin.Optional},
 				{Name: "id", Require: plugin.Optional},
+				{Name: "ids", Require: plugin.Optional, CacheMatch: query_cache.CacheMatchExact},
 			},
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "The ID of the zone setting."},
+			{Name: "ids", Type: proto.ColumnType_JSON, Transform: transform.FromQual("ids"), Description: "The IDs of the zone setting."},
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "Zone identifier."},
 
 			// The value field from the API response may have string or JSON property.
@@ -60,6 +65,7 @@ func listZoneSettings(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	// Check if specific setting is requested
 	inputSettingId := d.EqualsQualString("id")
+	inputSettingIds := d.EqualsQuals["ids"].GetJsonbValue()
 
 	// Available zone setting IDs
 	settingIds := []string{
@@ -80,6 +86,15 @@ func listZoneSettings(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	// If specific setting ID is requested, only query that one
 	if inputSettingId != "" {
 		settingIds = []string{inputSettingId}
+	}
+
+	if inputSettingIds != "" {
+		var ids []string
+		err := json.Unmarshal([]byte(inputSettingIds), &ids)
+		if err != nil {
+			return nil, errors.New("unable to parse the 'ids' query parameter the value must be in the format '[\"http2\", \"ssl\"]'")
+		}
+		settingIds = ids
 	}
 
 	conn, err := connectV4(ctx, d)

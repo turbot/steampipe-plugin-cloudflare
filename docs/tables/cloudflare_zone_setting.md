@@ -13,64 +13,66 @@ The `cloudflare_zone_setting` table provides insights into individual zone setti
 
 **Important Notes:**
 - By default this table fetches all settings across all zones.
-- For optimal performance and to reduce query time, always specify `zone_id` and/or `id` (setting ID) in your WHERE clause
+- For optimal performance and to reduce query time, always specify `zone_id` and/or `id` (setting ID) in your WHERE clause.
+- Use `ids` column to query multiple specific settings efficiently by providing a JSON array of setting IDs.
 - Possible values for `id` are:
-    - `0rtt`
-    - `advanced_ddos`
-    - `always_online`
-    - `always_use_https`
-    - `automatic_https_rewrites`
-    - `brotli`
-    - `browser_cache_ttl`
-    - `browser_check`
-    - `cache_level`
-    - `challenge_ttl`
-    - `ciphers`
-    - `cname_flattening`
-    - `development_mode`
-    - `early_hints`
-    - `edge_cache_ttl`
-    - `email_obfuscation`
-    - `h2_prioritization`
-    - `hotlink_protection`
-    - `http2`
-    - `http3`
-    - `image_resizing`
-    - `ip_geolocation`
-    - `ipv6`
-    - `max_upload`
-    - `min_tls_version`
-    - `mirage`
-    - `nel`
-    - `opportunistic_encryption`
-    - `opportunistic_onion`
-    - `orange_to_orange`
-    - `origin_error_page_pass_thru`
-    - `origin_h2_max_streams`
-    - `origin_max_http_version`
-    - `polish`
-    - `prefetch_preload`
-    - `privacy_pass`
-    - `proxy_read_timeout`
-    - `pseudo_ipv4`
-    - `replace_insecure_js`
-    - `response_buffering`
-    - `rocket_loader`
-    - `automatic_platform_optimization`
-    - `security_header`
-    - `security_level`
-    - `server_side_exclude`
-    - `sha1_support`
-    - `sort_query_string_for_cache`
-    - `ssl`
-    - `ssl_recommender`
-    - `tls_1_2_only`
-    - `tls_1_3`
-    - `tls_client_auth`
-    - `true_client_ip_header`
-    - `waf`
-    - `webp`
-    - `websockets`
+  - `aegis`
+  - `0rtt`
+  - `advanced_ddos`
+  - `always_online`
+  - `always_use_https`
+  - `automatic_https_rewrites`
+  - `brotli`
+  - `browser_cache_ttl`
+  - `browser_check`
+  - `cache_level`
+  - `challenge_ttl`
+  - `ciphers`
+  - `cname_flattening`
+  - `development_mode`
+  - `early_hints`
+  - `edge_cache_ttl`
+  - `email_obfuscation`
+  - `h2_prioritization`
+  - `hotlink_protection`
+  - `http2`
+  - `http3`
+  - `image_resizing`
+  - `ip_geolocation`
+  - `ipv6`
+  - `max_upload`
+  - `min_tls_version`
+  - `mirage`
+  - `nel`
+  - `opportunistic_encryption`
+  - `opportunistic_onion`
+  - `orange_to_orange`
+  - `origin_error_page_pass_thru`
+  - `origin_h2_max_streams`
+  - `origin_max_http_version`
+  - `polish`
+  - `prefetch_preload`
+  - `privacy_pass`
+  - `proxy_read_timeout`
+  - `pseudo_ipv4`
+  - `replace_insecure_js`
+  - `response_buffering`
+  - `rocket_loader`
+  - `automatic_platform_optimization`
+  - `security_header`
+  - `security_level`
+  - `server_side_exclude`
+  - `sha1_support`
+  - `sort_query_string_for_cache`
+  - `ssl`
+  - `ssl_recommender`
+  - `tls_1_2_only`
+  - `tls_1_3`
+  - `tls_client_auth`
+  - `true_client_ip_header`
+  - `waf`
+  - `webp`
+  - `websockets`
 
 ## Examples
 
@@ -239,6 +241,41 @@ where
   zs.id = 'development_mode'
 order by
   z.name;
+```
+
+### Query multiple settings with zone comparison
+Compare multiple settings across zones efficiently using the `ids` column.
+
+```sql+postgres
+select
+  z.name as zone_name,
+  z.type as zone_type,
+  zs.id as setting_id,
+  zs.value,
+  zs.editable
+from
+  cloudflare_zone_setting zs
+  join cloudflare_zone z on zs.zone_id = z.id
+where
+  zs.ids = '["development_mode", "ssl", "security_level"]'
+order by
+  z.name, zs.id;
+```
+
+```sql+sqlite
+select
+  z.name as zone_name,
+  z.type as zone_type,
+  zs.id as setting_id,
+  zs.value,
+  zs.editable
+from
+  cloudflare_zone_setting zs
+  join cloudflare_zone z on zs.zone_id = z.id
+where
+  zs.ids = '["development_mode", "ssl", "security_level"]'
+order by
+  z.name, zs.id;
 ```
 
 ### List editable vs non-editable settings summary
