@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	"strings"
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/dns"
@@ -9,6 +10,10 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/cloudflare/cloudflare-go/v4/cache"
+	"github.com/cloudflare/cloudflare-go/v4/argo"
+	"github.com/cloudflare/cloudflare-go/v4/bot_management"
+	"github.com/cloudflare/cloudflare-go/v4/security_txt"
 )
 
 func tableCloudflareZone(ctx context.Context) *plugin.Table {
@@ -48,6 +53,12 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			{Name: "status", Type: proto.ColumnType_STRING, Description: "Status of the zone."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "A full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup."},
 			{Name: "vanity_name_servers", Type: proto.ColumnType_JSON, Description: "Custom name servers for the zone."},
+			{Name: "smart_tiered_cache", Type: proto.ColumnType_JSON, Hydrate: getSmartTieredCache, Transform: transform.FromValue(), Description: "Smart Tiered Cache settings for the zone."},
+			{Name: "regional_tiered_cache", Type: proto.ColumnType_JSON, Hydrate: getRegionalTieredCache, Transform: transform.FromValue(), Description: "Regional Tiered Cache settings for the zone."},
+			{Name: "argo_tiered_caching", Type: proto.ColumnType_JSON, Hydrate: getArgoTieredCaching, Transform: transform.FromValue(), Description: "Argo Tiered Caching settings for the zone."},
+			{Name: "argo_smart_routing", Type: proto.ColumnType_JSON, Hydrate: getArgoSmartRouting, Transform: transform.FromValue(), Description: "Argo Smart Routing settings for the zone."},
+			{Name: "bot_management", Type: proto.ColumnType_JSON, Hydrate: getBotManagement, Transform: transform.FromValue(), Description: "Bot management settings for the zone."},
+			{Name: "security_txt", Type: proto.ColumnType_JSON, Hydrate: getSecurityTXT, Transform: transform.FromValue(), Description: "Security.txt configuration for the zone."},
 		}),
 	}
 }
@@ -144,6 +155,125 @@ func getZonePlan(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 	return plans, nil
+}
+
+func getSmartTieredCache(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+	input := cache.SmartTieredCacheGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	}
+
+	smartTieredCache, err := conn.Cache.SmartTieredCache.Get(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return smartTieredCache, nil
+}
+
+func getRegionalTieredCache(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+	input := cache.RegionalTieredCacheGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	}
+
+	regionalTieredCache, err := conn.Cache.RegionalTieredCache.Get(ctx, input)
+	if err != nil {
+		// This setting might not be available for all zones
+		if strings.Contains(err.Error(), "setting is not available") {
+			return nil,nil
+		}
+		logger.Error("cloudflare_zone_setting.listZoneSettings", "Regional tiered cache api error", err)
+		return nil, nil
+	}
+	return regionalTieredCache, nil
+}
+
+func getArgoSmartRouting(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+	input := argo.SmartRoutingGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	}
+
+	argoSmartRouting, err := conn.Argo.SmartRouting.Get(ctx, input)
+	if err != nil {
+		// This setting might not be available for all zones
+		if strings.Contains(err.Error(), "The request is not authorized to access this setting") {
+			return nil,nil
+		}
+		logger.Error("cloudflare_zone_setting.listZoneSettings", "Argo smart routing api error", err)
+		return nil, nil
+	}
+	return argoSmartRouting, nil
+}
+
+func getArgoTieredCaching(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+	input := argo.TieredCachingGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	}
+
+	argoTieredCaching, err := conn.Argo.TieredCaching.Get(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return argoTieredCaching, nil
+}
+
+func getBotManagement(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+    logger := plugin.Logger(ctx)
+    conn, err := connectV4(ctx, d)
+    if err != nil {
+        return nil, err
+    }
+
+    zone := h.Item.(zones.Zone)
+    params := bot_management.BotManagementGetParams{
+        ZoneID: cloudflare.F(zone.ID),
+    }
+
+    resp, err := conn.BotManagement.Get(ctx, params)
+    if err != nil {
+        logger.Error("cloudflare_bot_management.get", "API error", err)
+        return nil, err
+    }
+
+	// BotManagementGetResponse.AsUnion returns the wrong type, returning the raw json instead
+    return resp.JSON.RawJSON(), nil
+}
+
+func getSecurityTXT(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+	input := security_txt.SecurityTXTGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	}
+
+	security_txt, err := conn.SecurityTXT.Get(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return security_txt, nil
 }
 
 //// TRANSFORM FUNCTIONS
