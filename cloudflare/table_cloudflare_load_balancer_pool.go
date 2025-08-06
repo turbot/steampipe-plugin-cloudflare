@@ -37,7 +37,7 @@ func tableCloudflareLoadBalancerPool(ctx context.Context) *plugin.Table {
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp when the pool was last modified."},
 			{Name: "notification_email", Type: proto.ColumnType_STRING, Description: "The email address to send health status notifications to. This can be an individual mailbox or a mailing list. Multiple emails can be supplied as a comma delimited list."},
 
-			{Name: "account", Type: proto.ColumnType_STRING,Hydrate: getLoadBalancerPoolAccountName, Transform: transform.FromValue(), Description: "The email address to send health status notifications to. This can be an individual mailbox or a mailing list. Multiple emails can be supplied as a comma delimited list."},
+			{Name: "account_name", Type: proto.ColumnType_STRING, Hydrate: getLoadBalancerPoolAccountName, Transform: transform.FromValue(), Description: "The name of the account associated with the load balancer pool."},
 
 			// JSON columns
 			{Name: "check_regions", Type: proto.ColumnType_JSON, Description: "A list of regions (specified by region code) from which to run health checks."},
@@ -93,13 +93,13 @@ func getLoadBalancerPoolHealth(ctx context.Context, d *plugin.QueryData, h *plug
 		AccountID: cloudflare.F(account.ID),
 	}
 
-	pool_health, err := conn.LoadBalancers.Pools.Health.Get(ctx,pool.ID,input)
+	pool_health, err := conn.LoadBalancers.Pools.Health.Get(ctx, pool.ID, input)
 	if err != nil {
 		// This setting might not be available for all zones
 		if strings.Contains(err.Error(), "Health info unavailable") {
 			return nil, nil
 		}
-		logger.Error("cloudflare_load_balancer_pool.getLoadBalancerPoolHealth", "Argo smart routing api error", err)
+		logger.Error("cloudflare_load_balancer_pool.getLoadBalancerPoolHealth", "load balancer pool health API error", err)
 		return nil, nil
 	}
 	return pool_health, nil
