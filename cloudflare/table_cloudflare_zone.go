@@ -189,9 +189,9 @@ func getRegionalTieredCache(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if err != nil {
 		// This setting might not be available for all zones
 		if strings.Contains(err.Error(), "setting is not available") {
-			return nil,nil
+			return nil, nil
 		}
-		logger.Error("cloudflare_zone_setting.listZoneSettings", "Regional tiered cache api error", err)
+		logger.Error("cloudflare_zone_setting.getRegionalTieredCache", "Regional tiered cache api error", err)
 		return nil, nil
 	}
 	return regionalTieredCache, nil
@@ -212,9 +212,9 @@ func getArgoSmartRouting(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	if err != nil {
 		// This setting might not be available for all zones
 		if strings.Contains(err.Error(), "The request is not authorized to access this setting") {
-			return nil,nil
+			return nil, nil
 		}
-		logger.Error("cloudflare_zone_setting.listZoneSettings", "Argo smart routing api error", err)
+		logger.Error("cloudflare_zone_setting.getArgoSmartRouting", "Argo smart routing api error", err)
 		return nil, nil
 	}
 	return argoSmartRouting, nil
@@ -251,11 +251,16 @@ func getBotManagement(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
     resp, err := conn.BotManagement.Get(ctx, params)
     if err != nil {
-        logger.Error("cloudflare_bot_management.get", "API error", err)
+        logger.Error("cloudflare_bot_management.getBotManagement", "API error", err)
         return nil, err
     }
 
-	// BotManagementGetResponse.AsUnion returns the wrong type, returning the raw json instead
+	// The BotManagementGetResponse.AsUnion method is designed to return one of the following types:
+	// BotFightModeConfiguration, SuperBotFightModeDefinitelyConfiguration, SuperBotFightModeLikelyConfiguration, or SubscriptionConfiguration,
+	// depending on the subscription type for the zone's bot management settings.
+	// However, due to a bug or incomplete implementation in the SDK, the method returns an incorrect or incomplete type that does not align 
+	// with the expected schema. 
+	// As a workaround, we directly return the raw JSON response, allowing the caller to manually unmarshal the data as needed.
     return resp.JSON.RawJSON(), nil
 }
 
