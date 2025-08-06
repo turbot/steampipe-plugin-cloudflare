@@ -97,7 +97,7 @@ func getLoadBalancerPoolHealth(ctx context.Context, d *plugin.QueryData, h *plug
 	if err != nil {
 		// This setting might not be available for all zones
 		if strings.Contains(err.Error(), "Health info unavailable") {
-			return nil,nil
+			return nil, nil
 		}
 		logger.Error("cloudflare_load_balancer_pool.getLoadBalancerPoolHealth", "Argo smart routing api error", err)
 		return nil, nil
