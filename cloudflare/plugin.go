@@ -5,6 +5,7 @@ import (
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/rate_limiter"
 )
 
 func Plugin(ctx context.Context) *plugin.Plugin {
@@ -12,6 +13,17 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name: "steampipe-plugin-cloudflare",
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
+		},
+		
+		// https://developers.cloudflare.com/fundamentals/api/reference/limits/
+		// The Cloudflare API has a rate limit 1200/5 minutes - Client API per user
+		RateLimiters: []*rate_limiter.Definition{
+			{
+				Name:           "cloudflare_api",
+				FillRate:       60,
+				BucketSize:     60,
+				MaxConcurrency: 60,
+			},
 		},
 		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
 			{
