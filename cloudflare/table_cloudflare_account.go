@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/accounts"
@@ -98,7 +99,17 @@ func getAccount(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 func getExtraFieldsFromAPIresponse(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	response := d.HydrateItem.(accounts.Account)
+	var response accounts.Account
+
+	switch val := d.HydrateItem.(type) {
+	case accounts.Account:
+		response = val
+	case *accounts.Account:
+		response = *val
+	default:
+		return nil, fmt.Errorf("unexpected type %T in getExtraFieldsFromAPIresponse", d.HydrateItem)
+	}
+
 	param := d.Param.(string)
 
 	extraFields, err := toMap(response.JSON.RawJSON())
