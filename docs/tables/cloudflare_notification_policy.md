@@ -17,6 +17,8 @@ The `cloudflare_notification_policy` table provides insights into notification p
 ## Examples
 
 ### Query all notification policies for an account
+Retrieves all notification policies for a specific account ID. Notification policies define the types of alerts and notifications configured for an account.
+
 ```sql+postgres
 select
   id,
@@ -47,7 +49,9 @@ where
   account_id = 'YOUR_ACCOUNT_ID';
 ```
 
-### Get a specidif notification policy by ID
+### Get a specific notification policy by ID
+Retrieves detailed information about a specific notification policy, identified by its ID and the account ID.
+
 ```sql+postgres
 select
   id,
@@ -83,33 +87,8 @@ where
 ```
 
 ### Query all disabled notification policies
-```sql+postgres
-select
-  id,
-  name,
-  alert_type,
-  enabled
-from
-  cloudflare_notification_policy
-where
-  account_id = 'YOUR_ACCOUNT_ID'
-  and enabled = false;
-```
+Retrieves all disabled notification policies (enabled = false) for a specific account ID. Disabled policies represent configurations that are not actively generating alerts.
 
-```sql+sqlite
-select
-  id,
-  name,
-  alert_type,
-  enabled
-from
-  cloudflare_notification_policy
-where
-  account_id = 'YOUR_ACCOUNT_ID'
-  and enabled = false;
-```
-
-### Query all disabled notification policies
 ```sql+postgres
 select
   id,
@@ -137,6 +116,8 @@ where
 ```
 
 ### Query all notification policies for advanced DDoS alert
+Retrieves all notification policies of type advanced_ddos_attack_l7_alert (specific to Layer 7 DDoS attack notifications) for a given account ID.
+
 ```sql+postgres
 select
   id,

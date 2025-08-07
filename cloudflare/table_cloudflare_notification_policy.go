@@ -42,7 +42,7 @@ func tableCloudflareNotificationPolicy(ctx context.Context) *plugin.Table {
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the policy."},
 			
 			// Query columns for filtering
-			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter rulesets."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter notification policies."},
 		
 			// JSON Columns
 			{Name: "mechanisms", Type: proto.ColumnType_JSON, Description: "List of IDs that will be used when dispatching a notification."},
@@ -102,7 +102,7 @@ func listNotificationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugi
 // getNotificationPolicy retrieves a specific notification policy by ID.
 //
 // Parameters:
-// - id: The ruleset identifier (required)
+// - id: The notification policy identifier (required)
 // - account_id: The account context (at least one required)
 func getNotificationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
