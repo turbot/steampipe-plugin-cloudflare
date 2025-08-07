@@ -35,7 +35,7 @@ func tableCloudflareCustomCertificate(ctx context.Context) *plugin.Table {
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "Custom certificate identifier."},
-			{Name: "bundle_method", Type: proto.ColumnType_STRING, Description: "Custom certificate identifier."},
+			{Name: "bundle_method", Type: proto.ColumnType_STRING, Description: "The method used to build the SSL certificate chain."},
 			{Name: "expires_on", Type: proto.ColumnType_TIMESTAMP,  Description: "When the certificate from the authority expires."},
 			{Name: "hosts", Type: proto.ColumnType_STRING, Description: "The domain names covered by the custom certificate."},
 			{Name: "issuer", Type: proto.ColumnType_STRING, Description: "The certificate authority that issued the certificate."},
@@ -128,13 +128,13 @@ func getCustomCertificate(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// Execute API call to get the specific custom certificate
-	ruleset, err := conn.CustomCertificates.Get(ctx, customCertificateID, input)
+	customCertificate, err := conn.CustomCertificates.Get(ctx, customCertificateID, input)
 	if err != nil {
 		logger.Error("cloudflare_custom_certificate.getCustomCertificate", "error", err)
 		return nil, err
 	}
 
-	return ruleset, nil
+	return customCertificate, nil
 }
 
 //// TRANSFORM FUNCTIONS

@@ -145,5 +145,5 @@ from
 where
   zone_id = 'YOUR_ZONE_ID'
 order by
-  priority::integer asc;
+  cast(priority as integer) asc;
 ```
