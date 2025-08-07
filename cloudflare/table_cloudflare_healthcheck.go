@@ -49,11 +49,11 @@ func tableCloudflareHealthcheck(ctx context.Context) *plugin.Table {
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "The protocol to use for the health check. Currently supported protocols are 'HTTP', 'HTTPS' and 'TCP'."},
 			
 			// Query columns for filtering
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter custom certificates."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter healthchecks."},
 		
 			// JSON Columns
-			{Name: "tcp_config", Type: proto.ColumnType_JSON,Transform: transform.FromField("TCPConfig"), Description: "Parameters specific to TCP health check."},
-			{Name: "http_config", Type: proto.ColumnType_JSON,Transform: transform.FromField("HTTPConfig"), Description: "Parameters specific to an HTTP or HTTPS health check."},
+			{Name: "tcp_config", Type: proto.ColumnType_JSON, Transform: transform.FromField("TCPConfig"), Description: "Parameters specific to TCP health check."},
+			{Name: "http_config", Type: proto.ColumnType_JSON, Transform: transform.FromField("HTTPConfig"), Description: "Parameters specific to an HTTP or HTTPS health check."},
 			{Name: "check_regions", Type: proto.ColumnType_JSON, Description: "A list of regions from which to run health checks. Null means Cloudflare will pick a default region."},
 		}),
 	}
@@ -108,7 +108,7 @@ func listHealthchecks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 // getHealthcheck retrieves a specific healthcheck by ID.
 //
 // Parameters:
-// - id: The custom certificate identifier (required)
+// - id: The healthcheck identifier (required)
 // - zone_id: The account or zone context (required)
 func getHealthcheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
@@ -127,12 +127,12 @@ func getHealthcheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Execute API call to get the specific healthcheck
-	ruleset, err := conn.Healthchecks.Get(ctx, healthcheckID, input)
+	healthcheck, err := conn.Healthchecks.Get(ctx, healthcheckID, input)
 	if err != nil {
 		logger.Error("cloudflare_healthcheck.getHealthcheck", "error", err)
 		return nil, err
 	}
 
-	return ruleset, nil
+	return healthcheck, nil
 }
 

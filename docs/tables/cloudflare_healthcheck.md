@@ -17,6 +17,8 @@ The `cloudflare_healthcheck` table provides insights into health check definitio
 ## Examples
 
 ### Query all healthcheck for a zone
+Retrieves all healthchecks associated with a specific zone ID. Healthchecks are used to monitor the availability and performance of backend resources (e.g., servers or services).
+
 ```sql+postgres
 select
   id,
@@ -46,6 +48,8 @@ where
 ```
 
 ### Get a specific healthcheck by ID
+Retrieves detailed information about a specific healthcheck, identified by its ID and the zone ID.
+
 ```sql+postgres
 select
   id,
@@ -64,7 +68,7 @@ from
   cloudflare_healthcheck
 where
   zone_id = 'YOUR_ZONE_ID'
-  and id      = 'HEALTHCHECK_ID';
+  and id = 'HEALTHCHECK_ID';
 ```
 
 ```sql+sqlite
@@ -85,10 +89,12 @@ from
   cloudflare_healthcheck
 where
   zone_id = 'YOUR_ZONE_ID'
-  and id      = 'HEALTHCHECK_ID';
+  and id = 'HEALTHCHECK_ID';
 ```
 
 ### Query all unhealthy healthcheck with more than 'n' consectives fails
+Retrieves all unhealthy healthchecks for a specific zone that have experienced 3 or more consecutive failures. It's useful for identifying problem areas and addressing persistent back-end service issues.
+
 ```sql+postgres
 select
   id,
@@ -124,6 +130,8 @@ order by
 ```
 
 ### Query all suspended healthcheck
+Retrieves all suspended healthchecks for a specific zone. A suspended healthcheck is one that has been temporarily paused and is not actively running probes.
+
 ```sql+postgres
 select
   id,
@@ -151,5 +159,3 @@ where
   zone_id = 'YOUR_ZONE_ID'
   and suspended = true;
 ```
-
-
