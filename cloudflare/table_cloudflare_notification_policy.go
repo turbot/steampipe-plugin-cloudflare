@@ -74,7 +74,7 @@ func listNotificationPolicies(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
-	// Only list scripts for accounts stated in the input query
+	// Only list notification policies for accounts stated in the input query
 	if inputAccountId != "" && inputAccountId != accountDetails.ID {
 		return nil, nil
 	}
