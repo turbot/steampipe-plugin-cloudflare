@@ -5,6 +5,7 @@ import (
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/alerting"
+	"github.com/cloudflare/cloudflare-go/v4/accounts"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -18,9 +19,10 @@ func tableCloudflareNotificationPolicy(ctx context.Context) *plugin.Table {
 		Description: "Cloudflare Notifications help you stay up to date with your Cloudflare account.",
 		List: &plugin.ListConfig{
 			KeyColumns: []*plugin.KeyColumn{
-				{Name: "account_id", Require: plugin.Required},
+				{Name: "account_id", Require: plugin.Optional},
 			},
 			Hydrate: listNotificationPolicies,
+			ParentHydrate: listAccount,	
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -42,7 +44,7 @@ func tableCloudflareNotificationPolicy(ctx context.Context) *plugin.Table {
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of the policy."},
 			
 			// Query columns for filtering
-			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter notification policies."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("AccountID"), Description: "The account ID to filter notification policies."},
 		
 			// JSON Columns
 			{Name: "mechanisms", Type: proto.ColumnType_JSON, Description: "List of IDs that will be used when dispatching a notification."},
@@ -51,37 +53,47 @@ func tableCloudflareNotificationPolicy(ctx context.Context) *plugin.Table {
 	}
 }
 
+type NotificationPolicyInfo struct {
+	AccountID string
+	alerting.Policy
+}
+
 //// LIST FUNCTION
 
 // listNotificationPolicies retrieves all notification policies for the specified account_id.
 //
 // Account-level notification policies (account_id)
-func listNotificationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listNotificationPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
+	accountDetails := h.Item.(accounts.Account)
+	inputAccountId := d.EqualsQualString("account_id")
+
 	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("cloudflare_notification_policy.listNotificationPolicies", "connection_error", err)
 		return nil, err
 	}
 
-	// Get the qualifiers
-	quals := d.EqualsQuals
-	accountID := quals["account_id"].GetStringValue()
-
-	// Empty check
-	if accountID == "" {
+	// Only list scripts for accounts stated in the input query
+	if inputAccountId != "" && inputAccountId != accountDetails.ID {
 		return nil, nil
 	}
 
 	// Build API parameters
 	input := alerting.PolicyListParams{
-		AccountID: cloudflare.F(accountID),
+		AccountID: cloudflare.F(accountDetails.ID),
 	}
 
 	// Execute paginated API call
 	iter := conn.Alerting.Policies.ListAutoPaging(ctx, input)
 	for iter.Next() {
-		notificationPolicy := iter.Current()
+		current := iter.Current()
+
+		notificationPolicy := NotificationPolicyInfo{
+			AccountID:			accountDetails.ID,
+			Policy:				current,
+		}
+
 		d.StreamListItem(ctx, notificationPolicy)
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -121,10 +133,15 @@ func getNotificationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	// Execute API call to get the specific notification policy
-	notificationPolicy, err := conn.Alerting.Policies.Get(ctx, notificationPolicyID, input)
+	item, err := conn.Alerting.Policies.Get(ctx, notificationPolicyID, input)
 	if err != nil {
 		logger.Error("cloudflare_notification_policy.getNotificationPolicy", "error", err)
 		return nil, err
+	}
+
+	notificationPolicy := NotificationPolicyInfo{
+		AccountID:			accountID,
+		Policy:				*item,
 	}
 
 	return notificationPolicy, nil
