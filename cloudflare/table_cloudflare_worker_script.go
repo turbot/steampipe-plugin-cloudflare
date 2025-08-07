@@ -36,10 +36,10 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			{Name: "account_name", Type: proto.ColumnType_STRING,  Hydrate: getParentAccountDetails, Transform: transform.FromField("Name"), Description: "Account name."},
 		
 			// Query columns for filtering
-			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getParentAccountDetails, Transform: transform.FromField("ID"), Description: "Account identifier."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getParentAccountDetails, Transform: transform.FromField("ID"), Description: "The account ID to filter Worker scripts."},
 		
 			// JSON Columns
-			{Name: "subdomain", Type: proto.ColumnType_JSON, Hydrate: getWorkerSubdomain, Transform: transform.FromValue(),Description: "If the Worker is available on the workers.dev subdomain."},
+			{Name: "subdomain", Type: proto.ColumnType_JSON, Hydrate: getWorkerSubdomain, Transform: transform.FromValue(),Description: "Whether the Worker is available on the workers.dev subdomain."},
 			{Name: "tail_consumers", Type: proto.ColumnType_JSON, Description: "List of Workers that will consume logs from the attached Worker."},
 			{Name: "placement", Type: proto.ColumnType_JSON, Transform: transform.FromField("Placement"), Description: "Configuration for Smart Placement."},
 		}),
@@ -48,7 +48,7 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-// listWorkerScripts retrieves all notification policies across all accounts.
+// listWorkerScripts retrieves all Worker scripts across all accounts.
 func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	accountDetails := h.Item.(accounts.Account)
@@ -77,8 +77,8 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	for iter.Next() {
-		resource := iter.Current()
-		d.StreamListItem(ctx, resource)
+		script := iter.Current()
+		d.StreamListItem(ctx, script)
 	}
 	return nil, nil
 }
@@ -88,8 +88,9 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 // getWorkerSubdomain returns if the Worker is available on the workers.dev subdomain.
 //
 // Parameters:
-// - id: The ruleset identifier (required)
+// - id: The Worker script identifier (required)
 func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	account := h.ParentItem.(accounts.Account)
     script := h.Item.(workers.Script)
 
@@ -107,7 +108,10 @@ func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	// SDK does not map the response correctly, therefore returning the raw json instead
 	var m map[string]json.RawMessage
-	json.Unmarshal([]byte(subdomain.JSON.RawJSON()), &m)
+	if err := json.Unmarshal([]byte(subdomain.JSON.RawJSON()), &m); err != nil {
+		logger.Error("cloudflare_worker_script.getWorkerSubdomain", err)
+		return nil, err
+	}
 	return m["result"], nil
 }
 

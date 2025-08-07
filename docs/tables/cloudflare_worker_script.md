@@ -15,6 +15,8 @@ The `cloudflare_worker_script` table provides insights into metadata for Workers
 ## Examples
 
 ### Query all worker scripts
+Retrieves all Worker scripts for all accounts. Worker scripts are lightweight JavaScript applications that run on Cloudflare's network to customize and enhance website functionality.
+
 ```sql+postgres
 select
   id,
@@ -46,6 +48,8 @@ from
 ```
 
 ### Query all worker scripts with worker.dev subdomain available
+Retrieves all Worker scripts where the worker.dev subdomain is not enabled. The worker.dev subdomain provides an automatic subdomain for developers to test and deploy Worker scripts in a staging or development environment.
+
 ```sql+postgres
 select
   id,
@@ -71,6 +75,8 @@ where
 ```
 
 ### Query all worker scripts which have modules or assets
+Retrieves all Worker scripts that have assets or modules enabled. Assets include additional resources (e.g., images, fonts, WASM files), while modules refer to modern JavaScript module syntax (e.g., ES Modules).
+
 ```sql+postgres
 select
   id,
