@@ -58,8 +58,8 @@ func tableCloudflareCustomPage(ctx context.Context) *plugin.Table {
 			{Name: "preview_target", Type: proto.ColumnType_STRING, Description: "Preview action to apply."},
 
 			// Query columns for filtering
-			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter rulesets."},
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter rulesets."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter custom pages."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter custom pages."},
 
 			// JSON Columns
 			{Name: "required_tokens", Type: proto.ColumnType_JSON, Description: "Error tokens are required by the custom page."},

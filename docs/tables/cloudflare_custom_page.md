@@ -17,6 +17,8 @@ The `cloudflare_custom_page` table provides insight into configurable custom pag
 ## Examples
 
 ### Query all custom pages for a zone/account
+Retrieves all custom pages that are associated with a specific zone ID in the cloudflare_custom_page table.
+
 ```sql+postgres
 select
   id,
@@ -28,7 +30,7 @@ select
 from
   cloudflare_custom_page
 where
-  zone_id    = 'YOUR_ZONE_ID';
+  zone_id = 'YOUR_ZONE_ID';
 ```
 
 ```sql+sqlite
@@ -42,8 +44,10 @@ select
 from
   cloudflare_custom_page
 where
-  zone_id    = 'YOUR_ZONE_ID';
+  zone_id = 'YOUR_ZONE_ID';
 ```
+
+Retrieves all custom pages that are associated with a specific account ID in the cloudflare_custom_page table.
 
 ```sql+postgres
 select
@@ -56,7 +60,7 @@ select
 from
   cloudflare_custom_page
 where
-  account_id    = 'YOUR_ACCOUNT_ID';
+  account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ```sql+sqlite
@@ -70,10 +74,12 @@ select
 from
   cloudflare_custom_page
 where
-  account_id    = 'YOUR_ACCOUNT_ID';
+  account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ### Get a specific custom page by ID
+Retrieves detailed information about a specific custom page.
+
 ```sql+postgres
 select
   id,
@@ -105,6 +111,8 @@ where
 ```
 
 ### Query all custom pages recently created
+Retrieves all custom pages created within the last 7 days for a specific account_id.
+
 ```sql+postgres
 select
   id,
@@ -121,21 +129,23 @@ order by
 ```
 
 ```sql+sqlite
-SELECT
+select
   id,
   description,
   state,
   created_on
-FROM
+from
   cloudflare_custom_page
-WHERE
+where
   account_id = 'YOUR_ACCOUNT_ID'
-  AND datetime(created_on) >= datetime('now', '-7 days')
-ORDER BY
+  and datetime(created_on) >= datetime('now', '-7 days')
+order by
   created_on DESC;
 ```
 
 ### Query all customized error pages
+Fetches all error pages that have been customized for a specific account ID. The results are filtered to only include pages where state is set to 'customized'.
+
 ```sql+postgres
 select
   id,
