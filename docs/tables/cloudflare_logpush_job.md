@@ -17,6 +17,8 @@ The `cloudflare_logpush_job` table provides insights into configured log shippin
 ## Examples
 
 ### Query all logpush jobs for a zone/account
+Retrieves all Logpush jobs associated with a specific zone ID. Logpush jobs are used to deliver specific datasets from Cloudflare to an external storage destination (like AWS S3, GCP, etc.).
+
 ```sql+postgres
 select
   id,
@@ -29,7 +31,39 @@ select
 from
   cloudflare_logpush_job
 where
-  zone_id    = 'YOUR_ZONE_ID';
+  zone_id = 'YOUR_ZONE_ID';
+```
+
+Retrieves all Logpush jobs associated with a specific account ID. Logpush jobs are used to deliver specific datasets from Cloudflare to an external storage destination (like AWS S3, GCP, etc.).
+
+```sql+sqlite
+select
+  id,
+  name,
+  dataset,
+  destination_conf,
+  enabled,
+  last_complete,
+  last_error
+from
+  cloudflare_logpush_job
+where
+  zone_id = 'YOUR_ZONE_ID';
+```
+
+```sql+postgres
+select
+  id,
+  name,
+  dataset,
+  destination_conf,
+  enabled,
+  last_complete,
+  last_error
+from
+  cloudflare_logpush_job
+where
+  account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ```sql+sqlite
@@ -44,40 +78,12 @@ select
 from
   cloudflare_logpush_job
 where
-  zone_id    = 'YOUR_ZONE_ID';
-```
-
-```sql+postgres
-select
-  id,
-  name,
-  dataset,
-  destination_conf,
-  enabled,
-  last_complete,
-  last_error
-from
-  cloudflare_logpush_job
-where
-  account_id    = 'YOUR_ACCOUNT_ID';
-```
-
-```sql+sqlite
-select
-  id,
-  name,
-  dataset,
-  destination_conf,
-  enabled,
-  last_complete,
-  last_error
-from
-  cloudflare_logpush_job
-where
-  account_id    = 'YOUR_ACCOUNT_ID';
+  account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ### Get a specific logpush job
+Retrieves detailed information about a specific Logpush job, identified by its ID and the account ID.
+
 ```sql+postgres
 select
   id,
@@ -121,6 +127,8 @@ where
 ```
 
 ### Query all logpush jobs with a recent failure
+Retrieves all active logpush jobs (enabled = true) that have encountered a recent failure (last_error is not null). Results are sorted by last_error in descending order, meaning the most recent failures appear first.
+
 ```sql+postgres
 select
   id,
@@ -156,6 +164,8 @@ order by
 ```
 
 ### Query all disabled logpush jobs
+Retrieves all disabled Logpush jobs (enabled = false) for a specific account ID.
+
 ```sql+postgres
 select
   id,
@@ -183,6 +193,8 @@ where
 ```
 
 ### Query all logpush jobs sending firewall events
+Retrieves all Logpush jobs that are configured to send firewall events (dataset = 'firewall_events') for a specific account ID.
+
 ```sql+postgres
 select
   id,
