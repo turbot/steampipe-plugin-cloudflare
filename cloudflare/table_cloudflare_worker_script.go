@@ -39,7 +39,7 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getParentAccountDetails, Transform: transform.FromField("ID"), Description: "The account ID to filter Worker scripts."},
 		
 			// JSON Columns
-			{Name: "subdomain", Type: proto.ColumnType_JSON, Hydrate: getWorkerSubdomain, Transform: transform.FromValue(),Description: "Whether the Worker is available on the workers.dev subdomain."},
+			{Name: "subdomain", Type: proto.ColumnType_JSON, Hydrate: getWorkerSubdomain, Transform: transform.FromValue(), Description: "Whether the Worker is available on the workers.dev subdomain."},
 			{Name: "tail_consumers", Type: proto.ColumnType_JSON, Description: "List of Workers that will consume logs from the attached Worker."},
 			{Name: "placement", Type: proto.ColumnType_JSON, Transform: transform.FromField("Placement"), Description: "Configuration for Smart Placement."},
 		}),
@@ -92,7 +92,7 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	account := h.ParentItem.(accounts.Account)
-    script := h.Item.(workers.Script)
+	script := h.Item.(workers.Script)
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
@@ -101,7 +101,7 @@ func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	input := workers.ScriptSubdomainGetParams{
 		AccountID: cloudflare.F(account.ID),
 	}
-	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx,script.ID,input)
+	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx, script.ID, input)
 	if err != nil {
 		return nil, err
 	}

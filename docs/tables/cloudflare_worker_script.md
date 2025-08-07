@@ -48,7 +48,7 @@ from
 ```
 
 ### Query all worker scripts with worker.dev subdomain available
-Retrieves all Worker scripts where the worker.dev subdomain is not enabled. The worker.dev subdomain provides an automatic subdomain for developers to test and deploy Worker scripts in a staging or development environment.
+Retrieves all Worker scripts where the worker.dev subdomain is enabled. The worker.dev subdomain provides an automatic subdomain for developers to test and deploy Worker scripts in a staging or development environment.
 
 ```sql+postgres
 select
@@ -59,7 +59,7 @@ select
 from
   cloudflare_worker_script
 where
-  subdomain ->> 'enabled' = 'false';
+  subdomain ->> 'enabled' = 'true';
 ```
 
 ```sql+sqlite
@@ -71,7 +71,7 @@ select
 from
   cloudflare_worker_script
 where
-  subdomain ->> 'enabled' = 'false';
+  subdomain ->> 'enabled' = 'true';
 ```
 
 ### Query all worker scripts which have modules or assets
