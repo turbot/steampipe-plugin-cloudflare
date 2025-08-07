@@ -159,19 +159,3 @@ func getCustomPage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	return *customPage, nil
 }
-
-// OTHER FUNCTIONS
-
-func toString(v interface{}) string {
-	if s, ok := v.(string); ok {
-		return s
-	}
-	return ""
-}
-
-func toTime(v interface{}) (time.Time, error) {
-	if s, ok := v.(string); ok {
-		return time.Parse(time.RFC3339, s)
-	}
-	return time.Time{}, fmt.Errorf("invalid time format: %v", v)
-}
