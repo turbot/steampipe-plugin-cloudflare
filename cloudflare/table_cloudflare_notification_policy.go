@@ -103,7 +103,7 @@ func listNotificationPolicies(ctx context.Context, d *plugin.QueryData, _ *plugi
 //
 // Parameters:
 // - id: The ruleset identifier (required)
-// - account_id OR zone_id: The account or zone context (at least one required)
+// - account_id: The account context (at least one required)
 func getNotificationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
@@ -120,7 +120,7 @@ func getNotificationPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		AccountID: cloudflare.F(accountID),
 	}
 
-	// Execute API call to get the specific ruleset
+	// Execute API call to get the specific notification policy
 	notificationPolicy, err := conn.Alerting.Policies.Get(ctx, notificationPolicyID, input)
 	if err != nil {
 		logger.Error("cloudflare_notification_policy.getNotificationPolicy", "error", err)
