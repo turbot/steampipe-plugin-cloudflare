@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/zones"
@@ -98,7 +99,14 @@ func getZoneSetting(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	// Use the SDK function to get individual zone setting
 	item, err := conn.Zones.Settings.Get(ctx, settingID, zones.SettingGetParams{ZoneID: cloudflare.F(zoneID)})
 	if err != nil {
-		logger.Error("cloudflare_zone_setting.getZoneSetting", "API error", err)
+		// Some settings might not be available for all zones
+		if strings.Contains(err.Error(), "Undefined zone setting") {
+			return nil, nil
+		}
+		if strings.Contains(err.Error(), "Access denied") {
+			return nil, nil
+		}
+		logger.Error("cloudflare_zone_setting.listZoneSettings", "ZoneSetting api error", err)
 		return nil, err
 	}
 
