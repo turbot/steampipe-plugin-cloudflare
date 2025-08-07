@@ -34,6 +34,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_load_balancer":         tableCloudflareLoadBalancer(ctx),
 			"cloudflare_load_balancer_monitor": tableCloudflareLoadBalancerMonitor(ctx),
 			"cloudflare_load_balancer_pool":    tableCloudflareLoadBalancerPool(ctx),
+			"cloudflare_logpush_job":           tableCloudflareLogpushJob(ctx),
 			"cloudflare_page_rule":             tableCloudflarePageRule(ctx),
 			"cloudflare_r2_bucket":             tableCloudflareR2Bucket(ctx),
 			"cloudflare_r2_object":             tableCloudflareR2Object(ctx),
