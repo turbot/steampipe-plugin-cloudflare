@@ -84,6 +84,7 @@ func getLoadBalancerPoolHealth(ctx context.Context, d *plugin.QueryData, h *plug
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
+		logger.Error("cloudflare_load_balancer_pool.getLoadBalancerPoolHealth", "connection_error", err)
 		return nil, err
 	}
 	pool := h.Item.(load_balancers.Pool)
@@ -100,7 +101,7 @@ func getLoadBalancerPoolHealth(ctx context.Context, d *plugin.QueryData, h *plug
 			return nil, nil
 		}
 		logger.Error("cloudflare_load_balancer_pool.getLoadBalancerPoolHealth", "load balancer pool health API error", err)
-		return nil, nil
+		return nil, err
 	}
 	return pool_health, nil
 }
