@@ -49,20 +49,20 @@ func tableCloudflareCustomPage(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "id", Type: proto.ColumnType_STRING,Transform: transform.FromField("ID"),Description: "Custom page identifier."},
-			{Name: "description", Type: proto.ColumnType_STRING, Description: "Custom page description."},
-			{Name: "state", Type: proto.ColumnType_STRING, Description: "The custom page state."},
-			{Name: "url", Type: proto.ColumnType_STRING, Description: "The URL associated with the custom page."},
-			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the setting was last modified."},
-			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the custom page was created."},
-			{Name: "preview_target", Type: proto.ColumnType_STRING, Description: "Preview action to apply."},
+			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("id"), Description: "Custom page identifier."},
+			{Name: "description", Type: proto.ColumnType_STRING, Transform: transform.FromField("description"), Description: "Custom page description."},
+			{Name: "state", Type: proto.ColumnType_STRING, Transform: transform.FromField("state"), Description: "The custom page state."},
+			{Name: "url", Type: proto.ColumnType_STRING, Transform: transform.FromField("url"), Description: "The URL associated with the custom page."},
+			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("modified_on"), Description: "When the setting was last modified."},
+			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("created_on"), Description: "When the custom page was created."},
+			{Name: "preview_target", Type: proto.ColumnType_STRING, Transform: transform.FromField("preview_target"), Description: "Preview action to apply."},
 
 			// Query columns for filtering
 			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter custom pages."},
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter custom pages."},
 
 			// JSON Columns
-			{Name: "required_tokens", Type: proto.ColumnType_JSON, Description: "Error tokens are required by the custom page."},
+			{Name: "required_tokens", Type: proto.ColumnType_JSON, Transform: transform.FromField("required_tokens"), Description: "Error tokens are required by the custom page."},
 		}),
 	}
 }
@@ -108,48 +108,7 @@ func listCustomPages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	for iter.Next() {
 		current := iter.Current()
 
-		// Needs manual mapping because CustomPageListResponse type is interface{}
-		m, ok := current.(map[string]interface{})
-		if !ok {
-			logger.Warn("Unexpected type", fmt.Sprintf("%T", current))
-			continue
-		}
-
-		cp := CustomPage{
-			ID:            toString(m["id"]),
-			Description:   toString(m["description"]),
-			State:         toString(m["state"]),
-			URL:           toString(m["url"]),
-			PreviewTarget: toString(m["preview_target"]),
-		}
-
-		if createdOn, ok := m["created_on"]; ok {
-			if t, err := toTime(createdOn); err == nil {
-				cp.CreatedOn = t
-			} else {
-				logger.Warn("Invalid created_on format", "error", err)
-			}
-		}
-
-		if modifiedOn, ok := m["modified_on"]; ok {
-			if t, err := toTime(modifiedOn); err == nil {
-				cp.ModifiedOn = t
-			} else {
-				logger.Warn("Invalid modified_on format", "error", err)
-			}
-		}
-
-		if tokens, ok := m["required_tokens"]; ok {
-			if arr, ok := tokens.([]interface{}); ok {
-				for _, token := range arr {
-					if str, ok := token.(string); ok {
-						cp.RequiredTokens = append(cp.RequiredTokens, str)
-					}
-				}
-			}
-		}
-
-		d.StreamListItem(ctx, cp)
+		d.StreamListItem(ctx, current)
 
 		if d.RowsRemaining(ctx) == 0 {
 			return nil, nil
@@ -198,49 +157,7 @@ func getCustomPage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, err
 	}
 
-	raw := *customPage
-	m, ok := raw.(map[string]interface{})
-		if !ok {
-			logger.Warn("Unexpected type", fmt.Sprintf("%T", customPage))
-			return nil, nil
-		}
-
-	// Needs manual mapping because CustomPages.Get return type is *interface{}
-	cp := CustomPage{
-			ID:            toString(m["id"]),
-			Description:   toString(m["description"]),
-			State:         toString(m["state"]),
-			URL:           toString(m["url"]),
-			PreviewTarget: toString(m["preview_target"]),
-		}
-
-		if createdOn, ok := m["created_on"]; ok {
-			if t, err := toTime(createdOn); err == nil {
-				cp.CreatedOn = t
-			} else {
-				logger.Warn("Invalid created_on format", "error", err)
-			}
-		}
-
-		if modifiedOn, ok := m["modified_on"]; ok {
-			if t, err := toTime(modifiedOn); err == nil {
-				cp.ModifiedOn = t
-			} else {
-				logger.Warn("Invalid modified_on format", "error", err)
-			}
-		}
-
-		if tokens, ok := m["required_tokens"]; ok {
-			if arr, ok := tokens.([]interface{}); ok {
-				for _, token := range arr {
-					if str, ok := token.(string); ok {
-						cp.RequiredTokens = append(cp.RequiredTokens, str)
-					}
-				}
-			}
-		}
-
-	return cp, nil
+	return *customPage, nil
 }
 
 // OTHER FUNCTIONS
