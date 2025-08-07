@@ -16,7 +16,7 @@ The `cloudflare_logpush_job` table provides insights into configured log shippin
 
 ## Examples
 
-### Query all logpush jobs for a zone/account
+### Query all logpush jobs for a zone
 Retrieves all Logpush jobs associated with a specific zone ID. Logpush jobs are used to deliver specific datasets from Cloudflare to an external storage destination (like AWS S3, GCP, etc.).
 
 ```sql+postgres
@@ -34,8 +34,6 @@ where
   zone_id = 'YOUR_ZONE_ID';
 ```
 
-Retrieves all Logpush jobs associated with a specific account ID. Logpush jobs are used to deliver specific datasets from Cloudflare to an external storage destination (like AWS S3, GCP, etc.).
-
 ```sql+sqlite
 select
   id,
@@ -50,6 +48,9 @@ from
 where
   zone_id = 'YOUR_ZONE_ID';
 ```
+
+### Query all logpush jobs for an account
+Retrieves all Logpush jobs associated with a specific account ID. Logpush jobs are used to deliver specific datasets from Cloudflare to an external storage destination (like AWS S3, GCP, etc.).
 
 ```sql+postgres
 select
