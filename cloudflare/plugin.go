@@ -29,6 +29,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_account_role":          tableCloudflareAccountRole(ctx),
 			"cloudflare_api_token":             tableCloudflareAPIToken(ctx),
 			"cloudflare_dns_record":            tableCloudflareDNSRecord(ctx),
+			"cloudflare_custom_certificate":    tableCloudflareCustomCertificate(ctx),
 			"cloudflare_firewall_rule":         tableCloudflareFirewallRule(ctx),
 			"cloudflare_load_balancer":         tableCloudflareLoadBalancer(ctx),
 			"cloudflare_load_balancer_monitor": tableCloudflareLoadBalancerMonitor(ctx),
@@ -43,7 +44,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_worker_route":          tableCloudflareWorkerRoute(ctx),
 			"cloudflare_zone":                  tableCloudflareZone(ctx),
 			"cloudflare_zone_setting":          tableCloudflareZoneSetting(ctx),
-			"cloudflare_custom_certificate":    tableCloudflareCustomCertificate(ctx),
 		},
 	}
 	return p
