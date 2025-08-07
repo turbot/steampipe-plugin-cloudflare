@@ -50,7 +50,7 @@ func tableCloudflareCustomPage(ctx context.Context) *plugin.Table {
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING,Transform: transform.FromField("ID"),Description: "Custom page identifier."},
-			{Name: "description", Type: proto.ColumnType_STRING, Description: "Custom page descriptionn."},
+			{Name: "description", Type: proto.ColumnType_STRING, Description: "Custom page description."},
 			{Name: "state", Type: proto.ColumnType_STRING, Description: "The custom page state."},
 			{Name: "url", Type: proto.ColumnType_STRING, Description: "The URL associated with the custom page."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the setting was last modified."},
@@ -72,8 +72,8 @@ func tableCloudflareCustomPage(ctx context.Context) *plugin.Table {
 // listCustomPages retrieves all custom pages for the specified account_id or zone_id.
 //
 // This function handles both account-level and zone-level custom pages:
-// - Account-level rulesets (account_id)
-// - Zone-level rulesets (zone_id)
+// - Account-level custom pages (account_id)
+// - Zone-level custom pages (zone_id)
 func listCustomPages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
@@ -114,7 +114,7 @@ func listCustomPages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 			logger.Warn("Unexpected type", fmt.Sprintf("%T", current))
 			continue
 		}
-		logger.Debug("Réponse API", "data", m)
+
 		cp := CustomPage{
 			ID:            toString(m["id"]),
 			Description:   toString(m["description"]),
@@ -174,7 +174,7 @@ func getCustomPage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("cloudflare_custom_pages.getRuleset", "connection_error", err)
+		logger.Error("cloudflare_custom_pages.getCustomPage", "connection_error", err)
 		return nil, err
 	}
 	quals := d.EqualsQuals
@@ -193,6 +193,11 @@ func getCustomPage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	// Execute API call to get the specific custom page
 	customPage, err := conn.CustomPages.Get(ctx, customPageID, input)
+	if err != nil {
+		logger.Error("cloudflare_custom_pages.getCustomPages", "error", err)
+		return nil, err
+	}
+
 	raw := *customPage
 	m, ok := raw.(map[string]interface{})
 		if !ok {
@@ -234,11 +239,6 @@ func getCustomPage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 				}
 			}
 		}
-
-	if err != nil {
-		logger.Error("cloudflare_custom_pages.getCustomPages", "error", err)
-		return nil, err
-	}
 
 	return cp, nil
 }

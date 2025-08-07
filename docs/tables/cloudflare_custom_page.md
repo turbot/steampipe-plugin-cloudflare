@@ -86,7 +86,7 @@ from
   cloudflare_custom_page
 where
   id = 'CUSTOM_PAGE_ID'
-  account_id = 'YOUR_ACCOUNT_ID';
+  and account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ```sql+sqlite
@@ -101,7 +101,7 @@ from
   cloudflare_custom_page
 where
   id = 'CUSTOM_PAGE_ID'
-  account_id = 'YOUR_ACCOUNT_ID';
+  and account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ### Query all custom pages recently created
@@ -146,7 +146,7 @@ from
   cloudflare_custom_page
 where
   account_id = 'YOUR_ACCOUNT_ID'
-  and state == 'customized';
+  and state = 'customized';
 ```
 
 ```sql+sqlite
@@ -159,5 +159,5 @@ from
   cloudflare_custom_page
 where
   account_id = 'YOUR_ACCOUNT_ID'
-  and state == 'customized';
+  and state = 'customized';
 ```
