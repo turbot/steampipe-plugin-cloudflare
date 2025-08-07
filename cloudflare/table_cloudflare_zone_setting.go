@@ -138,7 +138,7 @@ func transformModifiedOn(ctx context.Context, d *transform.TransformData) (inter
 
 //// API call
 
-// ListZoneSettings makes a GET request to https://api.cloudflare.com/client/v4/zones/$ZONE_ID/settings
+// ListAllZoneSettings makes a GET request to https://api.cloudflare.com/client/v4/zones/$ZONE_ID/settings
 // Note: The main API documentation (https://developers.cloudflare.com/api/resources/zones/subresources/settings/methods/list/) lists this endpoint as DEPRECATED.
 // However, according to the deprecation reference (https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-06-08), only the "cname_flattening" setting is affected; the endpoint itself is not fully deprecated.
 func ListAllZoneSettings(ctx context.Context, d *plugin.QueryData, zoneID string) ([]ZoneSettingInfo, error) {
@@ -178,8 +178,8 @@ func ListAllZoneSettings(ctx context.Context, d *plugin.QueryData, zoneID string
 		// Parse each setting as a zones.SettingGetResponse
 		var settingResponse zones.SettingGetResponse
 		if err := json.Unmarshal(rawSetting, &settingResponse); err != nil {
-			logger.Warn("cloudflare_zone_setting.ListZoneSettings", "failed to parse setting", err, "raw_data", string(rawSetting))
-			continue
+			logger.Error("cloudflare_zone_setting.ListZoneSettings", "failed to parse setting", err, "raw_data", string(rawSetting))
+			return nil, fmt.Errorf("failed to parse setting: %w", err)
 		}
 
 		settings = append(settings, ZoneSettingInfo{zoneID, settingResponse})
