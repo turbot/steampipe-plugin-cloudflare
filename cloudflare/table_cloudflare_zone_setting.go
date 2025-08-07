@@ -139,8 +139,8 @@ func transformModifiedOn(ctx context.Context, d *transform.TransformData) (inter
 //// API call
 
 // ListZoneSettings makes a GET request to https://api.cloudflare.com/client/v4/zones/$ZONE_ID/settings
-// As per the API doc(https://developers.cloudflare.com/api/resources/zones/subresources/settings/methods/list/) it is mentioned that the endpoint is DEPRECATED
-// However, in deprecation API doc(https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-06-08) the endpoint is not DEPRECATED it is AFFECTED by a single setting "cname_flattening".
+// Note: The main API documentation (https://developers.cloudflare.com/api/resources/zones/subresources/settings/methods/list/) lists this endpoint as DEPRECATED.
+// However, according to the deprecation reference (https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-06-08), only the "cname_flattening" setting is affected; the endpoint itself is not fully deprecated.
 func ListAllZoneSettings(ctx context.Context, d *plugin.QueryData, zoneID string) ([]ZoneSettingInfo, error) {
 	logger := plugin.Logger(ctx)
 
