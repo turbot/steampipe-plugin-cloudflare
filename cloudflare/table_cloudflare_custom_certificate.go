@@ -110,7 +110,7 @@ func listCustomCertificates(ctx context.Context, d *plugin.QueryData, _ *plugin.
 //
 // Parameters:
 // - id: The custom certificate identifier (required)
-// - zone_id: The account or zone context (required)
+// - zone_id: The zone context (required)
 func getCustomCertificate(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
@@ -149,6 +149,7 @@ func transformGeoRestrictions(ctx context.Context, d *transform.TransformData) (
         }
         return string(customCertificate.GeoRestrictions.Label), nil
     default:
+		logger.Error("cloudflare_custom_certificate.transformGeoRestrictions", "customCertificate unexpected type", err)
         return nil, fmt.Errorf("unexpected type: %T", d.HydrateItem)
     }
 }
