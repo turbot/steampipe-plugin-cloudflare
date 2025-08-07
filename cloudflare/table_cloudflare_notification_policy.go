@@ -60,9 +60,6 @@ type NotificationPolicyInfo struct {
 
 //// LIST FUNCTION
 
-// listNotificationPolicies retrieves all notification policies for the specified account_id.
-//
-// Account-level notification policies (account_id)
 func listNotificationPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	accountDetails := h.Item.(accounts.Account)
