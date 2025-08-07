@@ -43,7 +43,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_worker_route":          tableCloudflareWorkerRoute(ctx),
 			"cloudflare_zone":                  tableCloudflareZone(ctx),
 			"cloudflare_zone_setting":          tableCloudflareZoneSetting(ctx),
-			"cloudflare_logpush_job":          	tableCloudflareLogpushJob(ctx),
+			"cloudflare_logpush_job":           tableCloudflareLogpushJob(ctx),
 		},
 	}
 	return p

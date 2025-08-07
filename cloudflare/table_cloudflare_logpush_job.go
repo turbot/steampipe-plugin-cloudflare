@@ -36,7 +36,7 @@ func tableCloudflareLogpushJob(ctx context.Context) *plugin.Table {
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_INT, Transform: transform.FromField("ID"), Description: "Logpush Job identifier."},
 			{Name: "dataset", Type: proto.ColumnType_STRING, Description: "Name of the dataset."},
-			{Name: "destination_conf", Type: proto.ColumnType_STRING, Description: " Uniquely identifies a resource (such as an s3 bucket) where data will be pushed."},
+			{Name: "destination_conf", Type: proto.ColumnType_STRING, Description: "Uniquely identifies a resource (such as an s3 bucket) where data will be pushed."},
 			{Name: "enabled", Type: proto.ColumnType_BOOL, Description: "Flag that indicates if the job is enabled."},
 			{Name: "error_message", Type: proto.ColumnType_STRING, Description: "If not null, the job is currently failing."},
 			{Name: "frequency", Type: proto.ColumnType_STRING, Description: "[Deprecated] The frequency at which Cloudflare sends batches of logs to your destination - Use `max_upload_*` parameters instead "},
@@ -50,8 +50,8 @@ func tableCloudflareLogpushJob(ctx context.Context) *plugin.Table {
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Optional human readable job name."},
 
 			// Query columns for filtering
-			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter rulesets."},
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter rulesets."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("account_id"), Description: "The account ID to filter logpush jobs."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter logpush jobs."},
 		
 			// JSON Columns
 			{Name: "output_options", Type: proto.ColumnType_JSON, Description: "The structured replacement for `logpull_options`."},
@@ -63,9 +63,9 @@ func tableCloudflareLogpushJob(ctx context.Context) *plugin.Table {
 
 // listLogpushJobs retrieves all logpush jobs for the specified account_id or zone_id.
 //
-// This function handles both account-level and zone-level rulesets:
-// - Account-level rulesets (account_id)
-// - Zone-level rulesets (zone_id)
+// This function handles both account-level and zone-level logpush jobs:
+// - Account-level logpush jobs (account_id)
+// - Zone-level logpush jobs (zone_id)
 func listLogpushJobs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)

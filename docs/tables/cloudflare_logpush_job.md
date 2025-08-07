@@ -96,7 +96,7 @@ from
   cloudflare_logpush_job
 where
   id = 123456789
-  account_id = 'YOUR_ACCOUNT_ID' ;
+  account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ```sql+sqlite
@@ -117,7 +117,7 @@ from
   cloudflare_logpush_job
 where
   id = 123456789
-  account_id = 'YOUR_ACCOUNT_ID' ;
+  account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ### Query all logpush jobs with a recent failure
