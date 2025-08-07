@@ -11,9 +11,6 @@ Notification Policies enable configurable alerts based on Cloudflare account-lev
 
 The `cloudflare_notification_policy` table provides insights into notification policy definitions per account within Cloudflare. As a security administrator or DevOps engineer, you can review policy ID, name, alert type, re-alert interval, enabled state, description, JSON-encoded filters and mechanisms, and creation/modification timestamps. Use it to audit alert policies, identify disabled or misconfigured alerts, filter by event types, assess delivery mechanisms, and maintain event-driven monitoring.
 
-**Important Notes**
-- You must specify an `account_id` in a `where` or `join` clause to query this table.
-
 ## Examples
 
 ### Query all notification policies for an account
@@ -21,32 +18,42 @@ Retrieves all notification policies for a specific account ID. Notification poli
 
 ```sql+postgres
 select
-  id,
-  name,
-  alert_type,
-  alert_interval,
-  enabled,
-  created,
-  modified
+  n.id,
+  n.name,
+  n.alert_type,
+  n.alert_interval,
+  n.enabled,
+  n.created,
+  n.modified,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  account_id = 'YOUR_ACCOUNT_ID';
+  n.account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ```sql+sqlite
 select
-  id,
-  name,
-  alert_type,
-  alert_interval,
-  enabled,
-  created,
-  modified
+  n.id,
+  n.name,
+  n.alert_type,
+  n.alert_interval,
+  n.enabled,
+  n.created,
+  n.modified,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  account_id = 'YOUR_ACCOUNT_ID';
+  n.account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ### Get a specific notification policy by ID
@@ -54,36 +61,42 @@ Retrieves detailed information about a specific notification policy, identified 
 
 ```sql+postgres
 select
-  id,
-  name,
-  description,
-  alert_type,
-  alert_interval,
-  enabled,
-  filters,
-  mechanisms
+  n.id,
+  n.name,
+  n.description,
+  n.alert_type,
+  n.alert_interval,
+  n.enabled,
+  n.filters,
+  n.mechanisms,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  id = 'NOTIFICATION_POLICY_ID'
-  and account_id = 'YOUR_ACCOUNT_ID';
+  n.id = 'NOTIFICATION_POLICY_ID'
+  and n.account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ```sql+sqlite
 select
-  id,
-  name,
-  description,
-  alert_type,
-  alert_interval,
-  enabled,
-  filters,
-  mechanisms
+  n.id,
+  n.name,
+  n.alert_type,
+  n.enabled,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  id = 'NOTIFICATION_POLICY_ID'
-  and account_id = 'YOUR_ACCOUNT_ID';
+  n.account_id = 'YOUR_ACCOUNT_ID'
+  and n.enabled = false;
 ```
 
 ### Query all disabled notification policies
@@ -91,28 +104,38 @@ Retrieves all disabled notification policies (enabled = false) for a specific ac
 
 ```sql+postgres
 select
-  id,
-  name,
-  alert_type,
-  enabled
+  n.id,
+  n.name,
+  n.alert_type,
+  n.enabled,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  account_id = 'YOUR_ACCOUNT_ID'
-  and enabled = false;
+  n.account_id = 'YOUR_ACCOUNT_ID'
+  and n.enabled = false;
 ```
 
 ```sql+sqlite
 select
-  id,
-  name,
-  alert_type,
-  enabled
+  n.id,
+  n.name,
+  n.alert_type,
+  n.enabled,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  account_id = 'YOUR_ACCOUNT_ID'
-  and enabled = false;
+  n.account_id = 'YOUR_ACCOUNT_ID'
+  and n.enabled = false;
 ```
 
 ### Query all notification policies for advanced DDoS alert
@@ -120,26 +143,36 @@ Retrieves all notification policies of type advanced_ddos_attack_l7_alert (speci
 
 ```sql+postgres
 select
-  id,
-  name,
-  alert_type,
-  description
+  n.id,
+  n.name,
+  n.alert_type,
+  n.description,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  account_id = 'YOUR_ACCOUNT_ID'
-  and alert_type = 'advanced_ddos_attack_l7_alert';
+  n.account_id = 'YOUR_ACCOUNT_ID'
+  and n.alert_type = 'advanced_ddos_attack_l7_alert';
 ```
 
 ```sql+sqlite
 select
-  id,
-  name,
-  alert_type,
-  description
+  n.id,
+  n.name,
+  n.alert_type,
+  n.description,
+  ca.name as account_name
 from
-  cloudflare_notification_policy
+  cloudflare_notification_policy n
+join
+  cloudflare_account ca
+on
+  n.account_id = ca.id
 where
-  account_id = 'YOUR_ACCOUNT_ID'
-  and alert_type = 'advanced_ddos_attack_l7_alert';
+  n.account_id = 'YOUR_ACCOUNT_ID'
+  and n.alert_type = 'advanced_ddos_attack_l7_alert';
 ```
