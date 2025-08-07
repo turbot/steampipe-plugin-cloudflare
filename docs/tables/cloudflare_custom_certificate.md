@@ -110,7 +110,7 @@ from
   cloudflare_custom_certificate
 where
   zone_id = 'YOUR_ZONE_ID'
-  and expires_on < now() + interval '30 days'
+  and expires_on < datetime('now', '+30 days')
 order by
   expires_on;
 ```
