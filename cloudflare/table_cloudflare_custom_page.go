@@ -2,7 +2,6 @@ package cloudflare
 
 import (
 	"context"
-	"time"
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/custom_pages"
@@ -10,19 +9,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
-
-// CUSTOM PAGE STRUCT DEFINITION
-
-type CustomPage struct {
-	ID            string    `json:"id"`
-	Description   string    `json:"description"`
-	State         string    `json:"state"`
-	URL           string    `json:"url"`
-	ModifiedOn    time.Time `json:"modified_on"`
-	CreatedOn     time.Time `json:"created_on"`
-	RequiredTokens []string `json:"required_tokens"`
-	PreviewTarget string    `json:"preview_target"`
-}
 
 //// TABLE DEFINITION
 
@@ -52,7 +38,7 @@ func tableCloudflareCustomPage(ctx context.Context) *plugin.Table {
 			{Name: "description", Type: proto.ColumnType_STRING, Transform: transform.FromField("description"), Description: "Custom page description."},
 			{Name: "state", Type: proto.ColumnType_STRING, Transform: transform.FromField("state"), Description: "The custom page state."},
 			{Name: "url", Type: proto.ColumnType_STRING, Transform: transform.FromField("url"), Description: "The URL associated with the custom page."},
-			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("modified_on"), Description: "When the setting was last modified."},
+			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("modified_on"), Description: "When the custom page was last modified."},
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("created_on"), Description: "When the custom page was created."},
 			{Name: "preview_target", Type: proto.ColumnType_STRING, Transform: transform.FromField("preview_target"), Description: "Preview action to apply."},
 

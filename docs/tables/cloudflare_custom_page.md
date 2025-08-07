@@ -16,7 +16,7 @@ The `cloudflare_custom_page` table provides insight into configurable custom pag
 
 ## Examples
 
-### Query all custom pages for a zone/account
+### Query all custom pages for a zone
 Retrieves all custom pages that are associated with a specific zone ID in the cloudflare_custom_page table.
 
 ```sql+postgres
@@ -47,6 +47,7 @@ where
   zone_id = 'YOUR_ZONE_ID';
 ```
 
+### Query all custom pages for an account
 Retrieves all custom pages that are associated with a specific account ID in the cloudflare_custom_page table.
 
 ```sql+postgres
@@ -140,7 +141,7 @@ where
   account_id = 'YOUR_ACCOUNT_ID'
   and datetime(created_on) >= datetime('now', '-7 days')
 order by
-  created_on DESC;
+  created_on desc;
 ```
 
 ### Query all customized error pages
