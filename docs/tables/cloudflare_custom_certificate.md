@@ -17,6 +17,8 @@ The `cloudflare_custom_certificate` table provides insights into user-managed SS
 ## Examples
 
 ### Query all custom certificates for a zone
+Retrieves all custom SSL certificates associated with a specific zone ID. Custom certificates are domain-specific SSL/TLS certificates uploaded for use in Cloudflare.
+
 ```sql+postgres
 select
   id,
@@ -44,6 +46,8 @@ where
 ```
 
 ### Get a specific custom certificate by its ID
+Retrieves detailed information about a specific custom certificate, identified by its ID and the zone ID.
+
 ```sql+postgres
 select
   id,
@@ -58,7 +62,7 @@ from
   cloudflare_custom_certificate
 where
   zone_id = 'YOUR_ZONE_ID'
-  and id      = 'CERTIFICATE_ID';
+  and id = 'CERTIFICATE_ID';
 ```
 
 ```sql+sqlite
@@ -75,10 +79,12 @@ from
   cloudflare_custom_certificate
 where
   zone_id = 'YOUR_ZONE_ID'
-  and id      = 'CERTIFICATE_ID';
+  and id = 'CERTIFICATE_ID';
 ```
 
 ### Query all custom certificates expiring in the next 30 days for a zone
+Retrieves all custom certificates for a specific zone that will expire in the next 30 days. This query is useful for monitoring expiring certificates to renew them before they expire.
+
 ```sql+postgres
 select
   id,
@@ -110,6 +116,8 @@ order by
 ```
 
 ### Order the custom certificates for a zone by priority
+Retrieves all custom certificates for a specific zone and orders them by their priority. Numeric priority values determine which certificate is selected when multiple certificates apply to a hostname.
+
 ```sql+postgres
 select
   id,
