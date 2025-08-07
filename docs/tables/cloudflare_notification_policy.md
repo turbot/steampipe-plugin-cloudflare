@@ -85,8 +85,12 @@ where
 select
   n.id,
   n.name,
+  n.description,
   n.alert_type,
+  n.alert_interval,
   n.enabled,
+  n.filters,
+  n.mechanisms,
   ca.name as account_name
 from
   cloudflare_notification_policy n
@@ -95,8 +99,8 @@ join
 on
   n.account_id = ca.id
 where
-  n.account_id = 'YOUR_ACCOUNT_ID'
-  and n.enabled = false;
+  n.id = 'NOTIFICATION_POLICY_ID'
+  and n.account_id = 'YOUR_ACCOUNT_ID';
 ```
 
 ### Query all disabled notification policies
