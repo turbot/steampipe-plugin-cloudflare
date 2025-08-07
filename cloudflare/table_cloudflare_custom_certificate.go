@@ -140,6 +140,7 @@ func getCustomCertificate(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 //// TRANSFORM FUNCTIONS
 
 func transformGeoRestrictions(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
     switch customCertificate := d.HydrateItem.(type) {
     case custom_certificates.CustomCertificate:
         return string(customCertificate.GeoRestrictions.Label), nil
@@ -149,7 +150,8 @@ func transformGeoRestrictions(ctx context.Context, d *transform.TransformData) (
         }
         return string(customCertificate.GeoRestrictions.Label), nil
     default:
+		err := fmt.Errorf("unexpected type: %T", d.HydrateItem)
 		logger.Error("cloudflare_custom_certificate.transformGeoRestrictions", "customCertificate unexpected type", err)
-        return nil, fmt.Errorf("unexpected type: %T", d.HydrateItem)
+        return nil, err
     }
 }
