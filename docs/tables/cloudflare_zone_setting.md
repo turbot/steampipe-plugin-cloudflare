@@ -14,7 +14,6 @@ The `cloudflare_zone_setting` table provides insights into individual zone setti
 **Important Notes:**
 - By default this table fetches all settings across all zones.
 - For optimal performance and to reduce query time, always specify `zone_id` and/or `id` (setting ID) in your WHERE clause.
-- Use `ids` column to query multiple specific settings efficiently by providing a JSON array of setting IDs.
 - Possible values for `id` are:
   - `aegis`
   - `0rtt`
@@ -241,41 +240,6 @@ where
   zs.id = 'development_mode'
 order by
   z.name;
-```
-
-### Query multiple settings with zone comparison
-Compare multiple settings across zones efficiently using the `ids` column.
-
-```sql+postgres
-select
-  z.name as zone_name,
-  z.type as zone_type,
-  zs.id as setting_id,
-  zs.value,
-  zs.editable
-from
-  cloudflare_zone_setting zs
-  join cloudflare_zone z on zs.zone_id = z.id
-where
-  zs.ids = '["development_mode", "ssl", "security_level"]'
-order by
-  z.name, zs.id;
-```
-
-```sql+sqlite
-select
-  z.name as zone_name,
-  z.type as zone_type,
-  zs.id as setting_id,
-  zs.value,
-  zs.editable
-from
-  cloudflare_zone_setting zs
-  join cloudflare_zone z on zs.zone_id = z.id
-where
-  zs.ids = '["development_mode", "ssl", "security_level"]'
-order by
-  z.name, zs.id;
 ```
 
 ### List editable vs non-editable settings summary
