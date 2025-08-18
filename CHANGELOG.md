@@ -1,3 +1,54 @@
+## v1.2.0 [2025-08-18]
+
+_Deprecations_
+
+- The `cloudflare_firewall_rule` table has been deprecated. Please use `cloudflare_ruleset` table instead. ([#166](https://github.com/turbot/steampipe-plugin-cloudflare/pull/166)) 
+- The following columns have been deprecated due to lack of API support and will be fully removed in the future major release: ([#166](https://github.com/turbot/steampipe-plugin-cloudflare/pull/166)) 
+  - `cloudflare_account_member`
+    - `code`
+  - `cloudflare_dns_record`
+    - `locked`
+  - `cloudflare_logpush_job`
+    - `frequency`
+    - `logpull_options`
+  - `cloudflare_user`
+    - `api_key`
+  - `cloudflare_zone`
+    - `plan_pending`
+    - `settings`
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_custom_page](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_custom_page) ([#176](https://github.com/turbot/steampipe-plugin-cloudflare/pull/176)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+  - [cloudflare_logpush_job](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_logpush_job) ([#177](https://github.com/turbot/steampipe-plugin-cloudflare/pull/177)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+  - [cloudflare_notification](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_notification) ([#179](https://github.com/turbot/steampipe-plugin-cloudflare/pull/179)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+  - [cloudflare_ruleset](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_ruleset) ([#166](https://github.com/turbot/steampipe-plugin-cloudflare/pull/166))
+  - [cloudflare_zone_setting](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_zone_setting) ([#170](https://github.com/turbot/steampipe-plugin-cloudflare/pull/170))
+  - [cloudflare_zone](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_zone) ([#170](https://github.com/turbot/steampipe-plugin-cloudflare/pull/170))
+
+_Enhancements_
+
+- Added the following new columns to the `cloudflare_zone` table: ([#174](https://github.com/turbot/steampipe-plugin-cloudflare/pull/174)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+  - `smart_tiered_cache`
+  - `regional_tiered_cache`
+  - `argo_tiered_caching`
+  - `argo_smart_routing`
+  - `bot_management`
+  - `security_txt`
+- Added columns `account_name` and `health` to the `cloudflare_load_balancer_pool` table. ([#175](https://github.com/turbot/steampipe-plugin-cloudflare/pull/175)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+- Added `max_request_timeout` and `max_retries` config arguments to effectively manage the plugin's rate limiting errors. ([#166](https://github.com/turbot/steampipe-plugin-cloudflare/pull/166)) 
+
+_Bug fixes_
+
+- Fixed the `ttl` column in `cloudflare_dns_record` table to correctly return data instead of `null`. ([#173](https://github.com/turbot/steampipe-plugin-cloudflare/pull/173)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+
+_Dependencies_
+
+- Recompiled plugin with [cloudflare-go v4.2.0](https://github.com/cloudflare/cloudflare-go/releases/tag/v4.2.0). ([#166](https://github.com/turbot/steampipe-plugin-cloudflare/pull/166)) 
+- Recompiled plugin with Go version `1.24`.
+- Recompiled plugin with [steampipe-plugin-sdk v5.13.0](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5130-2025-07-21) that addresses critical and high vulnerabilities in dependent packages.
+
 ## v1.1.0 [2025-04-18]
 
 _Deprecations_
