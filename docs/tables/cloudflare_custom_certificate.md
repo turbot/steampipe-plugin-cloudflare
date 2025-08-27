@@ -16,33 +16,45 @@ The `cloudflare_custom_certificate` table provides insights into user-managed SS
 
 ## Examples
 
+### Query all custom certificates
+
 ### Query all custom certificates for a zone
 Retrieves all custom SSL certificates associated with a specific zone ID. Custom certificates are domain-specific SSL/TLS certificates uploaded for use in Cloudflare.
 
 ```sql+postgres
 select
-  id,
-  hosts,
-  issuer,
-  status,
-  expires_on
+  cc.id,
+  cc.hosts,
+  cc.issuer,
+  cc.status,
+  cc.expires_on,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID';
+  cc.zone_id = 'YOUR_ZONE_ID';
 ```
 
 ```sql+sqlite
 select
-  id,
-  hosts,
-  issuer,
-  status,
-  expires_on
+  cc.id,
+  cc.hosts,
+  cc.issuer,
+  cc.status,
+  cc.expires_on,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID';
+  cc.zone_id = 'YOUR_ZONE_ID';
 ```
 
 ### Get a specific custom certificate by its ID
@@ -50,36 +62,46 @@ Retrieves detailed information about a specific custom certificate, identified b
 
 ```sql+postgres
 select
-  id,
-  hosts,
-  bundle_method,
-  priority,
-  uploaded_on,
-  modified_on,
-  geo_restrictions,
-  policy
+  cc.id,
+  cc.hosts,
+  cc.bundle_method,
+  cc.priority,
+  cc.uploaded_on,
+  cc.modified_on,
+  cc.geo_restrictions,
+  cc.policy,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID'
-  and id = 'CERTIFICATE_ID';
+  cc.zone_id = 'YOUR_ZONE_ID'
+  and cc.id = 'CERTIFICATE_ID';
 ```
 
 ```sql+sqlite
 select
-  id,
-  hosts,
-  bundle_method,
-  priority,
-  uploaded_on,
-  modified_on,
-  geo_restrictions,
-  policy
+  cc.id,
+  cc.hosts,
+  cc.bundle_method,
+  cc.priority,
+  cc.uploaded_on,
+  cc.modified_on,
+  cc.geo_restrictions,
+  cc.policy,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID'
-  and id = 'CERTIFICATE_ID';
+  cc.zone_id = 'YOUR_ZONE_ID'
+  and cc.id = 'CERTIFICATE_ID';
 ```
 
 ### Query all custom certificates expiring in the next 30 days for a zone
@@ -87,32 +109,42 @@ Retrieves all custom certificates for a specific zone that will expire in the ne
 
 ```sql+postgres
 select
-  id,
-  hosts,
-  issuer,
-  expires_on
+  cc.id,
+  cc.hosts,
+  cc.issuer,
+  cc.expires_on,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID'
-  and expires_on < now() + interval '30 days'
+  cc.zone_id = 'YOUR_ZONE_ID'
+  and cc.expires_on < now() + interval '30 days'
 order by
-  expires_on;
+  cc.expires_on;
 ```
 
 ```sql+sqlite
 select
-  id,
-  hosts,
-  issuer,
-  expires_on
+  cc.id,
+  cc.hosts,
+  cc.issuer,
+  cc.expires_on,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID'
-  and expires_on < datetime('now', '+30 days')
+  cc.zone_id = 'YOUR_ZONE_ID'
+  and cc.expires_on < datetime('now', '+30 days')
 order by
-  expires_on;
+  cc.expires_on;
 ```
 
 ### Order the custom certificates for a zone by priority
@@ -120,30 +152,40 @@ Retrieves all custom certificates for a specific zone and orders them by their p
 
 ```sql+postgres
 select
-  id,
-  hosts,
-  issuer,
-  priority,
-  status
+  cc.id,
+  cc.hosts,
+  cc.issuer,
+  cc.priority,
+  cc.status,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID'
+  cc.zone_id = 'YOUR_ZONE_ID'
 order by
-  priority::integer asc;
+  cc.priority::integer asc;
 ```
 
 ```sql+sqlite
 select
-  id,
-  hosts,
-  issuer,
-  priority,
-  status
+  cc.id,
+  cc.hosts,
+  cc.issuer,
+  cc.priority,
+  cc.status,
+  z.name as zone_name
 from
-  cloudflare_custom_certificate
+  cloudflare_custom_certificate cc
+join
+  cloudflare_zone z
+on
+  cc.zone_id = z.id
 where
-  zone_id = 'YOUR_ZONE_ID'
+  cc.zone_id = 'YOUR_ZONE_ID'
 order by
-  cast(priority as integer) asc;
+  cast(cc.priority as integer) asc;
 ```

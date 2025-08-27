@@ -7,6 +7,7 @@ import (
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/custom_certificates"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -20,9 +21,10 @@ func tableCloudflareCustomCertificate(ctx context.Context) *plugin.Table {
 		Description: "Custom certificates are meant for Business and Enterprise customers who want to use their own SSL certificates.",
 		List: &plugin.ListConfig{
 			KeyColumns: []*plugin.KeyColumn{
-				{Name: "zone_id", Require: plugin.Required},
+				{Name: "zone_id", Require: plugin.Optional},
 			},
 			Hydrate: listCustomCertificates,
+			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -59,26 +61,25 @@ func tableCloudflareCustomCertificate(ctx context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 // listCustomCertificates retrieves all custom certificates for the specified zone_id.
-func listCustomCertificates(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCustomCertificates(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
+	zoneDetails := h.Item.(zones.Zone)
+	inputZoneId := d.EqualsQualString("zone_id") 
+
 	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("cloudflare_custom_certificate.listCustomCertificates", "connection_error", err)
 		return nil, err
 	}
 
-	// Get the qualifiers
-	quals := d.EqualsQuals
-	zoneID := quals["zone_id"].GetStringValue()
-
-	// Empty check
-	if zoneID == "" {
+	// Only list custom certificates for zones stated in the input query
+	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
 		return nil, nil
 	}
 
 	// Build API parameters
 	input := custom_certificates.CustomCertificateListParams{
-		ZoneID: cloudflare.F(zoneID),
+		ZoneID: cloudflare.F(zoneDetails.ID),
 	}
 
 	// Execute paginated API call
