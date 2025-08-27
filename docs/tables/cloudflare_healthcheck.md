@@ -28,7 +28,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -47,7 +47,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -75,7 +75,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -101,7 +101,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -123,7 +123,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -145,7 +145,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -170,7 +170,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
@@ -189,7 +189,7 @@ select
 from
   cloudflare_healthcheck hc
 join
-  cloudflare_zone cz
+  cloudflare_zone z
 on
   z.zone_id = cz.id
 where
