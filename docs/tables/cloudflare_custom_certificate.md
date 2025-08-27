@@ -11,9 +11,6 @@ Custom Certificates allow Business and Enterprise customers to bring and manage 
 
 The `cloudflare_custom_certificate` table provides insights into user-managed SSL/TLS certificates within Cloudflare. As a security administrator or DevOps engineer, you can explore certificate-specific details through this table, including hosts, issuer, expiration, upload and modification timestamps, bundle method, priority, status, and geo-key policy configurations—all scoped at the zone level. Leverage it to audit custom certificate deployments, monitor expiration lifecycles, manage overlapping certificate priorities, and enforce geo‑restriction policies across your Cloudflare infrastructure.
 
-**Important Notes**
-- You must specify a `zone_id` in a `where` or `join` clause to query this table.
-
 ## Examples
 
 ### Query all custom certificates
