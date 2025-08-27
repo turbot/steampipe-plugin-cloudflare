@@ -5,6 +5,7 @@ import (
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/healthchecks"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -18,9 +19,10 @@ func tableCloudflareHealthcheck(ctx context.Context) *plugin.Table {
 		Description: "A Health Check is a service that runs on Cloudflare’s edge network to monitor whether an origin server is online.",
 		List: &plugin.ListConfig{
 			KeyColumns: []*plugin.KeyColumn{
-				{Name: "zone_id", Require: plugin.Required},
+				{Name: "zone_id", Require: plugin.Optional},
 			},
 			Hydrate: listHealthchecks,
+			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -49,7 +51,7 @@ func tableCloudflareHealthcheck(ctx context.Context) *plugin.Table {
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "The protocol to use for the health check. Currently supported protocols are 'HTTP', 'HTTPS' and 'TCP'."},
 			
 			// Query columns for filtering
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromQual("zone_id"), Description: "The zone ID to filter healthchecks."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "The zone ID to filter healthchecks."},
 		
 			// JSON Columns
 			{Name: "tcp_config", Type: proto.ColumnType_JSON, Transform: transform.FromField("TCPConfig"), Description: "Parameters specific to TCP health check."},
@@ -59,10 +61,18 @@ func tableCloudflareHealthcheck(ctx context.Context) *plugin.Table {
 	}
 }
 
+type HealthcheckInfo struct {
+	ZoneID string
+	healthchecks.Healthcheck
+}
+
 //// LIST FUNCTION
 
-// listHealthchecks retrieves all healthchecks for the specified zone_id.
-func listHealthchecks(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+// listHealthchecks retrieves all healthchecks.
+func listHealthchecks(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	zoneDetails := h.Item.(zones.Zone)
+	inputZoneId := d.EqualsQualString("zone_id")
+
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
@@ -70,24 +80,25 @@ func listHealthchecks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	// Get the qualifiers
-	quals := d.EqualsQuals
-	zoneID := quals["zone_id"].GetStringValue()
-
-	// Empty check
-	if zoneID == "" {
+	// Only list healthchecks for zones stated in the input query
+	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
 		return nil, nil
 	}
 
 	// Build API parameters
 	input := healthchecks.HealthcheckListParams{
-		ZoneID: cloudflare.F(zoneID),
+		ZoneID: cloudflare.F(zoneDetails.ID),
 	}
 
 	// Execute paginated API call
 	iter := conn.Healthchecks.ListAutoPaging(ctx, input)
 	for iter.Next() {
-		healthcheck := iter.Current()
+		current := iter.Current()
+
+		healthcheck := HealthcheckInfo{
+			ZoneID:				zoneDetails.ID,
+			Healthcheck:		current,
+		}
 		d.StreamListItem(ctx, healthcheck)
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -109,7 +120,7 @@ func listHealthchecks(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 //
 // Parameters:
 // - id: The healthcheck identifier (required)
-// - zone_id: The account or zone context (required)
+// - zone_id: The zone context (required)
 func getHealthcheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
@@ -127,12 +138,16 @@ func getHealthcheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Execute API call to get the specific healthcheck
-	healthcheck, err := conn.Healthchecks.Get(ctx, healthcheckID, input)
+	item, err := conn.Healthchecks.Get(ctx, healthcheckID, input)
 	if err != nil {
 		logger.Error("cloudflare_healthcheck.getHealthcheck", "error", err)
 		return nil, err
 	}
 
+	healthcheck := HealthcheckInfo{
+		ZoneID:				zoneID,
+		Healthcheck:		*item,
+	}
+
 	return healthcheck, nil
 }
-
