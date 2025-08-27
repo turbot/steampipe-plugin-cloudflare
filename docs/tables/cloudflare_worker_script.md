@@ -19,30 +19,40 @@ Retrieves all Worker scripts for all accounts. Worker scripts are lightweight Ja
 
 ```sql+postgres
 select
-  id,
-  account_id,
-  created_on,
-  modified_on,
-  usage_model,
-  has_assets,
-  has_modules,
-  logpush
+  ws.id,
+  ws.account_id,
+  ws.created_on,
+  ws.modified_on,
+  ws.usage_model,
+  ws.has_assets,
+  ws.has_modules,
+  ws.logpush,
+  a.name as account_name
 from
-  cloudflare_worker_script
+  cloudflare_worker_script ws
+join
+  cloudflare_account a
+on
+  ws.account_id = a.id;
 ```
 
 ```sql+sqlite
 select
-  id,
-  account_id,
-  created_on,
-  modified_on,
-  usage_model,
-  has_assets,
-  has_modules,
-  logpush
+  ws.id,
+  ws.account_id,
+  ws.created_on,
+  ws.modified_on,
+  ws.usage_model,
+  ws.has_assets,
+  ws.has_modules,
+  ws.logpush,
+  a.name as account_name
 from
-  cloudflare_worker_script
+  cloudflare_worker_script ws
+join
+  cloudflare_account a
+on
+  ws.account_id = a.id;
 ```
 
 ### Query all worker scripts with worker.dev subdomain available
@@ -50,24 +60,34 @@ Retrieves all Worker scripts where the worker.dev subdomain is enabled. The work
 
 ```sql+postgres
 select
-  id,
-  account_id,
-  subdomain
+  ws.id,
+  ws.account_id,
+  ws.subdomain,
+  a.name as account_name
 from
-  cloudflare_worker_script
+  cloudflare_worker_script ws
+join
+  cloudflare_account a
+on
+  ws.account_id = a.id
 where
-  subdomain ->> 'enabled' = 'true';
+  ws.subdomain ->> 'enabled' = 'true';
 ```
 
 ```sql+sqlite
 select
-  id,
-  account_id,
-  subdomain
+  ws.id,
+  ws.account_id,
+  ws.subdomain,
+  a.name as account_name
 from
-  cloudflare_worker_script
+  cloudflare_worker_script ws
+join
+  cloudflare_account a
+on
+  ws.account_id = a.id
 where
-  subdomain ->> 'enabled' = 'true';
+  ws.subdomain ->> 'enabled' = 'true';
 ```
 
 ### Query all worker scripts which have modules or assets
@@ -75,22 +95,32 @@ Retrieves all Worker scripts that have assets or modules enabled. Assets include
 
 ```sql+postgres
 select
-  id,
-  has_assets,
-  has_modules
+  ws.id,
+  ws.has_assets,
+  ws.has_modules,
+  a.name as account_name
 from
-  cloudflare_worker_script
+  cloudflare_worker_script ws
+join
+  cloudflare_account a
+on
+  ws.account_id = a.id
 where
-  has_assets = true or has_modules = true;
+  ws.has_assets = true or ws.has_modules = true;
 ```
 
 ```sql+sqlite
 select
-  id,
-  has_assets,
-  has_modules
+  ws.id,
+  ws.has_assets,
+  ws.has_modules,
+  a.name as account_name
 from
-  cloudflare_worker_script
+  cloudflare_worker_script ws
+join
+  cloudflare_account a
+on
+  ws.account_id = a.id
 where
-  has_assets = true or has_modules = true;
+  ws.has_assets = true or ws.has_modules = true;
 ```
