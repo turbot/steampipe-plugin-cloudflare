@@ -18,40 +18,40 @@ Retrieves all healthchecks associated with a specific zone ID. Healthchecks are 
 
 ```sql+postgres
 select
-  z.id,
-  z.name,
-  z.address,
-  z.status,
-  z.created_on,
-  z.description,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.address,
+  h.status,
+  h.created_on,
+  h.description,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID';
+  h.zone_id = 'YOUR_ZONE_ID';
 ```
 
 ```sql+sqlite
 select
-  z.id,
-  z.name,
-  z.address,
-  z.status,
-  z.created_on,
-  z.description,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.address,
+  h.status,
+  h.created_on,
+  h.description,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID';
+  h.zone_id = 'YOUR_ZONE_ID';
 ```
 
 ### Get a specific healthcheck by ID
@@ -59,54 +59,54 @@ Retrieves detailed information about a specific healthcheck, identified by its I
 
 ```sql+postgres
 select
-  z.id,
-  z.name,
-  z.address,
-  z.status,
-  z.failure_reason,
-  z.consecutive_fails,
-  z.consecutive_successes,
-  z.interval,
-  z.timeout,
-  z.retries,
-  z.suspended,
-  z.modified_on,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.address,
+  h.status,
+  h.failure_reason,
+  h.consecutive_fails,
+  h.consecutive_successes,
+  h.interval,
+  h.timeout,
+  h.retries,
+  h.suspended,
+  h.modified_on,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID'
-  and z.id = 'HEALTHCHECK_ID';
+  h.zone_id = 'YOUR_ZONE_ID'
+  and h.id = 'HEALTHCHECK_ID';
 ```
 
 ```sql+sqlite
 select
-  z.id,
-  z.name,
-  z.address,
-  z.status,
-  z.failure_reason,
-  z.consecutive_fails,
-  z.consecutive_successes,
-  z.interval,
-  z.timeout,
-  z.retries,
-  z.suspended,
-  z.modified_on,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.address,
+  h.status,
+  h.failure_reason,
+  h.consecutive_fails,
+  h.consecutive_successes,
+  h.interval,
+  h.timeout,
+  h.retries,
+  h.suspended,
+  h.modified_on,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID'
-  and z.id = 'HEALTHCHECK_ID';
+  h.zone_id = 'YOUR_ZONE_ID'
+  and h.id = 'HEALTHCHECK_ID';
 ```
 
 ### Query all unhealthy healthcheck with more than 'n' consecutive fails
@@ -114,46 +114,46 @@ Retrieves all unhealthy healthchecks for a specific zone that have experienced 3
 
 ```sql+postgres
 select
-  z.id,
-  z.name,
-  z.status,
-  z.failure_reason,
-  z.consecutive_fails,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.status,
+  h.failure_reason,
+  h.consecutive_fails,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID'
-  and z.consecutive_fails >= 3
-  and z.status = 'unhealthy'
+  h.zone_id = 'YOUR_ZONE_ID'
+  and h.consecutive_fails >= 3
+  and h.status = 'unhealthy'
 order by
-  z.consecutive_fails desc;
+  h.consecutive_fails desc;
 ```
 
 ```sql+sqlite
 select
-  z.id,
-  z.name,
-  z.status,
-  z.failure_reason,
-  z.consecutive_fails,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.status,
+  h.failure_reason,
+  h.consecutive_fails,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID'
-  and z.consecutive_fails >= 3
-  and z.status = 'unhealthy'
+  h.zone_id = 'YOUR_ZONE_ID'
+  and h.consecutive_fails >= 3
+  and h.status = 'unhealthy'
 order by
-  z.consecutive_fails desc;
+  h.consecutive_fails desc;
 ```
 
 ### Query all suspended healthchecks
@@ -161,38 +161,38 @@ Retrieves all suspended healthchecks for a specific zone. A suspended healthchec
 
 ```sql+postgres
 select
-  z.id,
-  z.name,
-  z.address,
-  z.status,
-  z.suspended,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.address,
+  h.status,
+  h.suspended,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID'
-  and z.suspended = true;
+  h.zone_id = 'YOUR_ZONE_ID'
+  and h.suspended = true;
 ```
 
 ```sql+sqlite
 select
-  z.id,
-  z.name,
-  z.address,
-  z.status,
-  z.suspended,
-  cz.name as zone_name
+  h.id,
+  h.name,
+  h.address,
+  h.status,
+  h.suspended,
+  z.name as zone_name
 from
-  cloudflare_healthcheck hc
+  cloudflare_healthcheck h
 join
   cloudflare_zone z
 on
-  z.zone_id = cz.id
+  h.zone_id = z.id
 where
-  z.zone_id = 'YOUR_ZONE_ID'
-  and z.suspended = true;
+  h.zone_id = 'YOUR_ZONE_ID'
+  and h.suspended = true;
 ```
