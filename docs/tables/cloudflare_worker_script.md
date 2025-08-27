@@ -21,7 +21,6 @@ Retrieves all Worker scripts for all accounts. Worker scripts are lightweight Ja
 select
   id,
   account_id,
-  account_name,
   created_on,
   modified_on,
   usage_model,
@@ -36,7 +35,6 @@ from
 select
   id,
   account_id,
-  account_name,
   created_on,
   modified_on,
   usage_model,
@@ -54,7 +52,6 @@ Retrieves all Worker scripts where the worker.dev subdomain is enabled. The work
 select
   id,
   account_id,
-  account_name,
   subdomain
 from
   cloudflare_worker_script
@@ -66,7 +63,6 @@ where
 select
   id,
   account_id,
-  account_name,
   subdomain
 from
   cloudflare_worker_script
@@ -80,7 +76,6 @@ Retrieves all Worker scripts that have assets or modules enabled. Assets include
 ```sql+postgres
 select
   id,
-  account_name,
   has_assets,
   has_modules
 from
@@ -92,7 +87,6 @@ where
 ```sql+sqlite
 select
   id,
-  account_name,
   has_assets,
   has_modules
 from

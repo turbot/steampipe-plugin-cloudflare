@@ -33,10 +33,9 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			{Name: "logpush", Type: proto.ColumnType_BOOL, Description: "Whether Logpush is turned on for the Worker."},
 			{Name: "modified_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the script was last modified."},
 			{Name: "usage_model", Type: proto.ColumnType_STRING, Description: "Usage model for the Worker invocations."},
-			{Name: "account_name", Type: proto.ColumnType_STRING,  Hydrate: getParentAccountDetails, Transform: transform.FromField("Name"), Description: "Account name."},
 		
 			// Query columns for filtering
-			{Name: "account_id", Type: proto.ColumnType_STRING, Hydrate: getParentAccountDetails, Transform: transform.FromField("ID"), Description: "The account ID to filter Worker scripts."},
+			{Name: "account_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("AccountID"), Description: "The account ID to filter Worker scripts."},
 		
 			// JSON Columns
 			{Name: "subdomain", Type: proto.ColumnType_JSON, Hydrate: getWorkerSubdomain, Transform: transform.FromValue(), Description: "Whether the Worker is available on the workers.dev subdomain."},
@@ -44,6 +43,11 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			{Name: "placement", Type: proto.ColumnType_JSON, Transform: transform.FromField("Placement"), Description: "Configuration for Smart Placement."},
 		}),
 	}
+}
+
+type WorkerScriptInfo struct {
+	AccountID string
+	workers.Script
 }
 
 //// LIST FUNCTION
@@ -77,7 +81,12 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	for iter.Next() {
-		script := iter.Current()
+		current := iter.Current()
+
+		script := WorkerScriptInfo{
+			AccountID:			accountDetails.ID,
+			Script:				current,
+		}
 		d.StreamListItem(ctx, script)
 	}
 	return nil, nil
@@ -92,7 +101,7 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	account := h.ParentItem.(accounts.Account)
-	script := h.Item.(workers.Script)
+	script := h.Item.(WorkerScriptInfo)
 
 	conn, err := connectV4(ctx, d)
 	if err != nil {
@@ -101,7 +110,7 @@ func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	input := workers.ScriptSubdomainGetParams{
 		AccountID: cloudflare.F(account.ID),
 	}
-	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx, script.ID, input)
+	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx, script.Script.ID, input)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +122,4 @@ func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 	return m["result"], nil
-}
-
-func getParentAccountDetails(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	return h.ParentItem.(accounts.Account), nil
 }
