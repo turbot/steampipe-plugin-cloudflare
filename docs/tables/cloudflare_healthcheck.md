@@ -109,7 +109,7 @@ where
   and h.id = 'HEALTHCHECK_ID';
 ```
 
-### Query all unhealthy healthcheck with more than 'n' consecutive fails
+### Query all unhealthy healthchecks with more than three consecutive failures
 Retrieves all unhealthy healthchecks for a specific zone that have experienced 3 or more consecutive failures. It's useful for identifying problem areas and addressing persistent back-end service issues.
 
 ```sql+postgres
@@ -156,7 +156,7 @@ order by
   h.consecutive_fails desc;
 ```
 
-### Query all suspended healthchecks
+### Query all suspended healthchecks for a zone
 Retrieves all suspended healthchecks for a specific zone. A suspended healthcheck is one that has been temporarily paused and is not actively running probes.
 
 ```sql+postgres
