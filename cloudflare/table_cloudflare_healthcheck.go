@@ -107,7 +107,7 @@ func listHealthchecks(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		}
 	}
 	if err := iter.Err(); err != nil {
-		logger.Error("cloudflare_healthcheck.listHealthchecks", "ListAutoPaging error", err)
+		logger.Error("cloudflare_healthcheck.listHealthchecks", "api_error", err)
 		return nil, err
 	}
 
@@ -140,7 +140,7 @@ func getHealthcheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	// Execute API call to get the specific healthcheck
 	item, err := conn.Healthchecks.Get(ctx, healthcheckID, input)
 	if err != nil {
-		logger.Error("cloudflare_healthcheck.getHealthcheck", "error", err)
+		logger.Error("cloudflare_healthcheck.getHealthcheck", "api_error", err)
 		return nil, err
 	}
 
