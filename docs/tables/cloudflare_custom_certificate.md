@@ -13,8 +13,6 @@ The `cloudflare_custom_certificate` table provides insights into user-managed SS
 
 ## Examples
 
-### Query all custom certificates
-
 ### Query all custom certificates for a zone
 Retrieves all custom SSL certificates associated with a specific zone ID. Custom certificates are domain-specific SSL/TLS certificates uploaded for use in Cloudflare.
 
