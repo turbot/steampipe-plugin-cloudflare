@@ -40,7 +40,7 @@ func tableCloudflareWorkerScript(ctx context.Context) *plugin.Table {
 			// JSON Columns
 			{Name: "subdomain", Type: proto.ColumnType_JSON, Hydrate: getWorkerSubdomain, Transform: transform.FromValue(), Description: "Whether the Worker is available on the workers.dev subdomain."},
 			{Name: "tail_consumers", Type: proto.ColumnType_JSON, Description: "List of Workers that will consume logs from the attached Worker."},
-			{Name: "placement", Type: proto.ColumnType_JSON, Transform: transform.FromField("Placement"), Description: "Configuration for Smart Placement."},
+			{Name: "placement", Type: proto.ColumnType_JSON, Description: "Configuration for Smart Placement."},
 		}),
 	}
 }
@@ -105,7 +105,6 @@ func listWorkerScripts(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 // - id: The Worker script identifier (required)
 func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	account := h.ParentItem.(accounts.Account)
 	script := h.Item.(WorkerScriptInfo)
 
 	conn, err := connectV4(ctx, d)
@@ -113,10 +112,11 @@ func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 	input := workers.ScriptSubdomainGetParams{
-		AccountID: cloudflare.F(account.ID),
+		AccountID: cloudflare.F(script.AccountID),
 	}
 	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx, script.Script.ID, input)
 	if err != nil {
+		logger.Error("cloudflare_worker_script.getWorkerSubdomain", "api call error", err)
 		return nil, err
 	}
 
