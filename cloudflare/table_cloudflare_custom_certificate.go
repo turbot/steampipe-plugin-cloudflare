@@ -50,7 +50,7 @@ func tableCloudflareCustomCertificate(ctx context.Context) *plugin.Table {
 			{Name: "policy", Type: proto.ColumnType_STRING, Description: "Specify the policy that determines the region where your private key will be held locally."},
 			
 			// Query columns for filtering
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "The zone ID to filter custom certificates."},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "The unique identifier of the zone where the custom certificate is provisioned."},
 		
 			// JSON Columns
 			{Name: "keyless_server", Type: proto.ColumnType_JSON, Description: "Keyless certificate details."},
@@ -98,7 +98,7 @@ func listCustomCertificates(ctx context.Context, d *plugin.QueryData, h *plugin.
 		if strings.Contains(err.Error(), "Plan level does not allow custom certificates") {
 			return nil, nil
 		}
-		logger.Error("cloudflare_custom_certificate.listCustomCertificates", "ListAutoPaging error", err)
+		logger.Error("cloudflare_custom_certificate.listCustomCertificates", "api_error", err)
 		return nil, err
 	}
 
@@ -131,7 +131,7 @@ func getCustomCertificate(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	// Execute API call to get the specific custom certificate
 	customCertificate, err := conn.CustomCertificates.Get(ctx, customCertificateID, input)
 	if err != nil {
-		logger.Error("cloudflare_custom_certificate.getCustomCertificate", "error", err)
+		logger.Error("cloudflare_custom_certificate.getCustomCertificate", "api_error", err)
 		return nil, err
 	}
 
