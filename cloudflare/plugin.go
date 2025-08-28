@@ -31,6 +31,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"cloudflare_custom_page":           tableCloudflareCustomPage(ctx),
 			"cloudflare_dns_record":            tableCloudflareDNSRecord(ctx),
 			"cloudflare_firewall_rule":         tableCloudflareFirewallRule(ctx),
+			"cloudflare_healthcheck":           tableCloudflareHealthcheck(ctx),
 			"cloudflare_load_balancer":         tableCloudflareLoadBalancer(ctx),
 			"cloudflare_load_balancer_monitor": tableCloudflareLoadBalancerMonitor(ctx),
 			"cloudflare_load_balancer_pool":    tableCloudflareLoadBalancerPool(ctx),
