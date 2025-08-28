@@ -35,7 +35,9 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the record (e.g. A, MX, CNAME)."},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Domain name for the record (e.g. steampipe.io)."},
 			{Name: "content", Type: proto.ColumnType_STRING, Description: "Content or value of the record. Changes by type, including IP address for A records and domain for CNAME records."},
-			{Name: "ttl", Type: proto.ColumnType_INT, Description: "Time to live in seconds of the record."},
+			
+			// Property ttl is NULL without the transform FromField function
+			{Name: "ttl", Type: proto.ColumnType_DOUBLE,Transform: transform.FromField("TTL"), Description: "Time to live in seconds of the record."},
 
 			// Other columns
 			{Name: "created_on", Type: proto.ColumnType_TIMESTAMP, Description: "When the record was created."},
