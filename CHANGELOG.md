@@ -1,3 +1,12 @@
+## v1.3.0 [2025-08-29]
+
+_What's new?_
+
+- New tables added (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+  - [cloudflare_custom_certificate](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_custom_certificate) ([#180](https://github.com/turbot/steampipe-plugin-cloudflare/pull/180))
+  - [cloudflare_healthcheck](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_healthcheck) ([#181](https://github.com/turbot/steampipe-plugin-cloudflare/pull/181))
+  - [cloudflare_worker_script](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_worker_script) ([#182](https://github.com/turbot/steampipe-plugin-cloudflare/pull/182))
+
 ## v1.2.0 [2025-08-18]
 
 _Deprecations_
