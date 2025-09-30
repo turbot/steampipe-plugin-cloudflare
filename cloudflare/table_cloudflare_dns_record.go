@@ -63,7 +63,7 @@ type RecordInfo struct {
 func listDNSRecord(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	zoneDetails := h.Item.(zones.Zone)
 	inputZoneId := d.EqualsQualString("zone_id")
-	
+
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
