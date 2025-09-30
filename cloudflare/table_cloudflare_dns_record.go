@@ -71,7 +71,7 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, err
 	}
 
-	// Only list healthchecks for zones stated in the input query
+	// Only list zones stated in the input query
 	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
 		return nil, nil
 	}
