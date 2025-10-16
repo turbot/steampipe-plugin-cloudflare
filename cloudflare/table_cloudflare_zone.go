@@ -7,6 +7,7 @@ import (
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/dns"
 	"github.com/cloudflare/cloudflare-go/v4/zones"
+	"github.com/cloudflare/cloudflare-go/v4/leaked_credential_checks"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -59,6 +60,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			{Name: "argo_smart_routing", Type: proto.ColumnType_JSON, Hydrate: getArgoSmartRouting, Transform: transform.FromValue(), Description: "Argo Smart Routing settings for the zone."},
 			{Name: "bot_management", Type: proto.ColumnType_JSON, Hydrate: getBotManagement, Transform: transform.FromValue(), Description: "Bot management settings for the zone."},
 			{Name: "security_txt", Type: proto.ColumnType_JSON, Hydrate: getSecurityTXT, Transform: transform.FromValue(), Description: "Security.txt configuration for the zone."},
+			{Name: "leaked_credential_check", Type: proto.ColumnType_JSON, Hydrate: getLeakedCredentialCheck, Transform: transform.FromValue(), Description: "Leaked Credential Check configuration for the zone."},
 		}),
 	}
 }
@@ -279,6 +281,23 @@ func getSecurityTXT(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 	return security_txt, nil
+}
+
+func getLeakedCredentialCheck(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+	input := leaked_credential_checks.LeakedCredentialCheckGetParams{
+		ZoneID: cloudflare.F(zone.ID),
+	}
+
+	leaked_credential_check, err := conn.LeakedCredentialChecks.Get(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return leaked_credential_check, nil
 }
 
 //// TRANSFORM FUNCTIONS
