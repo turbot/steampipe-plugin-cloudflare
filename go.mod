@@ -5,11 +5,11 @@ go 1.24
 toolchain go1.24.1
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.18.1
+	github.com/aws/aws-sdk-go-v2 v1.39.3
 	github.com/aws/aws-sdk-go-v2/config v1.18.27
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.26
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.29.3
-	github.com/aws/smithy-go v1.13.5
+	github.com/aws/smithy-go v1.23.1
 	github.com/cloudflare/cloudflare-go/v4 v4.2.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.13.1
 )
