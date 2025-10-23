@@ -60,7 +60,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			{Name: "argo_smart_routing", Type: proto.ColumnType_JSON, Hydrate: getArgoSmartRouting, Transform: transform.FromValue(), Description: "Argo Smart Routing settings for the zone."},
 			{Name: "bot_management", Type: proto.ColumnType_JSON, Hydrate: getBotManagement, Transform: transform.FromValue(), Description: "Bot management settings for the zone."},
 			{Name: "security_txt", Type: proto.ColumnType_JSON, Hydrate: getSecurityTXT, Transform: transform.FromValue(), Description: "Security.txt configuration for the zone."},
-			{Name: "leaked_credential_check", Type: proto.ColumnType_BOOL, Hydrate: getLeakedCredentialCheck, Transform: transform.FromField("Enabled"), Description: "Whether Leaked Credential Check is enabled."},
+			{Name: "leaked_credential_check_enabled", Type: proto.ColumnType_BOOL, Hydrate: getLeakedCredentialCheck, Transform: transform.FromField("Enabled"), Description: "Whether Leaked Credential Check is enabled."},
 		}),
 	}
 }
