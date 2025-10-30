@@ -1,3 +1,10 @@
+## v1.4.0 [2025-10-30]
+
+_Enhancements_
+
+- Added the column `leaked_credential_check_enabled` to `cloudflare_zone` table. ([#187](https://github.com/turbot/steampipe-plugin-cloudflare/pull/187)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+- Added the parent table `cloudflare_zone` to the `cloudflare_dns_record` table, so queries no longer require `zone_id` in the `WHERE` or `JOIN` clause. ([#185](https://github.com/turbot/steampipe-plugin-cloudflare/pull/185)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+
 ## v1.3.1 [2025-10-13]
 
 _Dependencies_

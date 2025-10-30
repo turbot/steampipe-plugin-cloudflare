@@ -18,14 +18,20 @@ Explore which DNS records belong to each zone in your Cloudflare account. This a
 
 ```sql+postgres
 select
-  *
+  name,
+  type,
+  content,
+  ttl
 from
   cloudflare_dns_record
 ```
 
 ```sql+sqlite
 select
-  *
+  name,
+  type,
+  content,
+  ttl
 from
   cloudflare_dns_record
 ```
