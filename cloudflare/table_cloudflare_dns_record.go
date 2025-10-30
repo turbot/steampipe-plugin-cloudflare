@@ -5,7 +5,7 @@ import (
 
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/dns"
-
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -18,9 +18,10 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 		Description: "DNS records for a zone.",
 		List: &plugin.ListConfig{
 			KeyColumns: plugin.KeyColumnSlice{
-				{Name: "zone_id", Require: plugin.Required, CacheMatch: query_cache.CacheMatchExact},
+				{Name: "zone_id", Require: plugin.Optional, CacheMatch: query_cache.CacheMatchExact},
 			},
 			Hydrate: listDNSRecord,
+			ParentHydrate: listZones,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
@@ -29,7 +30,7 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined.", Transform: transform.FromQual("zone_id")},
+			{Name: "zone_id", Type: proto.ColumnType_STRING, Description: "Zone where the record is defined.", Transform: transform.FromField("ZoneID")},
 			{Name: "zone_name", Type: proto.ColumnType_STRING, Description: "[Deprecated] Name of the zone where the record is defined."},
 			{Name: "id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ID"), Description: "ID of the record."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "Type of the record (e.g. A, MX, CNAME)."},
@@ -54,18 +55,24 @@ func tableCloudflareDNSRecord(ctx context.Context) *plugin.Table {
 	}
 }
 
-func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+type RecordInfo struct {
+	ZoneID string
+	dns.RecordResponse
+}
+
+func listDNSRecord(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	zoneDetails := h.Item.(zones.Zone)
+	inputZoneId := d.EqualsQualString("zone_id")
+
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
 		logger.Error("cloudflare_dns_record.listDNSRecord", "connection error", err)
 		return nil, err
 	}
-	quals := d.EqualsQuals
-	zoneID := quals["zone_id"].GetStringValue()
 
-	// Empty check
-	if zoneID == "" {
+	// Only list zones stated in the input query
+	if inputZoneId != "" && inputZoneId != zoneDetails.ID {
 		return nil, nil
 	}
 
@@ -78,13 +85,18 @@ func listDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 
 	input := dns.RecordListParams{
-		ZoneID:  cloudflare.F(zoneID),
+		ZoneID:  cloudflare.F(zoneDetails.ID),
 		PerPage: cloudflare.F(float64(maxLimit)),
 	}
 
 	iter := conn.DNS.Records.ListAutoPaging(ctx, input)
 	for iter.Next() {
-		record := iter.Current()
+		current := iter.Current()
+
+		record := RecordInfo{
+			ZoneID:				zoneDetails.ID,
+			RecordResponse:		current,
+		}
 		d.StreamListItem(ctx, record)
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -115,10 +127,16 @@ func getDNSRecord(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		ZoneID: cloudflare.F(zoneID),
 	}
 
-	record, err := conn.DNS.Records.Get(ctx, id, input)
+	item, err := conn.DNS.Records.Get(ctx, id, input)
 	if err != nil {
 		logger.Error("cloudflare_dns_record.getDNSRecord", "DNSRecord api error", err)
 		return nil, err
 	}
-	return &record, nil
+
+	record := RecordInfo{
+		ZoneID:				zoneID,
+		RecordResponse:		*item,
+	}
+
+	return record, nil
 }

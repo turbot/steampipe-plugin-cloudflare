@@ -11,21 +11,16 @@ Cloudflare DNS is a service that provides global, fast, and secure Domain Name S
 
 The `cloudflare_dns_record` table provides insights into DNS records within Cloudflare. As a network administrator, you can explore record-specific details through this table, including the type of record, associated zone, and configuration settings. Utilize it to uncover information about DNS records, such as those with certain configurations, the zones they are associated with, and their current status.
 
-**Important Notes**
-- You must specify the `zone_id` in the `where` clause to query this table.
-
 ## Examples
 
-### Query all DNS records for the zone
-Explore all DNS records associated with a specific zone to understand its configuration and manage its settings effectively. This can be particularly useful in troubleshooting or optimizing network performance.
+### List all records from each zone
+Explore which DNS records belong to each zone in your Cloudflare account. This allows you to understand the distribution and organization of your DNS records, aiding in efficient management and troubleshooting.
 
 ```sql+postgres
 select
   *
 from
   cloudflare_dns_record
-where
-  zone_id = 'ecfee56e04ffb0de172231a027abe23b';
 ```
 
 ```sql+sqlite
@@ -33,8 +28,85 @@ select
   *
 from
   cloudflare_dns_record
+```
+
+### List DNS records filtered by type
+Filter DNS records by their record type (e.g., A, CNAME, MX) for detailed management and troubleshooting of specific record types.
+
+```sql+postgres
+select
+  name,
+  type,
+  content,
+  ttl
+from
+  cloudflare_dns_record
 where
-  zone_id = 'ecfee56e04ffb0de172231a027abe23b';
+  type = 'A';
+```
+
+```sql+sqlite
+select
+  name,
+  type,
+  content,
+  ttl
+from
+  cloudflare_dns_record
+where
+  type = 'A';
+```
+
+### List DNS records that are proxied by Cloudflare
+Explore DNS records that are utilizing Cloudflare's origin protection, helping optimize security and performance for those records.
+
+```sql+postgres
+select
+  name,
+  type,
+  proxied
+from
+  cloudflare_dns_record
+where
+  proxied = true;
+```
+
+```sql+sqlite
+select
+  name,
+  type,
+  proxied
+from
+  cloudflare_dns_record
+where
+  proxied = 1;
+```
+
+### List DNS records for a zone with specific TTL values
+Filter DNS records for a zone based on their ttl value, which is crucial for optimizing DNS cache times and performance.
+
+```sql+postgres
+select
+  name,
+  type,
+  ttl
+from
+  cloudflare_dns_record
+where
+  zone_id = 'YOUR_ZONE_ID'
+  and ttl > 300;
+```
+
+```sql+sqlite
+select
+  name,
+  type,
+  ttl
+from
+  cloudflare_dns_record
+where
+  zone_id = 'YOUR_ZONE_ID'
+  and ttl > 300;
 ```
 
 ### List MX records in priority order
@@ -48,7 +120,7 @@ select
 from
   cloudflare_dns_record
 where
-  zone_id = 'ecfee56e04ffb0de172231a027abe23b'
+  zone_id = 'YOUR_ZONE_ID'
   and type = 'MX'
 order by
   priority;
@@ -62,33 +134,8 @@ select
 from
   cloudflare_dns_record
 where
-  zone_id = 'ecfee56e04ffb0de172231a027abe23b'
+  zone_id = 'YOUR_ZONE_ID'
   and type = 'MX'
 order by
   priority;
-```
-
-### List all records from each zone
-Explore which DNS records belong to each zone in your Cloudflare account. This allows you to understand the distribution and organization of your DNS records, aiding in efficient management and troubleshooting.
-
-```sql+postgres
-select
-  r.*,
-  z.name as zone
-from
-  cloudflare_dns_record r,
-  cloudflare_zone z
-where
-  r.zone_id = z.id;
-```
-
-```sql+sqlite
-select
-  r.*,
-  z.name as zone
-from
-  cloudflare_dns_record r,
-  cloudflare_zone z
-where
-  r.zone_id = z.id;
 ```
