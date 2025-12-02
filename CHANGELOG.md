@@ -1,3 +1,10 @@
+## v1.5.0 [2025-12-02]
+
+_What's new?_
+
+- New tables added
+  - [cloudflare_managed_transform](https://hub.steampipe.io/plugins/turbot/cloudflare/tables/cloudflare_managed_transform) ([#196](https://github.com/turbot/steampipe-plugin-cloudflare/pull/196)) (Thanks [@Theo-Bouguet](https://github.com/Theo-Bouguet) for the contribution!!)
+
 ## v1.4.0 [2025-10-30]
 
 _Enhancements_
