@@ -13,15 +13,15 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCloudflareManagedTransforms(ctx context.Context) *plugin.Table {
+func tableCloudflareManagedTransform(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "cloudflare_managed_transforms",
+		Name:        "cloudflare_managed_transform",
 		Description: "Managed Transforms allow you to perform common adjustments to HTTP request and response headers with the click of a button.",
 		List: &plugin.ListConfig{
 			KeyColumns: []*plugin.KeyColumn{
 				{Name: "zone_id", Require: plugin.Optional},
 			},
-			Hydrate: listManagedTransforms,
+			Hydrate:       listManagedTransforms,
 			ParentHydrate: listZones,
 		},
 		Columns: commonColumns([]*plugin.Column{
@@ -30,10 +30,10 @@ func tableCloudflareManagedTransforms(ctx context.Context) *plugin.Table {
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "The type of Managed Transform: 'request_header' or 'response_header'."},
 			{Name: "enabled", Type: proto.ColumnType_BOOL, Description: "Whether the Managed Transform is enabled."},
 			{Name: "has_conflict", Type: proto.ColumnType_BOOL, Description: "Whether the Managed Transform conflicts with the currently-enabled Managed Transforms."},
-			
+
 			// Other columns
 			{Name: "zone_id", Type: proto.ColumnType_STRING, Transform: transform.FromField("ZoneID"), Description: "The zone ID."},
-			
+
 			// JSON Columns
 			{Name: "conflicts_with", Type: proto.ColumnType_JSON, Description: "The Managed Transforms that this Managed Transform conflicts with."},
 		}),
@@ -59,7 +59,7 @@ func listManagedTransforms(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	logger := plugin.Logger(ctx)
 	conn, err := connectV4(ctx, d)
 	if err != nil {
-		logger.Error("cloudflare_managed_transforms.listManagedTransforms", "connection_error", err)
+		logger.Error("cloudflare_managed_transform.listManagedTransforms", "connection_error", err)
 		return nil, err
 	}
 
@@ -76,7 +76,7 @@ func listManagedTransforms(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Execute API call (this is a GET operation that returns both lists)
 	response, err := conn.ManagedTransforms.List(ctx, input)
 	if err != nil {
-		logger.Error("cloudflare_managed_transforms.listManagedTransforms", "api_error", err)
+		logger.Error("cloudflare_managed_transform.listManagedTransforms", "api_error", err)
 		return nil, err
 	}
 

@@ -1,15 +1,15 @@
 ---
-title: "Steampipe Table: cloudflare_managed_transforms - Query Cloudflare Managed Transforms using SQL"
+title: "Steampipe Table: cloudflare_managed_transform - Query Cloudflare Managed Transforms using SQL"
 description: "Allows users to query Cloudflare Managed Transforms, surfacing configuration for HTTP request and response header modifications including transform ID, type, enabled status, conflict detection, and associated zone information."
 ---
 
-# Table: cloudflare_managed_transforms - Query Cloudflare Managed Transforms using SQL
+# Table: cloudflare_managed_transform - Query Cloudflare Managed Transforms using SQL
 
 Managed Transforms allow you to perform common adjustments to HTTP request and response headers with the click of a button. These pre-configured transforms help standardize header handling across your zones without requiring custom rules.
 
 ## Table Usage Guide
 
-The `cloudflare_managed_transforms` table provides insights into managed transform configurations per zone within Cloudflare. As a security administrator or DevOps engineer, you can explore transform ID, type (request or response header), enabled status, conflict detection flags, and the list of conflicting transforms. Use it to audit active header modifications, detect configuration conflicts, and verify transform settings across zones.
+The `cloudflare_managed_transform` table provides insights into managed transform configurations per zone within Cloudflare. As a security administrator or DevOps engineer, you can explore transform ID, type (request or response header), enabled status, conflict detection flags, and the list of conflicting transforms. Use it to audit active header modifications, detect configuration conflicts, and verify transform settings across zones.
 
 ## Examples
 
@@ -24,7 +24,7 @@ select
   mt.has_conflict,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -41,7 +41,7 @@ select
   mt.has_conflict,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -60,7 +60,7 @@ select
   mt.enabled,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -76,7 +76,7 @@ select
   mt.enabled,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -97,7 +97,7 @@ select
   mt.conflicts_with,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -115,7 +115,7 @@ select
   mt.conflicts_with,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -134,7 +134,7 @@ select
   mt.has_conflict,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -150,7 +150,7 @@ select
   mt.has_conflict,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -169,7 +169,7 @@ select
   mt.has_conflict,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -185,7 +185,7 @@ select
   mt.has_conflict,
   z.name as zone_name
 from
-  cloudflare_managed_transforms mt
+  cloudflare_managed_transform mt
 join
   cloudflare_zone z
 on
@@ -203,7 +203,7 @@ select
   enabled,
   count(*) as transform_count
 from
-  cloudflare_managed_transforms
+  cloudflare_managed_transform
 group by
   type,
   enabled
@@ -218,7 +218,7 @@ select
   enabled,
   count(*) as transform_count
 from
-  cloudflare_managed_transforms
+  cloudflare_managed_transform
 group by
   type,
   enabled
