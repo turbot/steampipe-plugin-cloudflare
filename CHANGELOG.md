@@ -1,3 +1,9 @@
+## v1.5.1 [2025-12-02]
+
+_Bug fixes_
+
+- Fixed missing closing backtick in the `cloudflare_managed_transform` table documentation.
+
 ## v1.5.0 [2025-12-02]
 
 _What's new?_
