@@ -111,3 +111,24 @@ select
 from
   cloudflare_zone;
 ```
+
+### Get the rate plan each zone is subscribed to
+Explore each zone's active subscription to see which rate plan it's currently on.
+
+```sql+postgres
+select
+  name,
+  subscription -> 'rate_plan' ->> 'id' as plan_id,
+  subscription -> 'rate_plan' ->> 'public_name' as plan_name
+from
+  cloudflare_zone;
+```
+
+```sql+sqlite
+select
+  name,
+  json_extract(subscription, '$.rate_plan.id') as plan_id,
+  json_extract(subscription, '$.rate_plan.public_name') as plan_name
+from
+  cloudflare_zone;
+```
