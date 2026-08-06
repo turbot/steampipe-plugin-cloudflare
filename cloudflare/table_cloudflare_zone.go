@@ -2,6 +2,8 @@ package cloudflare
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"strings"
 
 	"github.com/cloudflare/cloudflare-go/v4"
@@ -49,8 +51,9 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 			{Name: "paused", Type: proto.ColumnType_BOOL, Description: "Indicates if the zone is only using Cloudflare DNS services. A true value means the zone will not receive security or performance benefits."},
 			{Name: "permissions", Type: proto.ColumnType_JSON, Description: "Available permissions on the zone for the current user requesting the item.", Transform: transform.FromP(getExtraFieldPermissionsFromAPIresponse, "permissions")},
 			{Name: "settings", Type: proto.ColumnType_JSON, Description: "[DEPRECATED] Simple key value map of zone settings like advanced_ddos = on. Use cloudflare_zone_setting table instead."},
-			{Name: "plan", Type: proto.ColumnType_JSON, Hydrate: getZonePlan, Transform: transform.FromValue(), Description: "Current plan associated with the zone."},
+			{Name: "plan", Type: proto.ColumnType_JSON, Hydrate: getZonePlan, Transform: transform.FromValue(), Description: "Rate plans available for the zone to switch to. Not the current plan - use 'subscription' instead. See #198."},
 			{Name: "plan_pending", Type: proto.ColumnType_JSON, Description: "[DEPRECATED] Pending plan change associated with the zone."},
+			{Name: "subscription", Type: proto.ColumnType_JSON, Hydrate: getZoneSubscription, Transform: transform.FromValue(), Description: "The zone's current subscription, including its active rate plan."},
 			{Name: "status", Type: proto.ColumnType_STRING, Description: "Status of the zone."},
 			{Name: "type", Type: proto.ColumnType_STRING, Description: "A full zone implies that DNS is hosted with Cloudflare. A partial zone is typically a partner-hosted zone or a CNAME setup."},
 			{Name: "vanity_name_servers", Type: proto.ColumnType_JSON, Description: "Custom name servers for the zone."},
@@ -157,6 +160,30 @@ func getZonePlan(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 	return plans, nil
+}
+
+func getZoneSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	conn, err := connectV4(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+	zone := h.Item.(zones.Zone)
+
+	subscription, err := conn.Zones.Subscriptions.Get(ctx, zone.ID)
+	if err != nil {
+		// No active subscription for this zone.
+		var apiErr *cloudflare.Error
+		if errors.As(err, &apiErr) && apiErr.StatusCode == http.StatusNotFound {
+			return nil, nil
+		}
+		logger.Error("cloudflare_zone.getZoneSubscription", "API error", err)
+		return nil, err
+	}
+	if subscription == nil {
+		return nil, nil
+	}
+	return *subscription, nil
 }
 
 func getSmartTieredCache(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
