@@ -1,3 +1,14 @@
+## v1.6.0 [2026-08-06]
+
+_Enhancements_
+
+- Added the `subscription` column to the `cloudflare_zone` table. ([#210](https://github.com/turbot/steampipe-plugin-cloudflare/pull/210)) (Thanks [@sbldevnet](https://github.com/sbldevnet) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with steampipe-plugin-sdk v6.0.0.
+- Recompiled plugin with Go version `1.26`. ([#199](https://github.com/turbot/steampipe-plugin-cloudflare/pull/199))
+
 ## v1.5.1 [2025-12-02]
 
 _Bug fixes_
