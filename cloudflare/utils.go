@@ -19,8 +19,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/memoize"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
 type Organization struct {
