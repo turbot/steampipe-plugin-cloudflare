@@ -112,8 +112,8 @@ from
   cloudflare_zone;
 ```
 
-### Get the rate plan each zone is subscribed to
-Explore each zone's active subscription to see which rate plan it's currently on.
+### Get the rate plan for each zone
+Explore each zone's active subscription to see which rate plan it's currently on. Zones without an active subscription return null.
 
 ```sql+postgres
 select
