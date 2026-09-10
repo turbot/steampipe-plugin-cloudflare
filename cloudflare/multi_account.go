@@ -29,10 +29,14 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 	if err != nil {
 		panic(err.Error())
 	}
-	matrix := make([]map[string]interface{}, len(page.Result))
-	for page != nil {
-		for i, account := range page.Result {
-			matrix[i] = map[string]interface{}{matrixKeyAccount: account.ID}
+	var matrix []map[string]interface{}
+	// GetNextPage always issues another API call and only returns a nil page on
+	// error; it never signals "no more pages" by itself. Cloudflare returns an
+	// empty result array once the page range is exhausted, so that emptiness is
+	// what we must use to stop, otherwise this loops forever.
+	for page != nil && len(page.Result) > 0 {
+		for _, account := range page.Result {
+			matrix = append(matrix, map[string]interface{}{matrixKeyAccount: account.ID})
 		}
 		if page, err = page.GetNextPage(); err != nil {
 			panic(err.Error())
