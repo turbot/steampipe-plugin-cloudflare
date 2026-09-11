@@ -1,3 +1,13 @@
+## v1.6.1 [2026-09-11]
+
+_Bug fixes_
+
+- Fixed the `cloudflare_access_policy` table to correctly return results instead of hanging indefinitely while paginating accounts. ([#212](https://github.com/turbot/steampipe-plugin-cloudflare/pull/212)) (Thanks [@dark-panda](https://github.com/dark-panda) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v6.1.0](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v610-2026-08-18) that fixes data races in the SDK's in-process execute path.
+
 ## v1.6.0 [2026-08-06]
 
 _Enhancements_
