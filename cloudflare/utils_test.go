@@ -43,6 +43,7 @@ func TestNewR2ClientIgnoresAWSEnvironment(t *testing.T) {
 			t.Setenv("AWS_USE_DUALSTACK_ENDPOINT", "")
 			t.Setenv("AWS_CONFIG_FILE", "/dev/null")
 			t.Setenv("AWS_SHARED_CREDENTIALS_FILE", "/dev/null")
+			t.Setenv("AWS_CA_BUNDLE", "")
 
 			capture := &captureClient{}
 			opts = append(opts,
