@@ -29,7 +29,7 @@ func tableCloudflareHealthcheck(ctx context.Context) *plugin.Table {
 				{Name: "id", Require: plugin.Required},
 				{Name: "zone_id", Require: plugin.Required},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid healthcheck identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid healthcheck identifier"})},
 			Hydrate:           getHealthcheck,
 		},
 		Columns: commonColumns([]*plugin.Column{

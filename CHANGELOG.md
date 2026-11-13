@@ -1,3 +1,13 @@
+## v1.6.2 [2026-11-13]
+
+_Bug fixes_
+
+- Fixed the `cloudflare_r2_object` table failing on machines with no AWS region set, or with AWS FIPS or dual-stack endpoints enabled, after the AWS S3 client update.
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v6.2.1](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v621-2026-11-12), which lowers plugin memory use, with the query cache fixes for missing or duplicate rows from [v6.2.0](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v620-2026-11-11). ([#219](https://github.com/turbot/steampipe-plugin-cloudflare/pull/219))
+
 ## v1.6.1 [2026-09-11]
 
 _Bug fixes_

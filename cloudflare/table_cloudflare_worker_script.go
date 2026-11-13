@@ -114,7 +114,7 @@ func getWorkerSubdomain(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	input := workers.ScriptSubdomainGetParams{
 		AccountID: cloudflare.F(script.AccountID),
 	}
-	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx, script.Script.ID, input)
+	subdomain, err := conn.Workers.Scripts.Subdomain.Get(ctx, script.ID, input)
 	if err != nil {
 		logger.Error("cloudflare_worker_script.getWorkerSubdomain", "api call error", err)
 		return nil, err

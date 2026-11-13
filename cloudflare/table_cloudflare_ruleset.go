@@ -29,7 +29,7 @@ func tableCloudflareRuleset(ctx context.Context) *plugin.Table {
 				{Name: "account_id", Require: plugin.AnyOf},
 				{Name: "zone_id", Require: plugin.AnyOf},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid ruleset identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid ruleset identifier"})},
 			Hydrate:           getRuleset,
 		},
 		Columns: commonColumns([]*plugin.Column{

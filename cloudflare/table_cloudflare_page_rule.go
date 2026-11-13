@@ -36,7 +36,7 @@ func tableCloudflarePageRule(ctx context.Context) *plugin.Table {
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AllColumns([]string{"zone_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"HTTP status 404"})},
 			Hydrate:           getPageRule,
 		},
 		Columns: commonColumns([]*plugin.Column{

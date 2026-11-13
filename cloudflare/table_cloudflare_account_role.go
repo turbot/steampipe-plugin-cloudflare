@@ -35,7 +35,7 @@ func tableCloudflareAccountRole(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			Hydrate:           getAccountRole,
 			KeyColumns:        plugin.AllColumns([]string{"account_id", "id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 403"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"HTTP status 403"})},
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
