@@ -90,10 +90,14 @@ func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s
 }
 
 // R2 expects the region "auto". Set it here rather than taking any AWS region
-// from the environment: the S3 endpoint rules reject an empty one.
+// from the environment: the S3 endpoint rules reject an empty one. They also
+// reject a custom endpoint combined with AWS FIPS or dual-stack settings from
+// the environment, which do not apply to R2.
 func newR2Client(cfg aws.Config, accountID string) *s3.Client {
 	return s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.Region = "auto"
+		o.EndpointOptions.UseFIPSEndpoint = aws.FIPSEndpointStateDisabled
+		o.EndpointOptions.UseDualStackEndpoint = aws.DualStackEndpointStateDisabled
 		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID))
 	})
 }
