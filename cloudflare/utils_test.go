@@ -24,8 +24,8 @@ func (c *captureClient) Do(r *http.Request) (*http.Response, error) {
 	return nil, errRequestCaptured
 }
 
-// The AWS settings a machine may carry for the AWS plugin must not change
-// where or how R2 requests are sent.
+// AWS region, FIPS and dual-stack settings a machine may carry for the AWS
+// plugin must not change the R2 endpoint or signing region.
 func TestNewR2ClientIgnoresAWSEnvironment(t *testing.T) {
 	cases := map[string][]func(*config.LoadOptions) error{
 		"no region":  nil,
@@ -35,6 +35,8 @@ func TestNewR2ClientIgnoresAWSEnvironment(t *testing.T) {
 	}
 	for name, opts := range cases {
 		t.Run(name, func(t *testing.T) {
+			t.Setenv("AWS_PROFILE", "")
+			t.Setenv("AWS_DEFAULT_PROFILE", "")
 			t.Setenv("AWS_REGION", "")
 			t.Setenv("AWS_DEFAULT_REGION", "")
 			t.Setenv("AWS_USE_FIPS_ENDPOINT", "")
