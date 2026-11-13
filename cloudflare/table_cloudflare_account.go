@@ -22,7 +22,7 @@ func tableCloudflareAccount(ctx context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("id"),
 			Hydrate:           getAccount,
-			ShouldIgnoreError: isNotFoundError([]string{"HTTP status 404"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"HTTP status 404"})},
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns

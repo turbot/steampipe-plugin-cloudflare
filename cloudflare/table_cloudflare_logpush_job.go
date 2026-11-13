@@ -29,7 +29,7 @@ func tableCloudflareLogpushJob(ctx context.Context) *plugin.Table {
 				{Name: "account_id", Require: plugin.AnyOf},
 				{Name: "zone_id", Require: plugin.AnyOf},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid logpush job identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid logpush job identifier"})},
 			Hydrate:           getLogpushJob,
 		},
 		Columns: commonColumns([]*plugin.Column{

@@ -55,7 +55,7 @@ type UserDetails struct {
 // Create Cloudflare R2 API client
 func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s3.Client, error) {
 	sessionCacheKey := fmt.Sprintf("session-v2-%s", accountID)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(sessionCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, sessionCacheKey); ok {
 		return cachedData.(*s3.Client), nil
 	}
 
@@ -74,28 +74,25 @@ func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s
 		return nil, errors.New("cloudflare R2 API credentials not found. Edit your connection to configure AccessKey and Secret, and then restart Steampipe")
 	}
 
-	r2EndpointResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		return aws.Endpoint{
-			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID),
-		}, nil
-	})
-
 	cfg, err := config.LoadDefaultConfig(context.Background(),
-		config.WithEndpointResolverWithOptions(r2EndpointResolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secret, "")),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %v", err)
 	}
-	client := s3.NewFromConfig(cfg)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID))
+	})
 
-	d.ConnectionManager.Cache.Set(sessionCacheKey, client)
+	if err := d.ConnectionCache.Set(ctx, sessionCacheKey, client); err != nil {
+		plugin.Logger(ctx).Warn("cloudflare.getR2Client", "cache_key", sessionCacheKey, "error", err)
+	}
 
 	return client, nil
 }
 
-func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
-	return func(err error) bool {
+func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicateWithContext {
+	return func(_ context.Context, _ *plugin.QueryData, _ *plugin.HydrateData, err error) bool {
 		errMsg := err.Error()
 		for _, msg := range notFoundErrors {
 			if strings.Contains(errMsg, msg) {
@@ -330,7 +327,7 @@ func toMap(in interface{}) (map[string]interface{}, error) {
 	// If we’re given a pointer, de-reference once and try again
 	// (covers *accounts.accountJSON, *SomeStruct, etc.).
 	rv := reflect.ValueOf(in)
-	if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+	if rv.Kind() == reflect.Pointer && !rv.IsNil() {
 		return toMap(rv.Elem().Interface())
 	}
 

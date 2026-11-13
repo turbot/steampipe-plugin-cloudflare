@@ -199,13 +199,13 @@ func listR2Objects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	// also, set the max limit to 1 for exact match
 	if key != "" {
 		input.Prefix = aws.String(key)
-		input.MaxKeys = 1
+		input.MaxKeys = aws.Int32(1)
 	}
 
 	// the owner field is not present in listV2 by default
 	// set it true if the column is passed in qual
 	if slices.Contains(d.QueryContext.Columns, "owner") {
-		input.FetchOwner = true
+		input.FetchOwner = aws.Bool(true)
 	}
 
 	object, err := conn.ListObjectsV2(ctx, input)

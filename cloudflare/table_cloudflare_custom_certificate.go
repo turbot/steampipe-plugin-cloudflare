@@ -31,7 +31,7 @@ func tableCloudflareCustomCertificate(ctx context.Context) *plugin.Table {
 				{Name: "id", Require: plugin.Required},
 				{Name: "zone_id", Require: plugin.Required},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid custom certificate identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid custom certificate identifier"})},
 			Hydrate:           getCustomCertificate,
 		},
 		Columns: commonColumns([]*plugin.Column{

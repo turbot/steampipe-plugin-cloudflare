@@ -29,7 +29,7 @@ func tableCloudflareNotificationPolicy(ctx context.Context) *plugin.Table {
 				{Name: "id", Require: plugin.Required},
 				{Name: "account_id", Require: plugin.Required},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid notification policy identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid notification policy identifier"})},
 			Hydrate:           getNotificationPolicy,
 		},
 		Columns: commonColumns([]*plugin.Column{

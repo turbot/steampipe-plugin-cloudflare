@@ -16,7 +16,7 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 
 	// cache matrix
 	cacheKey := "AccountListMatrix"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
@@ -44,6 +44,8 @@ func BuildAccountmatrix(ctx context.Context, d *plugin.QueryData) []map[string]i
 	}
 
 	// set cache
-	d.ConnectionManager.Cache.Set(cacheKey, matrix)
+	if err := d.ConnectionCache.Set(ctx, cacheKey, matrix); err != nil {
+		plugin.Logger(ctx).Warn("cloudflare.BuildAccountmatrix", "cache_key", cacheKey, "error", err)
+	}
 	return matrix
 }

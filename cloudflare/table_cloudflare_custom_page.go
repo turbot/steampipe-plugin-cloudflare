@@ -29,7 +29,7 @@ func tableCloudflareCustomPage(ctx context.Context) *plugin.Table {
 				{Name: "account_id", Require: plugin.AnyOf},
 				{Name: "zone_id", Require: plugin.AnyOf},
 			},
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid custom page identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid custom page identifier"})},
 			Hydrate:           getCustomPage,
 		},
 		Columns: commonColumns([]*plugin.Column{

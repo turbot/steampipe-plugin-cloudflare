@@ -28,7 +28,7 @@ func tableCloudflareZone(ctx context.Context) *plugin.Table {
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"Invalid zone identifier"}),
+			IgnoreConfig:       &plugin.IgnoreConfig{ShouldIgnoreErrorFunc: isNotFoundError([]string{"Invalid zone identifier"})},
 			Hydrate:           getZone,
 		},
 		Columns: commonColumns([]*plugin.Column{
