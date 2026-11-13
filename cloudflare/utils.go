@@ -80,15 +80,22 @@ func getR2Client(ctx context.Context, d *plugin.QueryData, accountID string) (*s
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %v", err)
 	}
-	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID))
-	})
+	client := newR2Client(cfg, accountID)
 
 	if err := d.ConnectionCache.Set(ctx, sessionCacheKey, client); err != nil {
 		plugin.Logger(ctx).Warn("cloudflare.getR2Client", "cache_key", sessionCacheKey, "error", err)
 	}
 
 	return client, nil
+}
+
+// R2 expects the region "auto". Set it here rather than taking any AWS region
+// from the environment: the S3 endpoint rules reject an empty one.
+func newR2Client(cfg aws.Config, accountID string) *s3.Client {
+	return s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.Region = "auto"
+		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID))
+	})
 }
 
 func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicateWithContext {
